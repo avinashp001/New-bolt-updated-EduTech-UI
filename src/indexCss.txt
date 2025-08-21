@@ -1,0 +1,205 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Enhanced KaTeX styling for better math rendering */
+.katex-display-container {
+  @apply text-center;
+}
+
+.katex-inline-container {
+  @apply inline-block;
+}
+
+/* KaTeX display math styling */
+.katex-display {
+  @apply my-4 text-center;
+  font-size: 1.2em !important;
+}
+
+/* KaTeX inline math styling */
+.katex {
+  font-size: 1.1em !important;
+}
+
+/* Math expression containers */
+.math-display {
+  @apply overflow-x-auto;
+}
+
+.math-inline {
+  @apply whitespace-nowrap;
+}
+
+/* Ensure math expressions are readable on all backgrounds */
+.katex .base {
+  color: #000000 !important;
+  font-size: .8rem;
+}
+
+.katex .mord,
+.katex .mop,
+.katex .mbin,
+.katex .mrel,
+.katex .mopen,
+.katex .mclose,
+.katex .mpunct {
+  color: #000000 !important;
+}
+
+/* Dark mode support for math */
+.dark .katex .base,
+.dark .katex .mord,
+.dark .katex .mop,
+.dark .katex .mbin,
+.dark .katex .mrel,
+.dark .katex .mopen,
+.dark .katex .mclose,
+.dark .katex .mpunct {
+  color: #f1f5f9  !important;
+}
+
+/* Enhanced list styling */
+.counter-reset-list {
+  counter-reset: list-counter;
+}
+
+.counter-increment-list {
+  counter-increment: list-counter;
+}
+
+.counter-content::before {
+  content: counter(list-counter);
+}
+
+/* Enhanced content styling */
+.theory-content {
+  @apply max-w-none;
+  line-height: 1.6;
+}
+
+.theory-content h1 {
+  color: #ea580c !important;
+  font-size: 1.75rem !important;
+  font-weight: 700 !important;
+  margin-bottom: 1rem !important;
+  margin-top: 2.5rem !important;
+}
+
+.theory-heading-h1{
+  color: #ea580c !important;
+}
+
+.theory-heading-h2{
+  color: #2563eb !important;
+}
+
+ theory-heading-h3{
+     color: #dc2626 !important;
+ }
+
+ theory-heading-h4{
+  color: #2563eb !important
+ }
+
+.theory-content h2 {
+  color: #2563eb !important;
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  margin-bottom: 0.75rem !important;
+  margin-top: 2rem !important;
+}
+
+.theory-content h3 {
+  color: #dc2626 !important;
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  margin-bottom: 0.75rem !important;
+  margin-top: 1.5rem !important;
+}
+
+.theory-content h4 {
+  color: #2563eb !important;
+  font-size: 1.125rem !important;
+  font-weight: 700 !important;
+  margin-bottom: 0.5rem !important;
+  margin-top: 1rem !important;
+}
+
+.theory-content p {
+  color: #374151 !important;
+  font-size: 1rem !important;
+  line-height: 1.6 !important;
+  margin-bottom: 1rem !important;
+}
+
+.theory-content ul {
+  list-style-type: disc !important;
+  margin-left: 1.5rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.theory-content ol {
+  list-style-type: decimal !important;
+  margin-left: 1.5rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.theory-content li {
+  color: #374151 !important;
+  margin-bottom: 0.5rem !important;
+  line-height: 1.6 !important;
+}
+
+.theory-content h1 {
+  @apply scroll-mt-8;
+}
+
+.theory-content h2 {
+  @apply scroll-mt-6;
+}
+
+.theory-content h3 {
+  @apply scroll-mt-4;
+}
+
+/* Enhanced table styling */
+.theory-content table {
+  @apply border-collapse border-spacing-0;
+}
+
+.theory-content table th {
+  @apply font-semibold;
+}
+
+.theory-content table td {
+  @apply align-top;
+}
+
+/* Enhanced blockquote styling */
+.theory-content blockquote {
+  @apply border-l-4 border-blue-400 pl-6 py-4 my-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-r-xl italic text-slate-700 shadow-sm;
+}
+
+/* Enhanced image styling */
+.theory-content img {
+  @apply rounded-xl shadow-lg border border-slate-200 my-8;
+}
+
+/* Enhanced horizontal rule styling */
+.theory-content hr {
+  @apply border-0 h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent my-8;
+}
+
+/* Enhanced definition list styling */
+.theory-content dl {
+  @apply my-6 bg-slate-50 p-6 rounded-xl border border-slate-200;
+}
+
+.theory-content dt {
+  @apply font-semibold text-slate-800 mb-2;
+}
+
+.theory-content dd {
+  @apply text-slate-600 mb-4 pl-4 border-l-2 border-slate-300;
+}

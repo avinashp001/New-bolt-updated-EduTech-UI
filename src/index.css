@@ -1,0 +1,564 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* SEO and Performance Optimizations */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Improve font loading performance */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Inter Regular'), local('Inter-Regular');
+}
+
+/* Critical CSS for above-the-fold content */
+.hero-section {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+}
+
+/* Optimize images for better loading */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Lazy loading optimization */
+img[loading="lazy"] {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+img[loading="lazy"].loaded {
+  opacity: 1;
+}
+
+/* Enhanced KaTeX styling for better math rendering */
+.katex-display-container {
+  @apply text-center;
+}
+
+.katex-inline-container {
+  @apply inline-block;
+}
+
+/* KaTeX display math styling */
+.katex-display {
+  @apply my-4 text-center;
+  font-size: 1.2em !important;
+}
+
+/* KaTeX inline math styling */
+.katex {
+  font-size: 1.1em !important;
+}
+
+/* Math expression containers */
+.math-display {
+  @apply overflow-x-auto;
+}
+
+.math-inline {
+  @apply whitespace-nowrap;
+}
+
+/* Ensure math expressions are readable on all backgrounds */
+.katex .base {
+  color: #1e293b !important;
+}
+
+.katex .mord,
+.katex .mop,
+.katex .mbin,
+.katex .mrel,
+.katex .mopen,
+.katex .mclose,
+.katex .mpunct {
+  color: #0a1321 !important;
+}
+
+/* Dark mode support for math */
+.dark .katex .base,
+.dark .katex .mord,
+.dark .katex .mop,
+.dark .katex .mbin,
+.dark .katex .mrel,
+.dark .katex .mopen,
+.dark .katex .mclose,
+.dark .katex .mpunct {
+  color: #10263c !important;
+}
+
+/* Enhanced list styling */
+.counter-reset-list {
+  counter-reset: list-counter;
+}
+
+.counter-increment-list {
+  counter-increment: list-counter;
+}
+
+.counter-content::before {
+  content: counter(list-counter);
+}
+
+/* Enhanced content styling */
+.theory-content {
+  @apply max-w-none;
+  line-height: 1.6;
+}
+
+.theory-content h1 {
+  color: #ea580c !important;
+  font-size: 1.75rem !important;
+  font-weight: 700 !important;
+  margin-bottom: 1rem !important;
+  margin-top: 2.5rem !important;
+}
+
+.theory-heading-h1{
+  color: #ea580c !important;
+}
+
+.theory-heading-h2{
+  color: #2563eb !important;
+}
+
+.theory-heading-h3{
+     color: #dc2626 !important;
+ }
+
+.theory-heading-h4{
+  color: #2563eb !important
+ }
+
+.theory-content h2 {
+  color: #2563eb !important;
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  margin-bottom: 0.75rem !important;
+  margin-top: 2rem !important;
+}
+
+.theory-content h3 {
+  color: #dc2626 !important;
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  margin-bottom: 0.75rem !important;
+  margin-top: 1.5rem !important;
+}
+
+.theory-content h4 {
+  color: #2563eb !important;
+  font-size: 1.125rem !important;
+  font-weight: 700 !important;
+  margin-bottom: 0.5rem !important;
+  margin-top: 1rem !important;
+}
+
+.theory-content p {
+  color: #374151 !important;
+  font-size: 1rem !important;
+  line-height: 1.6 !important;
+  margin-bottom: 1rem !important;
+}
+
+.theory-content ul {
+  list-style-type: disc !important;
+  margin-left: 1.5rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.theory-content ol {
+  list-style-type: decimal !important;
+  margin-left: 1.5rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.theory-content li {
+  color: #374151 !important;
+  margin-bottom: 0.5rem !important;
+  line-height: 1.6 !important;
+}
+
+.theory-content h1 {
+  @apply scroll-mt-8;
+}
+
+.theory-content h2 {
+  @apply scroll-mt-6;
+}
+
+.theory-content h3 {
+  @apply scroll-mt-4;
+}
+
+/* Enhanced table styling */
+.theory-content table {
+  @apply border-collapse border-spacing-0;
+}
+
+.theory-content table th {
+  @apply font-semibold;
+}
+
+.theory-content table td {
+  @apply align-top;
+}
+
+/* Enhanced blockquote styling */
+.theory-content blockquote {
+  @apply border-l-4 border-blue-400 pl-6 py-4 my-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-r-xl italic text-slate-700 shadow-sm;
+}
+
+/* Enhanced image styling */
+.theory-content img {
+  @apply rounded-xl shadow-lg border border-slate-200 my-8;
+}
+
+/* Enhanced horizontal rule styling */
+.theory-content hr {
+  @apply border-0 h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent my-8;
+}
+
+/* Enhanced definition list styling */
+.theory-content dl {
+  @apply my-6 bg-slate-50 p-6 rounded-xl border border-slate-200;
+}
+
+.theory-content dt {
+  @apply font-semibold text-slate-800 mb-2;
+}
+
+.theory-content dd {
+  @apply text-slate-600 mb-4 pl-4 border-l-2 border-slate-300;
+}
+
+/* Enhanced animations and transitions */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.animate-slide-in-up {
+  animation: slideInUp 0.6s ease-out;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.6s ease-out;
+}
+
+.animate-fade-in-scale {
+  animation: fadeInScale 0.5s ease-out;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  background-size: 200px 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Smooth hover effects */
+.hover-lift {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Glass morphism effects */
+.glass-morphism {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-morphism-dark {
+  background: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Gradient text effects */
+.gradient-text {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-warm {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-cool {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Enhanced button styles */
+.btn-primary {
+  @apply bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105;
+}
+
+.btn-secondary {
+  @apply bg-gradient-to-r from-slate-500 to-gray-600 text-white px-6 py-3 rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105;
+}
+
+.btn-success {
+  @apply bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105;
+}
+
+/* Card hover effects */
+.card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Progress bar animations */
+.progress-bar {
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: shimmer 2s infinite;
+}
+
+/* Staggered animations */
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+.stagger-5 { animation-delay: 0.5s; }
+.stagger-6 { animation-delay: 0.6s; }
+
+/* Responsive design improvements */
+@media (max-width: 768px) {
+  .mobile-stack {
+    @apply flex-col space-y-4 space-x-0;
+  }
+  
+  .mobile-full {
+    @apply w-full;
+  }
+}
+
+/* Dark mode enhancements */
+.dark .glass-morphism {
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Accessibility improvements */
+.focus-visible {
+  @apply outline-none ring-4 ring-blue-500/20 ring-offset-2;
+}
+
+/* Loading states */
+.skeleton {
+  @apply bg-slate-200 animate-pulse rounded;
+}
+
+.dark .skeleton {
+  @apply bg-slate-700;
+}
+
+/* Interactive elements */
+.interactive-element {
+  @apply transition-all duration-300 hover:scale-105 hover:shadow-lg cursor-pointer;
+}
+
+.interactive-element:active {
+  @apply scale-95;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-slate-100;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-300 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-slate-400;
+}
+
+.dark ::-webkit-scrollbar-track {
+  @apply bg-slate-800;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  @apply bg-slate-600;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  @apply bg-slate-500;
+}
+
+/* src/index.css */
+
+/* ... (keep your existing CSS rules) ... */
+
+.markdown-body {
+  @apply overflow-x-auto;
+}
+/* Custom Markdown Styles */
+.markdown-body h1 {
+  @apply text-2xl font-bold mt-4 mb-3 text-slate-800 dark:text-slate-100;
+}
+.markdown-body h2 {
+  @apply text-xl font-bold mt-3 mb-2 text-slate-700 dark:text-slate-200;
+}
+.markdown-body h3 {
+  @apply text-lg font-semibold mt-2 mb-1 text-slate-600 dark:text-slate-300;
+}
+.markdown-body h4 {
+  @apply text-base font-semibold mt-1 mb-1 text-slate-500 dark:text-slate-400;
+}
+.markdown-body p {
+  @apply text-sm leading-relaxed mb-1 text-slate-700 dark:text-slate-300;
+}
+.markdown-body ul {
+  @apply list-disc pl-5;
+}
+.markdown-body ol {
+  @apply list-decimal pl-5;
+}
+.markdown-body br {
+  @apply block h-2;
+}
+.markdown-body li {
+  @apply text-sm leading-relaxed text-slate-700 dark:text-slate-300;
+}
+.markdown-body strong {
+  @apply font-bold;
+}
+.markdown-body em {
+  @apply italic;
+}
+.markdown-body blockquote {
+  @apply border-l-4 border-blue-400 pl-4 py-1 my-1 bg-blue-50 dark:bg-blue-900/20 text-slate-700 dark:text-slate-300;
+}
+.markdown-body code {
+  @apply bg-gray-200 dark:bg-gray-700 text-red-600 dark:text-red-300 px-1 py-0.5 rounded text-xs;
+}
+.markdown-body pre {
+  @apply bg-gray-800 text-white p-1 rounded-md overflow-x-auto my-1;
+}
+.markdown-body pre code {
+  @apply bg-transparent text-white p-0;
+}
+.markdown-body a {
+  @apply text-blue-600 hover:underline;
+}
+
+/* Table specific styles */
+.markdown-body table {
+  @apply w-full border-collapse my-1;
+}
+.markdown-body th,
+.markdown-body td {
+  @apply border border-slate-300 dark:border-slate-600 px-4 py-1 text-left text-sm;
+}
+.markdown-body th {
+  @apply bg-slate-100 dark:bg-slate-700 font-semibold text-slate-800 dark:text-slate-200;
+}
+.markdown-body tr:nth-child(even) {
+  @apply bg-slate-50 dark:bg-slate-800;
+}
+.markdown-body tr:hover {
+  @apply bg-slate-100 dark:bg-slate-700;
+}
+
+/* .markdown-body td p,
+.markdown-body th p {
+  line-height: normal !important; 
+  margin-bottom: 0 !important;
+} */
