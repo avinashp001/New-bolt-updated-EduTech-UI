@@ -2,9 +2,11 @@
 import { QuestionGenerator } from './questionGenerator';
 import { PerformanceAnalyzer } from './performanceAnalyzer';
 import { AIMentor } from './mentor';
+import { ScheduleGenerator } from './scheduleGenerator';
 import { TheoryGeneratorV2 } from './theoryGeneratorV2';
 import { TheoryGenerator } from './theoryGenerator';
 import { TheoryQuestionGenerator } from './theoryquestionGenerator';
+// import { TheoryQuestionGenerator } from './theoryquestionGenerator';
 
 export class AIService {
   // Question Generation
@@ -16,6 +18,11 @@ export class AIService {
   static async generateTheoryQuizQuestions(content: string, subject: string, topic: string) {
     return TheoryQuestionGenerator.generateQuestions(content, subject, topic);
   }
+
+  // // Theory Quiz Generation
+  // static async generateTheoryQuizQuestions(content: string, subject: string, topic: string) {
+  //   return TheoryQuestionGenerator.generateQuestions(content, subject, topic);
+  // }
 
   // Performance Analysis
   static async analyzeTestPerformance(testData: any) {
@@ -39,16 +46,28 @@ export class AIService {
     return AIMentor.extractPDFContent(content, examType);
   }
 
+  // Schedule Generation
+  static async generateStudyPlan(examType: string, subjects: string[], availableHours: number, targetDate: string, studentProfile?: any) {
+    return ScheduleGenerator.generateStudyPlan(examType, subjects, availableHours, targetDate, studentProfile);
+  }
+
+  static async generateDetailedSchedule(studentProfile: any, totalWeeks: number, totalDays: number) {
+    return ScheduleGenerator.generateDetailedSchedule(studentProfile, totalWeeks, totalDays);
+  }
+
   // Theory Generation
   static async generateTheory(subject: string, topic: string, userId: string) {
     return TheoryGenerator.generateTheory(subject, topic, userId);
   }
 
-  // Theory Generation V2
-  static async generateTheoryV2(subject: string, topic: string, userId: string, examLevel: string) {
+
+// Theory Generation V2
+ static async generateTheoryV2(subject: string, topic: string, userId: string, examLevel: string) {
     return TheoryGeneratorV2.generateTheory(subject, topic, userId, examLevel);
   }
+
+
 }
 
 // Export individual modules for direct access if needed
-export { QuestionGenerator, PerformanceAnalyzer, AIMentor, TheoryGenerator, TheoryGeneratorV2, TheoryQuestionGenerator };
+export { QuestionGenerator, PerformanceAnalyzer, AIMentor, ScheduleGenerator, TheoryGenerator, TheoryGeneratorV2, TheoryQuestionGenerator };
