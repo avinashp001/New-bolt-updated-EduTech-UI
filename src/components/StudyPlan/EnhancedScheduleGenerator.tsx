@@ -987,7 +987,6 @@ useEffect(() => {
                   </div>
               <Zap className="w-4 h-4" />
               <span>Generate New Schedule</span>
-            </button>
           </div>
           
           <div className="space-y-4">
