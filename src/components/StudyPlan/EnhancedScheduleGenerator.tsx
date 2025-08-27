@@ -934,6 +934,7 @@ useEffect(() => {
               <Calendar className="w-6 h-6 text-blue-600" />
               <span>Daily Study Schedule</span>
             </h3>
+            <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               {CustomScheduleGenerator.generateToppersStudyTips(
                 examType ? {
@@ -1062,6 +1063,7 @@ useEffect(() => {
                       </div>
                     ))}
                   </div>
+                </>
                   
                   {day.motivationalNote && (
                     <div className="mt-4 p-3 bg-blue-50 rounded-lg">
