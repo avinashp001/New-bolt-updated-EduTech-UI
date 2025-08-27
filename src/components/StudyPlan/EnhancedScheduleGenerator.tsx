@@ -1002,7 +1002,6 @@ useEffect(() => {
                 Showing all days from today until your exam date. Scroll down to see your complete study journey.
               </p>
             </div>
-        
 
             
             {existingSchedule.map((day, index) => (
