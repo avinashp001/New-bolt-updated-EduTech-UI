@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Calendar, Target, BookOpen, Brain, Clock, TrendingUp, Award, CheckCircle, AlertTriangle, Zap, User, MapPin, Star } from 'lucide-react';
 import { useStudyPlan } from '../../hooks/useStudyPlan';
 import { useAuth } from '../../hooks/useAuth';
-import { CustomScheduleGenerator } from '../../lib/customScheduleGenerator';
+import { AIService } from '../../lib/mistralAI';
 import { supabase } from '../../lib/supabase';
 import { robustParseWithRetry } from "../../utils/jsonParser";
 
@@ -930,69 +930,19 @@ useEffect(() => {
         {/* Daily Schedule */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-  {/* Left: Title */}
-  <div className="flex items-center space-x-2">
-    <Calendar className="w-6 h-6 text-blue-600" />
-    <h3 className="text-xl font-bold text-slate-800">Daily Study Schedule</h3>
-  </div>
-
-  {/* Right: Tips grid */}
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-    {CustomScheduleGenerator.generateToppersStudyTips(
-      examType ? {
-        examType,
-        subjects,
-        weakSubjects,
-        strongSubjects,
-        dailyAvailableHours: dailyHours,
-        currentLevel,
-        studyPattern: preferredStudyTime,
-        concentrationSpan: settings?.defaultStudyDuration || 60,
-        breakPreference: settings?.breakInterval || 15,
-        revisionFrequency: 'weekly' as const,
-        mockTestFrequency: 'weekly' as const,
-        examDate: targetDate,
-        targetScore: 85,
-        previousExperience: 'some' as const,
-        learningStyle,
-        contentPreference,
-        motivationLevel,
-        commonDistractions,
-        shortTermGoal
-      } : {
-        examType: '',
-        subjects: [],
-        weakSubjects: [],
-        strongSubjects: [],
-        dailyAvailableHours: 6,
-        currentLevel: 'intermediate' as const,
-        studyPattern: 'morning' as const,
-        concentrationSpan: 60,
-        breakPreference: 15,
-        revisionFrequency: 'weekly' as const,
-        mockTestFrequency: 'weekly' as const,
-        examDate: '',
-        targetScore: 85,
-        previousExperience: 'some' as const
-      }
-    ).slice(0, 6).map((tip, index) => (
-      <div
-        key={index}
-        className="bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700 transition-colors flex items-center space-x-2"
-      >
-        <div className="w-5 h-5 mt-1 text-blue-600">
-          {tip.includes('80-20') ? '🎯' :
-           tip.includes('Spaced') ? '🔄' :
-           tip.includes('Active') ? '🧠' :
-           tip.includes('Peak') ? '⏰' :
-           tip.includes('Error') ? '📝' :
-           tip.includes('Mock') ? '🎪' :
-           tip.includes('Consistency') ? '💪' : '🎨'}
-        </div>
+            <h3 className="text-xl font-bold text-slate-800 flex items-center space-x-2">
+              <Calendar className="w-6 h-6 text-blue-600" />
+              <span>Daily Study Schedule</span>
+            </h3>
+            <button
+              onClick={handleGenerateNewSchedule}
+              className="bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700 transition-colors flex items-center space-x-2"
+            >
               <Zap className="w-4 h-4" />
               <span>Generate New Schedule</span>
+            </button>
           </div>
-
+          
           <div className="space-y-4">
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <p className="text-blue-800 font-medium">
@@ -1002,7 +952,6 @@ useEffect(() => {
                 Showing all days from today until your exam date. Scroll down to see your complete study journey.
               </p>
             </div>
-
             
             {existingSchedule.map((day, index) => (
               <div key={day.date || index} className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
@@ -1132,25 +1081,11 @@ useEffect(() => {
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-purple-600">{studentProfile.weakSubjects.length}</div>
-                    <div className="font-medium text-slate-800 text-sm" dangerouslySetInnerHTML={{ __html: tip.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
+              <div className="text-sm text-slate-600">Focus Areas</div>
+            </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-orange-600">{studentProfile.targetScore}%</div>
               <div className="text-sm text-slate-600">Target Score</div>
-            </div>
-            
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-200">
-              <div className="flex items-center space-x-2 mb-2">
-                <Brain className="w-5 h-5 text-blue-600" />
-                <span className="font-semibold text-blue-800">Custom Algorithm Features</span>
-              </div>
-              <ul className="text-sm text-blue-700 space-y-1">
-                <li>✅ Syllabus-based topic progression from comprehensive exam database</li>
-                <li>✅ Weak subject prioritization with 40% extra time allocation</li>
-                <li>✅ Spaced repetition scheduling for long-term retention</li>
-                <li>✅ Cognitive load optimization for maximum learning efficiency</li>
-                <li>✅ Adaptive difficulty progression based on preparation phase</li>
-                <li>✅ Mock test integration with performance analysis</li>
-              </ul>
             </div>
           </div>
         </div>
