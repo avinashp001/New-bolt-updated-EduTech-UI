@@ -1085,7 +1085,6 @@ useEffect(() => {
             ))}
           </div>
         </div>
-        </div>
 
         {/* Action Buttons */}
         <div className="flex justify-center space-x-4">
