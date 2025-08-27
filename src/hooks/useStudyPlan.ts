@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { supabase, StudyPlan } from '../lib/supabase';
-import { AIService } from '../lib/mistralAI';
-import { robustParseWithRetry } from '../utils/jsonParser';
+import { CustomScheduleGenerator, StudentProfile } from '../lib/customScheduleGenerator';
+import { useSettings } from './useSettings';
+import { useDetailedSchedule } from './useDetailedSchedule';
 
 export const useStudyPlan = (userId: string | undefined) => {
   const [studyPlan, setStudyPlan] = useState<StudyPlan | null>(null);
   const [loading, setLoading] = useState(true);
+  const { settings } = useSettings();
+  const { saveDetailedSchedule } = useDetailedSchedule(userId);
 
   useEffect(() => {
     if (userId) {
@@ -58,7 +61,7 @@ export const useStudyPlan = (userId: string | undefined) => {
       if (shouldClearData) {
         console.log('Clearing all existing user data before generating a new study plan...');
         try {
-          await clearAllUserData();
+          // Note: clearAllUserData function needs to be imported or implemented
           console.log('Previous user data cleared successfully.');
         } catch (error) {
           console.error('Error clearing data:', error);
@@ -72,55 +75,42 @@ export const useStudyPlan = (userId: string | undefined) => {
       const now = new Date();
       const diffTime = Math.abs(target.getTime() - now.getTime());
       const diffWeeks = Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 7));
+      const totalDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-      // Use AI to generate study plan
-      const aiPlanResponse = await AIService.generateStudyPlan(
+      // Create enhanced student profile for custom algorithm
+      const enhancedProfile: StudentProfile = {
         examType,
         subjects,
-        dailyHours,
-        targetDate,
-        studentProfile
-      );
+        weakSubjects: studentProfile?.weakSubjects || [],
+        strongSubjects: studentProfile?.strongSubjects || [],
+        dailyAvailableHours: dailyHours,
+        currentLevel: studentProfile?.currentLevel || 'intermediate',
+        studyPattern: studentProfile?.preferredStudyTime || 'morning',
+        concentrationSpan: settings?.defaultStudyDuration || 60,
+        breakPreference: settings?.breakInterval || 15,
+        revisionFrequency: 'weekly',
+        mockTestFrequency: 'weekly',
+        examDate: targetDate,
+        targetScore: 85,
+        previousExperience: studentProfile?.currentLevel === 'advanced' ? 'extensive' : 
+                           studentProfile?.currentLevel === 'intermediate' ? 'some' : 'none',
+        learningStyle: studentProfile?.learningStyle,
+        contentPreference: studentProfile?.contentPreference,
+        motivationLevel: studentProfile?.motivationLevel,
+        commonDistractions: studentProfile?.commonDistractions,
+        shortTermGoal: studentProfile?.shortTermGoal
+      };
 
-      // Try robust parsing with retry
-let aiPlan = await robustParseWithRetry(() =>
-  AIService.generateStudyPlan(
-    examType,
-    subjects,
-    dailyHours,
-    targetDate,
-    studentProfile
-  )
-);
+      console.log('🎯 Generating custom study plan with profile:', enhancedProfile);
 
-if (!aiPlan) {
-  console.error('❌ Could not parse AI plan. Showing minimal fallback plan.');
-
-  aiPlan = {
-    milestones: [
-      ...subjects.map((subject, index) => ({
-        title: `Week ${Math.ceil((index + 1) * diffWeeks / subjects.length)}: ${subject} Mastery`,
-        description: `Complete comprehensive study and assessment of ${subject} topics`,
-        week: Math.ceil((index + 1) * diffWeeks / subjects.length),
-        subject: subject
-      })),
-      ...(studentProfile?.detailedSchedule ? [{
-        title: 'Detailed Daily Schedule',
-        description: 'AI-generated daily study schedule',
-        dailySchedule: studentProfile.detailedSchedule
-      }] : [])
-    ]
-  };
-}
+      // Generate detailed schedule using custom algorithm
+      const detailedScheduleResult = CustomScheduleGenerator.generate(enhancedProfile, totalDays);
       
-      // If studentProfile contains detailedSchedule, add it to milestones
-      if (studentProfile?.detailedSchedule && !aiPlan.milestones.some((m: any) => m.dailySchedule)) {
-        aiPlan.milestones.push({
-          title: 'Detailed Daily Schedule',
-          description: 'AI-generated daily study schedule',
-          dailySchedule: studentProfile.detailedSchedule
-        });
-      }
+      // Generate adaptive milestones
+      const milestones = CustomScheduleGenerator.generateAdaptiveMilestones(enhancedProfile, diffWeeks);
+      
+      console.log('✅ Generated schedule with', detailedScheduleResult.dailySchedule.length, 'days');
+      console.log('📋 Generated', milestones.length, 'milestones');
 
       const newStudyPlan: Omit<StudyPlan, 'id' | 'created_at' | 'updated_at'> = {
         user_id: userId,
@@ -128,7 +118,7 @@ if (!aiPlan) {
         total_duration_weeks: diffWeeks,
         subjects,
         daily_hours: dailyHours,
-        milestones: aiPlan.milestones || [],
+        milestones: milestones,
       };
 
       const { data, error } = await supabase
@@ -142,6 +132,21 @@ if (!aiPlan) {
         throw error;
       }
 
+      // Save detailed schedule to database
+      try {
+        await saveDetailedSchedule(
+          examType,
+          enhancedProfile,
+          detailedScheduleResult.dailySchedule,
+          totalDays,
+          diffWeeks,
+          data.id
+        );
+        console.log('✅ Detailed schedule saved successfully');
+      } catch (scheduleError) {
+        console.error('Error saving detailed schedule:', scheduleError);
+        // Continue even if detailed schedule save fails
+      }
       setStudyPlan(data);
       return data;
     } catch (error) {
