@@ -992,7 +992,8 @@ useEffect(() => {
               <Zap className="w-4 h-4" />
               <span>Generate New Schedule</span>
           </div>
-        
+
+        <>
           <div className="space-y-4">
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <p className="text-blue-800 font-medium">
@@ -1002,6 +1003,7 @@ useEffect(() => {
                 Showing all days from today until your exam date. Scroll down to see your complete study journey.
               </p>
             </div>
+          </>
 
             
             {existingSchedule.map((day, index) => (
