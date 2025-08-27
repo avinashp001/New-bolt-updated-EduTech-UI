@@ -929,6 +929,7 @@ useEffect(() => {
 
         {/* Daily Schedule */}
         <div className="space-y-4">
+          <>
           <div className="flex items-center justify-between">
   {/* Left: Title */}
   <div className="flex items-center space-x-2">
@@ -1002,6 +1003,7 @@ useEffect(() => {
                 Showing all days from today until your exam date. Scroll down to see your complete study journey.
               </p>
             </div>
+
             
             {existingSchedule.map((day, index) => (
               <div key={day.date || index} className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
@@ -1066,7 +1068,6 @@ useEffect(() => {
                       </div>
                     ))}
                   </div>
-                </div>
                   
                   {day.motivationalNote && (
                     <div className="mt-4 p-3 bg-blue-50 rounded-lg">
@@ -1085,6 +1086,7 @@ useEffect(() => {
             ))}
           </div>
         </div>
+          </>
 
         {/* Action Buttons */}
         <div className="flex justify-center space-x-4">
