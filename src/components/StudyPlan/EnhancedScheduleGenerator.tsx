@@ -929,7 +929,6 @@ useEffect(() => {
 
         {/* Daily Schedule */}
         <div className="space-y-4">
-          <>
           <div className="flex items-center justify-between">
   {/* Left: Title */}
   <div className="flex items-center space-x-2">
@@ -1086,7 +1085,6 @@ useEffect(() => {
             ))}
           </div>
         </div>
-          </>
 
         {/* Action Buttons */}
         <div className="flex justify-center space-x-4">
