@@ -930,62 +930,65 @@ useEffect(() => {
         {/* Daily Schedule */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-xl font-bold text-slate-800 flex items-center space-x-2">
-              <Calendar className="w-6 h-6 text-blue-600" />
-              <span>Daily Study Schedule</span>
-            </h3>
-            <>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              {CustomScheduleGenerator.generateToppersStudyTips(
-                examType ? {
-                  examType,
-                  subjects,
-                  weakSubjects,
-                  strongSubjects,
-                  dailyAvailableHours: dailyHours,
-                  currentLevel,
-                  studyPattern: preferredStudyTime,
-                  concentrationSpan: settings?.defaultStudyDuration || 60,
-                  breakPreference: settings?.breakInterval || 15,
-                  revisionFrequency: 'weekly' as const,
-                  mockTestFrequency: 'weekly' as const,
-                  examDate: targetDate,
-                  targetScore: 85,
-                  previousExperience: 'some' as const,
-                  learningStyle,
-                  contentPreference,
-                  motivationLevel,
-                  commonDistractions,
-                  shortTermGoal
-                } : {
-                  examType: '',
-                  subjects: [],
-                  weakSubjects: [],
-                  strongSubjects: [],
-                  dailyAvailableHours: 6,
-                  currentLevel: 'intermediate' as const,
-                  studyPattern: 'morning' as const,
-                  concentrationSpan: 60,
-                  breakPreference: 15,
-                  revisionFrequency: 'weekly' as const,
-                  mockTestFrequency: 'weekly' as const,
-                  examDate: '',
-                  targetScore: 85,
-                  previousExperience: 'some' as const
-                }
-              ).slice(0, 6).map((tip, index) => (
-        <div
-    key={index}
-              className="bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700 transition-colors flex items-center space-x-2">
-                  <div className="w-5 h-5 mt-1 text-blue-600">
-                    {tip.includes('80-20') ? '🎯' : 
-                     tip.includes('Spaced') ? '🔄' : 
-                     tip.includes('Active') ? '🧠' : 
-                     tip.includes('Peak') ? '⏰' : 
-                     tip.includes('Error') ? '📝' : 
-                     tip.includes('Mock') ? '🎪' : 
-                     tip.includes('Consistency') ? '💪' : '🎨'}
-                  </div>
+  {/* Left: Title */}
+  <div className="flex items-center space-x-2">
+    <Calendar className="w-6 h-6 text-blue-600" />
+    <h3 className="text-xl font-bold text-slate-800">Daily Study Schedule</h3>
+  </div>
+
+  {/* Right: Tips grid */}
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+    {CustomScheduleGenerator.generateToppersStudyTips(
+      examType ? {
+        examType,
+        subjects,
+        weakSubjects,
+        strongSubjects,
+        dailyAvailableHours: dailyHours,
+        currentLevel,
+        studyPattern: preferredStudyTime,
+        concentrationSpan: settings?.defaultStudyDuration || 60,
+        breakPreference: settings?.breakInterval || 15,
+        revisionFrequency: 'weekly' as const,
+        mockTestFrequency: 'weekly' as const,
+        examDate: targetDate,
+        targetScore: 85,
+        previousExperience: 'some' as const,
+        learningStyle,
+        contentPreference,
+        motivationLevel,
+        commonDistractions,
+        shortTermGoal
+      } : {
+        examType: '',
+        subjects: [],
+        weakSubjects: [],
+        strongSubjects: [],
+        dailyAvailableHours: 6,
+        currentLevel: 'intermediate' as const,
+        studyPattern: 'morning' as const,
+        concentrationSpan: 60,
+        breakPreference: 15,
+        revisionFrequency: 'weekly' as const,
+        mockTestFrequency: 'weekly' as const,
+        examDate: '',
+        targetScore: 85,
+        previousExperience: 'some' as const
+      }
+    ).slice(0, 6).map((tip, index) => (
+      <div
+        key={index}
+        className="bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700 transition-colors flex items-center space-x-2"
+      >
+        <div className="w-5 h-5 mt-1 text-blue-600">
+          {tip.includes('80-20') ? '🎯' :
+           tip.includes('Spaced') ? '🔄' :
+           tip.includes('Active') ? '🧠' :
+           tip.includes('Peak') ? '⏰' :
+           tip.includes('Error') ? '📝' :
+           tip.includes('Mock') ? '🎪' :
+           tip.includes('Consistency') ? '💪' : '🎨'}
+        </div>
               <Zap className="w-4 h-4" />
               <span>Generate New Schedule</span>
           </div>
