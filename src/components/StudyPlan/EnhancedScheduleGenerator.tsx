@@ -1066,6 +1066,7 @@ useEffect(() => {
                       </div>
                     ))}
                   </div>
+                </div>
                   
                   {day.motivationalNote && (
                     <div className="mt-4 p-3 bg-blue-50 rounded-lg">
