@@ -366,31 +366,113 @@ export function extendSchedule(parsed: any, studentProfile: any, totalDays: numb
   if (!parsed?.dailySchedule) return parsed;
 
   const currentSchedule = Array.isArray(parsed.dailySchedule) ? parsed.dailySchedule : [];
+  
+  // If no existing schedule, return empty to let ScheduleGenerator handle fallback
+  if (currentSchedule.length === 0) {
+    console.warn('extendSchedule: No existing schedule to extend, returning empty');
+    return { dailySchedule: [] };
+  }
+  
   const today = new Date();
 
   const subjects: string[] = Array.isArray(studentProfile?.subjects) ? studentProfile.subjects : [];
   const weakSubjects: string[] = Array.isArray(studentProfile?.weakSubjects) ? studentProfile.weakSubjects : [];
   const dailyAvailableHours = Number(studentProfile?.dailyAvailableHours) || 9;
+  const isBeginnerLevel = studentProfile?.currentLevel === 'beginner';
+  const isIntermediateLevel = studentProfile?.currentLevel === 'intermediate';
 
   if (subjects.length === 0) {
     // Nothing to extend without subject list
     return { dailySchedule: currentSchedule };
   }
 
+  // Enhanced topic progression tracking
+  const topicProgressTracker: Record<string, { currentChapter: number; subTopicIndex: number }> = {};
+  subjects.forEach(subject => {
+    topicProgressTracker[subject] = { currentChapter: 0, subTopicIndex: 0 };
+  });
+  
+  // Analyze existing schedule to determine current progression
+  currentSchedule.forEach((day: any) => {
+    if (day.subjects && Array.isArray(day.subjects)) {
+      day.subjects.forEach((subj: any) => {
+        if (subj.subject && topicProgressTracker[subj.subject]) {
+          topicProgressTracker[subj.subject].currentChapter++;
+        }
+      });
+    }
+  });
   for (let i = currentSchedule.length; i < totalDays; i++) {
     const currentDate = new Date(today);
     currentDate.setDate(today.getDate() + i);
 
     const dayOfWeek = currentDate.toLocaleDateString("en-IN", { weekday: "long" });
     const isWeekend = dayOfWeek === "Saturday" || dayOfWeek === "Sunday";
+    const weekNumber = Math.ceil((i + 1) / 7);
 
     const subjectIndex = i % subjects.length;
     const primarySubject = subjects[subjectIndex];
     const secondarySubject = subjects[(subjectIndex + 1) % subjects.length];
 
     const isPrimaryWeak = weakSubjects.includes(primarySubject);
-    const primaryHours = isPrimaryWeak ? 5 : 4;
+    const primaryHours = isPrimaryWeak ? 
+      Math.ceil(dailyAvailableHours * 0.6) : 
+      Math.ceil(dailyAvailableHours * 0.5);
     const secondaryHours = Math.max(0, dailyAvailableHours - primaryHours);
+
+    // Generate specific topics based on progression and level
+    const generateSpecificTopics = (subject: string, isSecondary: boolean = false) => {
+      const progress = topicProgressTracker[subject];
+      const chapterNumber = Math.floor(progress.currentChapter / (isBeginnerLevel ? 4 : isIntermediateLevel ? 3 : 2)) + 1;
+      
+      if (isBeginnerLevel) {
+        const subTopics = ['Introduction', 'Basic Concepts', 'Examples', 'Simple Practice'];
+        const currentSubTopic = subTopics[progress.subTopicIndex % subTopics.length];
+        return isSecondary ? [
+          `${subject} - Chapter ${chapterNumber}: Quick Review`,
+          `${subject} - Chapter ${chapterNumber}: Practice Problems`
+        ] : [
+          `${subject} - Chapter ${chapterNumber}: ${currentSubTopic}`,
+          `${subject} - Chapter ${chapterNumber}: Step-by-step Learning`
+        ];
+      } else if (isIntermediateLevel) {
+        const subTopics = ['Theory & Concepts', 'Applications', 'Problem Solving'];
+        const currentSubTopic = subTopics[progress.subTopicIndex % subTopics.length];
+        return isSecondary ? [
+          `${subject} - Chapter ${chapterNumber}: Quick Review`,
+          `${subject} - Chapter ${chapterNumber}: Advanced Practice`
+        ] : [
+          `${subject} - Chapter ${chapterNumber}: ${currentSubTopic}`,
+          `${subject} - Chapter ${chapterNumber}: Comprehensive Understanding`
+        ];
+      } else {
+        return isSecondary ? [
+          `${subject} - Chapter ${chapterNumber}: Advanced Review`,
+          `${subject} - Chapter ${chapterNumber}: Integration & Synthesis`
+        ] : [
+          `${subject} - Chapter ${chapterNumber}: Mastery & Integration`,
+          `${subject} - Chapter ${chapterNumber}: Complex Problem Solving`
+        ];
+      }
+    };
+
+    // Generate time slots based on study pattern
+    const generateTimeSlot = (subjectIndex: number, hours: number) => {
+      const baseHour = studentProfile?.studyPattern === 'morning' ? 6 :
+                     studentProfile?.studyPattern === 'evening' ? 16 :
+                     studentProfile?.studyPattern === 'night' ? 20 : 9;
+      const startHour = baseHour + (subjectIndex * Math.ceil(hours));
+      const endHour = startHour + hours;
+      
+      const formatHour = (hour: number) => {
+        const adjustedHour = hour % 24;
+        const period = adjustedHour >= 12 ? 'PM' : 'AM';
+        const displayHour = adjustedHour === 0 ? 12 : adjustedHour > 12 ? adjustedHour - 12 : adjustedHour;
+        return `${displayHour}:${hour % 1 === 0.5 ? '30' : '00'} ${period}`;
+      };
+      
+      return `${formatHour(startHour)} - ${formatHour(endHour)}`;
+    };
 
     const dailySchedule = {
       date: currentDate.toISOString().split("T")[0],
@@ -399,46 +481,85 @@ export function extendSchedule(parsed: any, studentProfile: any, totalDays: numb
         {
           subject: primarySubject,
           hours: primaryHours,
-          timeSlot: "6:00 AM - 9:30 AM",
-          topics: [`${primarySubject} – Advanced Concepts`, `${primarySubject} – Mixed Practice`],
+          timeSlot: generateTimeSlot(0, primaryHours),
+          topics: generateSpecificTopics(primarySubject),
           priority: isPrimaryWeak ? "high" : "medium",
           studyType: isWeekend ? "revision" : "new-concepts",
           breakAfter: 15,
+          difficultyLevel: isBeginnerLevel ? 'easy' : isIntermediateLevel ? 'medium' : 'hard',
+          expectedOutcome: isBeginnerLevel ?
+            `Build foundation in ${primarySubject}` :
+            `Advance understanding of ${primarySubject}`
         },
         ...(secondarySubject
           ? [
               {
                 subject: secondarySubject,
                 hours: secondaryHours,
-                timeSlot: "10:00 AM - 12:30 PM",
-                topics: [`${secondarySubject} – Quick Review`, `${secondarySubject} – Problem Solving`],
+                timeSlot: generateTimeSlot(1, secondaryHours),
+                topics: generateSpecificTopics(secondarySubject, true),
                 priority: "medium",
                 studyType: "practice",
                 breakAfter: 15,
+                difficultyLevel: isBeginnerLevel ? 'easy' : 'medium',
+                expectedOutcome: `Reinforce ${secondarySubject} concepts through practice`
               },
             ]
           : []),
         ...(isWeekend
           ? [
               {
-                subject: "Mock Test",
-                hours: 2,
-                timeSlot: "3:00 PM - 5:00 PM",
-                topics: ["Full-Length Mock Test + Analysis"],
+                subject: isBeginnerLevel ? "Weekly Review" : "Mock Test",
+                hours: isBeginnerLevel ? 1.5 : 2,
+                timeSlot: generateTimeSlot(2, isBeginnerLevel ? 1.5 : 2),
+                topics: isBeginnerLevel ? [
+                  "Week's Learning Consolidation",
+                  "Concept Clarity Check",
+                  "Confidence Building"
+                ] : [
+                  "Full-Length Mock Test",
+                  "Performance Analysis",
+                  "Strategy Refinement"
+                ],
                 priority: "high",
-                studyType: "mock-test",
+                studyType: isBeginnerLevel ? "revision" : "mock-test",
                 breakAfter: 0,
+                difficultyLevel: isBeginnerLevel ? 'easy' : 'medium',
+                expectedOutcome: isBeginnerLevel ?
+                  "Consolidate week's learning and build confidence" :
+                  "Assess exam readiness and identify improvement areas"
               },
             ]
           : []),
       ],
       totalHours: dailyAvailableHours,
-      focusArea: isPrimaryWeak ? `Strengthen ${primarySubject}` : "Balanced Study",
-      motivationalNote: isWeekend
-        ? `Weekend revision focus: Reinforce ${primarySubject}`
-        : `Day ${i + 1}: Stay consistent and push your limits!`,
-      weeklyGoal: `Week ${Math.ceil((i + 1) / 7)}: Master progressively harder concepts and increase accuracy`,
+      focusArea: isPrimaryWeak ? 
+        `Strengthen ${primarySubject} - ${isBeginnerLevel ? 'Foundation Building' : 'Advanced Mastery'}` : 
+        `Balanced ${isBeginnerLevel ? 'Foundation' : 'Mastery'} Study`,
+      motivationalNote: isWeekend ?
+        `Weekend ${isBeginnerLevel ? 'consolidation' : 'revision'} focus: Reinforce ${primarySubject} understanding` :
+        isBeginnerLevel ?
+          `Day ${i + 1}: Take time to understand each concept. Quality learning builds lasting knowledge!` :
+          `Day ${i + 1}: Stay consistent and challenge yourself. Excellence is built daily!`,
+      weeklyGoal: `Week ${weekNumber}: ${isBeginnerLevel ? 'Build solid foundations and confidence in' : 'Master progressively advanced concepts in'} ${subjects.slice(0, 2).join(' & ')}`,
+      studyPhase: isBeginnerLevel ? 'foundation' : isIntermediateLevel ? 'building' : 'mastery',
+      difficultyLevel: isBeginnerLevel ? 'easy' : isIntermediateLevel ? 'medium' : 'hard'
     };
+
+    // Update topic progression trackers
+    topicProgressTracker[primarySubject].subTopicIndex++;
+    if (topicProgressTracker[primarySubject].subTopicIndex >= (isBeginnerLevel ? 4 : isIntermediateLevel ? 3 : 2)) {
+      topicProgressTracker[primarySubject].subTopicIndex = 0;
+      topicProgressTracker[primarySubject].currentChapter++;
+    }
+    
+    if (secondarySubject && topicProgressTracker[secondarySubject]) {
+      topicProgressTracker[secondarySubject].subTopicIndex++;
+      if (topicProgressTracker[secondarySubject].subTopicIndex >= (isBeginnerLevel ? 4 : isIntermediateLevel ? 3 : 2)) {
+        topicProgressTracker[secondarySubject].subTopicIndex = 0;
+        topicProgressTracker[secondarySubject].currentChapter++;
+      }
+    }
 
     currentSchedule.push(dailySchedule);
   }
