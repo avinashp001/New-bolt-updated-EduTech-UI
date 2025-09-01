@@ -1383,7 +1383,7 @@ const TheoryView: React.FC<{ userId: string }> = ({ userId }) => {
 
   useEffect(() => {
     fetchTheory(); // Call fetchTheory on component mount/dependency change
-  }, [subject, topic, userId]);
+  }, [subject, topic, user, userId]);
 
   const handleRetryFetchTheory = () => {
     fetchTheory();
