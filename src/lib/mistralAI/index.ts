@@ -60,10 +60,6 @@ export class AIService {
     return TheoryGenerator.generateTheory(subject, topic, userId, examLevel);
   }
 
-  static async generateTheory(subject: string, topic: string, userId: string, examLevel: string) { // Added examLevel
-    return TheoryGenerator.generateTheory(subject, topic, userId, examLevel); // Pass examLevel
-  }
-
 
 // Theory Generation V2
  static async generateTheoryV2(subject: string, topic: string, userId: string, examLevel: string) {
