@@ -1788,64 +1788,93 @@
 
 //  New change 
 
-
-import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Brain, BookOpen, Loader2, AlertCircle, Download } from 'lucide-react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { ArrowLeft, BookOpen, Brain, Loader, Play, FileText, Lightbulb, Target, CheckCircle, Download } from 'lucide-react'; // Added Download
 import { AIService } from '../../lib/mistralAI';
-import LoadingSpinner from '../Common/LoadingSpinner';
-import TheoryContentDisplay from '../Theory/TheoryContentDisplay';
+import 'katex/dist/katex.min.css';
+import RetryPopup from '../Common/RetryPopup';
 import { useAuth } from '../../hooks/useAuth'; // Import useAuth
-import { useNotification } from '../../context/NotificationContext';
-import html2pdf from 'html2pdf.js';
+import { useNotification } from '../../context/NotificationContext'; // Import useNotification
+import TheoryContentDisplay from '../Theory/TheoryContentDisplay'; // Import TheoryContentDisplay
+import html2pdf from 'html2pdf.js'; // Import html2pdf
 
-interface TheoryContent {
-  notes?: string;
-  mermaid?: string;
-  examTag?: string;
-}
-
-const TheoryView: React.FC<{ userId: string }> = ({ userId }) => {
-  const { subject, topic } = useParams<{ subject: string; topic: string }>();
+// Removed userId prop as it will be fetched from useAuth
+const TheoryView: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth(); // Get user from useAuth
-  const { showSuccess, showError } = useNotification();
+  const { subject: subjectParam, topic: topicParam } = useParams<{ subject: string; topic: string }>();
+  const { user, loading: authLoading } = useAuth(); // Get user and loading state from useAuth
+  const { showSuccess, showError } = useNotification(); // Get notification hooks
 
-  const [theoryContent, setTheoryContent] = useState<TheoryContent | null>(null);
+  const [theoryContent, setTheoryContent] = useState<any>(null); // Changed to any to match TheoryContentDisplay
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const theoryContentRef = useRef<HTMLDivElement>(null);
+  const [error, setError] = useState<string>('');
+  const [showRetryPopup, setShowRetryPopup] = useState(false);
+  const theoryContentRef = useRef<HTMLDivElement>(null); // Ref for PDF download
 
-  useEffect(() => {
-    if (subject && topic && userId) {
-      fetchTheory();
-    }
-  }, [subject, topic, userId, user?.target_exam]); // Re-fetch if target_exam changes
+  // Redirect if no parameters
+  if (!subjectParam || !topicParam) {
+    navigate('/app/courses');
+    return null;
+  }
+
+  const subject = decodeURIComponent(subjectParam);
+  const topic = decodeURIComponent(topicParam);
+
+  const handleProceedToAssessment = () => {
+    navigate(`/app/courses/theory-quiz/${encodeURIComponent(topic)}`, { // Updated path for theory quiz
+      state: {
+        subject: subject,
+        topic: topic,
+        theoryContent: theoryContent // Pass the parsed content
+      }
+    });
+  };
+
+  const handleBack = () => {
+    navigate(`/app/courses/${encodeURIComponent(subject)}`);
+  };
 
   const fetchTheory = async () => {
-    if (!subject || !topic || !userId) return;
+    if (!subject || !topic || !user?.id) { // Check for user.id
+      setError('User not authenticated or subject/topic missing.');
+      setIsLoading(false);
+      return;
+    }
 
     setIsLoading(true);
-    setError(null);
-    setTheoryContent(null);
+    setError('');
+    setShowRetryPopup(false);
 
     try {
-      const decodedSubject = decodeURIComponent(subject);
-      const decodedTopic = decodeURIComponent(topic);
-      const examLevel = user?.target_exam || 'General'; // Use user's target_exam or fallback
-
-      const content = await AIService.generateTheory(decodedSubject, decodedTopic, userId, examLevel);
+      const examLevel = user.target_exam || 'General'; // Get exam level from user profile
+      const content = await AIService.generateTheory(subject, topic, user.id, examLevel); // Pass examLevel
       const parsedContent = JSON.parse(content); // Assuming AI returns JSON string
-
       setTheoryContent(parsedContent);
-      showSuccess('Theory Loaded!', `Content for "${decodedTopic}" in ${decodedSubject} loaded successfully.`);
+      showSuccess('Theory Loaded!', `Content for "${topic}" in ${subject} loaded successfully.`);
     } catch (err) {
       console.error('Error fetching theory:', err);
       setError('Failed to load theory content. Please try again.');
       showError('Loading Failed', 'Could not load theory content. Please try again.');
+      setShowRetryPopup(true);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  useEffect(() => {
+    if (!authLoading && user?.id) { // Fetch only when user data is loaded
+      fetchTheory();
+    }
+  }, [subject, topic, user?.id, authLoading, user?.target_exam]); // Re-fetch if user or target_exam changes
+
+  const handleRetryFetchTheory = () => {
+    fetchTheory();
+  };
+
+  const handleCancelFetchTheory = () => {
+    setShowRetryPopup(false);
+    navigate(`/app/courses/${encodeURIComponent(subject)}`);
   };
 
   const handleDownloadPdf = () => {
@@ -1858,7 +1887,7 @@ const TheoryView: React.FC<{ userId: string }> = ({ userId }) => {
     const element = theoryContentRef.current;
     const opt = {
       margin: 0.5,
-      filename: `${subject?.replace(/[^a-zA-Z0-9]/g, '_')}_${topic?.replace(/[^a-zA-Z0-9]/g, '_')}_theory.pdf`,
+      filename: `${subject.replace(/[^a-zA-Z0-9]/g, '_')}_${topic.replace(/[^a-zA-Z0-9]/g, '_')}_theory.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2, logging: false, dpi: 192, letterRendering: true },
       jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
@@ -1867,18 +1896,43 @@ const TheoryView: React.FC<{ userId: string }> = ({ userId }) => {
     html2pdf().set(opt).from(element).save().then(() => {
       setIsLoading(false);
       showSuccess('PDF Downloaded!', 'The theory content has been successfully downloaded as a PDF.');
-    }).catch(error => {
+    }).catch(pdfError => {
       setIsLoading(false);
       showError('Download Failed', 'There was an error downloading the PDF. Please try again.');
-      console.error('PDF generation error:', error);
+      console.error('PDF generation error:', pdfError);
     });
   };
 
-  if (!subject || !topic) {
+  if (authLoading || (isLoading && !theoryContent && !error)) { // Show loading spinner while auth is loading or initial fetch
     return (
-      <div className="text-center text-slate-600">
-        <AlertCircle className="w-12 h-12 mx-auto mb-4" />
-        <p>Subject or topic not specified.</p>
+      <div className="max-w-4xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="bg-gradient-to-r dark:from-slate-700 dark:to-slate-800 from-green-500 to-blue-600 p-6 rounded-2xl text-white">
+          <div className="flex items-center space-x-3 mb-4">
+            <h2 className="text-xl font-bold">Theory: {topic}</h2>
+          </div>
+          <p className="text-sm text-teal-100">
+            Subject: <strong>{subject}</strong>
+          </p>
+        </div>
+
+        {/* Loading State */}
+        <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+          <div className="flex flex-col items-center justify-center py-12">
+            <div className="relative mb-6">
+              <Loader className="w-12 h-12 animate-spin text-blue-600" />
+              <BookOpen className="w-6 h-6 text-blue-600 absolute top-3 left-3" />
+            </div>
+            <h3 className="text-xl font-semibold text-slate-800 mb-2">Generating Theory Content</h3>
+            <p className="text-slate-600 text-center max-w-md">
+              Processing and generating comprehensive theory content for <strong>{topic}</strong> in {subject}...
+            </p>
+            <div className="mt-4 flex items-center space-x-2 text-sm text-slate-500">
+              <FileText className="w-4 h-4" />
+              <span>Processing with RAG technology</span>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -1886,20 +1940,29 @@ const TheoryView: React.FC<{ userId: string }> = ({ userId }) => {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-700 p-6 rounded-2xl text-white">
+      <div className="bg-gradient-to-r dark:from-slate-700 dark:to-slate-800 from-green-500 to-blue-600 p-6 rounded-2xl text-white">
         <div className="flex items-center space-x-3 mb-4">
-          <BookOpen className="w-8 h-8" />
-          <h2 className="text-2xl font-bold">{decodeURIComponent(topic)}</h2>
+          <h2 className="text-xl font-bold">Theory: {topic}</h2>
         </div>
-        <p className="text-blue-100">
-          Comprehensive theory for {decodeURIComponent(subject)}
+        <p className="text-sm text-green-100">
+          Subject: <strong>{subject}</strong>
         </p>
+        <div className="mt-4 flex items-center space-x-4 text-sm">
+          <div className="flex items-center space-x-2">
+            <Brain className="w-4 h-4" />
+            <span>RAG-Enhanced Content</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <FileText className="w-4 h-4" />
+            <span>Based on Uploaded Materials</span>
+          </div>
+        </div>
       </div>
 
       {/* Navigation and Download */}
       <div className="flex items-center justify-between">
         <button
-          onClick={() => navigate(-1)}
+          onClick={handleBack}
           className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
@@ -1913,7 +1976,7 @@ const TheoryView: React.FC<{ userId: string }> = ({ userId }) => {
           >
             {isLoading ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader className="w-4 h-4 animate-spin" />
                 <span>Downloading...</span>
               </>
             ) : (
@@ -1927,11 +1990,7 @@ const TheoryView: React.FC<{ userId: string }> = ({ userId }) => {
       </div>
 
       {/* Theory Content Display */}
-      {isLoading ? (
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 text-center">
-          <LoadingSpinner message="Generating theory content..." variant="brain" />
-        </div>
-      ) : error ? (
+      {error ? (
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 text-center">
           <AlertCircle className="w-12 h-12 mx-auto mb-4 text-red-500" />
           <p className="text-red-600">{error}</p>
@@ -1952,6 +2011,34 @@ const TheoryView: React.FC<{ userId: string }> = ({ userId }) => {
           <p className="text-slate-600">No theory content available for this topic yet.</p>
         </div>
       )}
+
+      {/* Action Buttons */}
+      <div className="flex flex-col sm:flex-row justify-between space-y-4 sm:space-y-0 sm:space-x-4">
+        <button
+          onClick={handleBack}
+          className="flex items-center justify-center space-x-2 px-6 py-3 border border-slate-300 text-slate-700 rounded-lg font-medium hover:bg-slate-50 transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          <span>Back to Course</span>
+        </button>
+
+        <button
+          onClick={handleProceedToAssessment}
+          className="flex items-center justify-center space-x-2 bg-gradient-to-r from-green-600 to-blue-600 text-white px-8 py-3 rounded-lg font-medium hover:from-green-700 hover:to-blue-700 transition-all shadow-lg"
+        >
+          <Play className="w-5 h-5" />
+          <span>Proceed to AI Assessment</span>
+        </button>
+      </div>
+
+      {/* Retry Popup */}
+      <RetryPopup
+        isOpen={showRetryPopup}
+        title="Failed to Generate Theory"
+        message={error || "We encountered an issue generating the theory content. Please try again."}
+        onTryAgain={handleRetryFetchTheory}
+        onCancel={handleCancelFetchTheory}
+      />
     </div>
   );
 };
