@@ -1150,38 +1150,396 @@
 
 
 
+// import { Mistral } from '@mistralai/mistralai';
+// import { supabase } from '../supabase';
+
+// /**
+//  * Unified TheoryGenerator (refined)
+//  * - RAG-first: Uses uploaded materials exclusively when available
+//  * - Fallback mirrors the SAME rich style (descriptive, beginner→advanced) with standard sources
+//  * - SSC → UPSC exam-sync with inline tags, study aids, misconceptions, interlinking
+//  * - Strict LaTeX rules ($ ... $ and $$ ... $$ only)
+//  * - Descriptive, paragraph-first output (no terse bullets)
+//  */
+
+// const apiKey = import.meta.env.VITE_MISTRAL_API_KEY;
+// const useMockAI = !apiKey;
+// const client = apiKey ? new Mistral({ apiKey }) : null;
+
+// // Tunables
+// const MODEL_NAME = 'mistral-large-latest';
+// const TEMPERATURE = 0.25; // lower = more factual, consistent
+// const MAX_TOKENS = 8500;  // bump slightly for longer chapters (adjust per plan)
+
+// export class TheoryGenerator {
+//   /** Public entrypoint */
+//   static async generateTheory(subject: string, topic: string, userId: string) {
+//     if (useMockAI) {
+//       await new Promise((resolve) => setTimeout(resolve, 300));
+//       return this.generateMockTheory(subject, topic);
+//     }
+
+//     try {
+//       const relevantContent = await this.retrieveRelevantContent(subject, topic, userId);
+//       const prompt = this.getUnifiedPrompt(subject, topic, relevantContent);
+
+//       const response = await client!.chat.complete({
+//         model: MODEL_NAME,
+//         messages: [
+//           {
+//             role: 'system',
+//             content:
+//               'You are a senior competitive exam mentor and academic content creator. Follow instructions exactly. Never hallucinate. Use ONLY provided sources when present. Prefer descriptive paragraphs over bullets. Avoid one-liners.',
+//           },
+//           { role: 'user', content: prompt },
+//         ],
+//         temperature: TEMPERATURE,
+//         max_tokens: MAX_TOKENS,
+//       });
+
+//       const out = response.choices?.[0]?.message?.content?.trim();
+//       return out && out.length > 0 ? out : this.generateMockTheory(subject, topic);
+//     } catch (error) {
+//       console.error('Error generating theory:', error);
+//       return this.generateMockTheory(subject, topic);
+//     }
+//   }
+
+//   /** RAG: Fetch uploaded materials with a relevance ranking pipeline. */
+//   private static async retrieveRelevantContent(
+//     subject: string,
+//     topic: string,
+//     userId: string,
+//   ): Promise<string[]> {
+//     try {
+//       const { data: materials, error } = await supabase
+//         .from('uploaded_materials')
+//         .select('extracted_content, filename, processed_topics, exam_relevance_score')
+//         .eq('user_id', userId)
+//         .gte('exam_relevance_score', 4); // slightly permissive threshold
+
+//       if (error) {
+//         console.error('Supabase error retrieving uploaded materials:', error);
+//         return [];
+//       }
+//       if (!materials || materials.length === 0) return [];
+
+//       // Normalize query terms
+//       const subjectKey = subject.toLowerCase();
+//       const topicKey = topic.toLowerCase();
+
+//       type Item = {
+//         content: string;
+//         filename?: string;
+//         processed_topics?: string[];
+//         score: number;
+//       };
+
+//       const scored: Item[] = materials
+//         .map((m: any) => {
+//           const content: string = m.extracted_content || '';
+//           const filename: string = (m.filename || '').toLowerCase();
+//           const topics: string[] = Array.isArray(m.processed_topics) ? m.processed_topics : [];
+//           const text = content.toLowerCase();
+
+//           const subjectHit = Number(
+//             text.includes(subjectKey) ||
+//               filename.includes(subjectKey) ||
+//               topics.some((t) => t?.toLowerCase?.().includes(subjectKey)),
+//           );
+//           const topicHit = Number(
+//             text.includes(topicKey) ||
+//               filename.includes(topicKey) ||
+//               topics.some((t) => t?.toLowerCase?.().includes(topicKey)),
+//           );
+
+//           // Soft scoring: topic match weighted higher than subject match
+//           const score = topicHit * 2 + subjectHit + (m.exam_relevance_score || 0) * 0.25;
+
+//           return { content, filename: m.filename, processed_topics: topics, score };
+//         })
+//         .sort((a, b) => b.score - a.score);
+
+//       // Take top N and extract relevant sections
+//       const top = scored.slice(0, 10);
+//       const snippets: string[] = [];
+
+//       for (const t of top) {
+//         const snippet = this.extractRelevantSections(t.content, subject, topic);
+//         if (snippet && snippet.length > 160) snippets.push(this.normalize(snippet));
+//         if (snippets.length >= 6) break;
+//       }
+
+//       // Deduplicate by simple semantic similarity on word sets
+//       const unique = this.dedupeBySimilarity(snippets, 0.82);
+//       return unique.slice(0, 5);
+//     } catch (err) {
+//       console.error('Error in retrieveRelevantContent:', err);
+//       return [];
+//     }
+//   }
+
+//   /** Extract relevant sections with neighbor-window expansion for context. */
+//   private static extractRelevantSections(content: string, subject: string, topic: string): string {
+//     if (!content || content.trim().length < 30) return '';
+
+//     const maxLen = 5200; // generous prompt budget per source
+//     const cleaned = content.replace(/\u0000/g, '').replace(/\s+\n/g, '\n').trim();
+
+//     const paras = cleaned
+//       .split(/\n\s*\n/g)
+//       .map((p) => p.trim())
+//       .filter((p) => p.length > 30);
+
+//     const sKey = subject.toLowerCase();
+//     const tKey = topic.toLowerCase();
+
+//     // rank paragraphs by presence of topic and subject
+//     const ranks = paras.map((p, i) => {
+//       const l = p.toLowerCase();
+//       const score = (l.includes(tKey) ? 2 : 0) + (l.includes(sKey) ? 1 : 0);
+//       return { i, p, score };
+//     });
+
+//     const sorted = ranks.sort((a, b) => b.score - a.score).slice(0, 8);
+
+//     // collect with a window around top hits to preserve context
+//     const take = new Set<number>();
+//     for (const r of sorted) {
+//       for (let j = Math.max(0, r.i - 1); j <= Math.min(paras.length - 1, r.i + 1); j++) {
+//         take.add(j);
+//       }
+//     }
+
+//     // build output up to maxLen
+//     const chosen = Array.from(take).sort((a, b) => a - b).map((idx) => paras[idx]);
+
+//     let out = '';
+//     for (const chunk of chosen) {
+//       if (out.length + chunk.length + 2 > maxLen) break;
+//       out += chunk + '\n\n';
+//     }
+
+//     if (out.trim().length > 160) return out.trim();
+
+//     // last resort: first few paragraphs
+//     return paras.slice(0, 4).join('\n\n');
+//   }
+
+//   /** Simple text normalization */
+//   private static normalize(s: string) {
+//     return s.replace(/\s+/g, ' ').replace(/\u0000/g, '').trim();
+//   }
+
+//   /** Very light similarity dedupe on word sets */
+//   private static dedupeBySimilarity(snippets: string[], threshold = 0.85) {
+//     const result: string[] = [];
+//     for (const s of snippets) {
+//       let isDup = false;
+//       const setA = new Set(s.toLowerCase().split(/[^a-z0-9]+/g).filter(Boolean));
+//       for (const r of result) {
+//         const setB = new Set(r.toLowerCase().split(/[^a-z0-9]+/g).filter(Boolean));
+//         const inter = new Set([...setA].filter((w) => setB.has(w)));
+//         const union = new Set([...setA, ...setB]);
+//         const sim = inter.size / Math.max(1, union.size);
+//         if (sim >= threshold) { isDup = true; break; }
+//       }
+//       if (!isDup) result.push(s);
+//     }
+//     return result;
+//   }
+
+//   /**
+//    * Unified Prompt Generator
+//    * - With sources: STRICT source fidelity (no external facts)
+//    * - Without sources: Same rich, descriptive style using standard consensus sources
+//    */
+//   private static getUnifiedPrompt(subject: string, topic: string, relevantContent: string[]): string {
+//     const hasSources = Array.isArray(relevantContent) && relevantContent.length > 0;
+//     const contentContext = hasSources ? relevantContent.join('\n\n---\n\n') : '(no uploaded materials)';
+
+//     const DESCRIPTIVE_STYLE_GUIDE = `
+// OUTPUT LENGTH & STYLE:
+// - Target length: **1,600–2,600 words** (comprehensive chapter-like notes).
+// - Write in **descriptive paragraphs**, not terse bullets.
+// - If bullets are absolutely necessary, each bullet must be **2–3 full sentences**.
+// - Progress naturally from **basics → intermediate → advanced** so a beginner can follow.
+// - Use precise, exam-appropriate terminology, but always **explain terms in plain language** on first use.
+// - Keep tone teacherly and clear; avoid filler or fluff.
+// `;
+
+//     const CORE_RULES = `
+// MATHEMATICAL EXPRESSIONS & FORMATTING RULES:
+// - Use LaTeX with $...$ for inline and $$...$$ for display.
+// - Do NOT use \\\[...] or \\\( ... \\\) or equation environments.
+// - Define every symbol and unit in plain words near first use.
+// - Never repeat the same formula or definition.
+// - Use clean Markdown: #, ##, ### for headings; **bold** for key terms; *italics* for emphasis.
+// - When including currency or units inside math, wrap in \\text{ } (e.g., $\\text{₹}1200$ or $5 \\text{ m/s}$).
+// `;
+
+//     const SHARED_STRUCTURE = `
+// REQUIRED STRUCTURE (Paragraph-first, SSC → UPSC Sync):
+// # ${topic} in ${subject}
+
+// ## Introduction
+// Write a gentle, beginner-friendly opening that defines the topic in plain language, gives brief context or historical background where relevant, and explains why exams care about it (SSC/Banking/UPSC).
+
+// ## Detailed Explanation (Progressive Flow)
+// Explain all subtopics in a **continuous narrative** that starts simple and gradually adds depth. Use analogies, micro-examples, and short caselets. Make the transitions smooth so a reader never feels a jump in difficulty.
+
+// ## Key Ideas & Exam Concepts
+// Summarize all essential definitions and principles **within paragraphs**. Insert relevance tags inline like [SSC/CHSL], [Banking/IBPS/RRB], [CDS/NDA/State PCS], [UPSC] where they naturally fit.
+
+// ## Formulas and Principles
+// For each formula: present once with $$...$$, then explain symbols and meaning in words, and add a short, clear worked example or usage scenario. Keep math neat.
+
+// ## Applications & Case Studies
+// Describe practical uses and exam-style applications in narrative form. Where suitable, include brief case studies or realistic scenarios and indicate which exams emphasize them.
+
+// ## Misconceptions & Clarifications
+// Explain common mistakes learners make and the correct reasoning, using short paragraphs instead of one-liners.
+
+// ## Interlinking with Other Topics
+// Describe high-yield connections to other chapters/subjects and why these edges are frequently tested. Mention exam focus where applicable.
+
+// ## Exam Preparation Strategy
+// Give actionable guidance for tackling typical questions (definition, analysis, numerical/diagram-based if applicable), recall strategies, and quick checks for self-evaluation. Provide mnemonics and memory hooks in context.
+
+// ## Study Tips & Revision Plan
+// Offer a short plan for moving from beginner → exam-ready: what to read, how to practice PYQs, spaced repetition cues, and how to integrate with mock tests.
+
+// ## Revision Quick Table  
+// Provide a concise tabular summary with these columns:  
+// - **Concept / Term**  
+// - **Explanation (1–2 lines, no bullets)**  
+// - **Formula / Example** (if applicable)  
+// - **Exam Relevance** ([SSC], [UPSC], [Banking], [State PCS], etc.)
+
+// `;
+
+//     if (hasSources) {
+//       return `You are an expert academic content creator and competitive exam mentor with 20+ years of experience in ${subject}.
+// Create **AUTHENTIC, HIGH-QUALITY, BEGINNER-FRIENDLY yet EXAM-READY notes** for the topic "${topic}" in ${subject},
+// **USING ONLY** the uploaded materials below. **Do not add external facts.** If any subtopic is missing, explicitly write: "The uploaded materials do not cover this subtopic." Expand explanations descriptively so a first-time learner understands everything.
+
+// UPLOADED STUDY MATERIALS (PRIMARY SOURCE):
+// ${contentContext}
+
+// CRITICAL CONTENT REQUIREMENTS:
+// 1) SOURCE FIDELITY: Extract and synthesize **only** what is verifiable from the uploaded materials. No hallucinations.
+// 2) SAME STYLE AS FALLBACK: Write in **long, descriptive paragraphs** (not terse bullets). Build from basic ideas to advanced insights smoothly.
+// 3) SSC → UPSC SYNC: Insert relevant coverage tags inline: [SSC CGL/CHSL], [Banking/IBPS/RRB], [CDS/NDA/State PCS], [UPSC].
+// 4) QUALITY OVER QUANTITY: Every line must add value; remove redundancy. No duplication of formulas/definitions/examples.
+// 5) GAP HONESTY: If something isn't present in sources, say so clearly.
+
+// ${DESCRIPTIVE_STYLE_GUIDE}
+// ${CORE_RULES}
+// ${SHARED_STRUCTURE}
+
+// Only output the final, polished notes.`;
+//     }
+
+//     // No sources → Full syllabus oriented fallback with IDENTICAL rich style
+//     return `You are an expert academic content creator and competitive exam mentor with 20+ years in ${subject}.
+// There are **no uploaded materials**. Generate **comprehensive, descriptive, beginner→advanced notes** for "${topic}" in ${subject}, matching the same style you would use if sources were provided. Use standard, widely accepted references (NCERTs, Govt publications, and standard competitive exam texts) to ensure correctness.
+
+// EXAM PREPARATION FOCUS:
+// - Emphasize concepts that frequently appear in ${subject} competitive exams
+// - Highlight common exam question patterns related to "${topic}"
+// - Include memory aids, mnemonics, or quick recall techniques where applicable
+// - Focus on problem-solving approaches and application methods
+// - Mention common mistakes or misconceptions that students should avoid
+// - **Integrate Problem-Solving Strategies**: Weave in practical problem-solving strategies relevant to competitive exams.
+// - **Identify and Explain High-Yield Concepts**: Clearly identify and explain concepts that are frequently tested and have high weightage in exams.
+// - **Connect Topics**: Suggest how this topic connects to other high-yield areas in the subject, fostering a holistic understanding.
+// - **Topper's Strategy Integration**: Incorporate elements of proven study strategies (e.g., active recall, spaced repetition, weakness-first approach) into the study tips or content where naturally applicable.
+
+// CONTENT RULES:
+// - Write like a **chapter explanation**, not revision bullets.
+// - Cover the **entire high-yield syllabus scope** for this topic (SSC → UPSC). If an item is *UPSC-only depth*, mark *(Advanced – UPSC only)*.
+// - Start simple, then deepen naturally; explain every term on first use.
+// - For formulas: present once in LaTeX, define symbols, and give one short worked example.
+// - Include **mnemonics, misconceptions with clarifications, interlinking, and exam strategy**.
+// - Insert exam tags naturally inline: [SSC CGL/CHSL], [Banking/IBPS/RRB], [CDS/NDA/State PCS], [UPSC].
+
+// ${DESCRIPTIVE_STYLE_GUIDE}
+// ${CORE_RULES}
+// ${SHARED_STRUCTURE}
+
+// Only output the final, polished notes.`;
+//   }
+
+//   /** Legacy mock content for offline/dev */
+//   private static generateMockTheory(subject: string, topic: string): string {
+//     const header = `# ${topic} in ${subject}\n\n`;
+//     const intro = `## Introduction\n${topic} is a foundational chapter in ${subject}. These notes provide beginner→advanced explanations with SSC→UPSC coverage.\n\n`;
+//     const body = `## Detailed Explanation (Progressive Flow)\nThis is placeholder content used only in local mock mode. In production, notes are generated from uploaded materials or the fallback syllabus.\n\n## Key Ideas & Exam Concepts\nExplain key ideas in paragraphs with inline tags like [SSC] or [UPSC].\n\n## Formulas and Principles\nFor example: $$x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$$ where $a$, $b$, and $c$ are coefficients in a quadratic equation.\n\n## Applications & Case Studies\nTie concepts to realistic examples and exam questions.\n\n## Misconceptions & Clarifications\nAddress common errors and provide correct reasoning.\n\n## Interlinking with Other Topics\nDescribe how this topic links to adjacent chapters.\n\n## Exam Preparation Strategy\nActionable tips for typical question types and quick checks.\n\n## Study Tips & Revision Plan\nSpaced repetition, active recall, and PYQ strategy.\n`;
+//     return header + intro + body;
+//   }
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { Mistral } from '@mistralai/mistralai';
 import { supabase } from '../supabase';
-
-/**
- * Unified TheoryGenerator (refined)
- * - RAG-first: Uses uploaded materials exclusively when available
- * - Fallback mirrors the SAME rich style (descriptive, beginner→advanced) with standard sources
- * - SSC → UPSC exam-sync with inline tags, study aids, misconceptions, interlinking
- * - Strict LaTeX rules ($ ... $ and $$ ... $$ only)
- * - Descriptive, paragraph-first output (no terse bullets)
- */
 
 const apiKey = import.meta.env.VITE_MISTRAL_API_KEY;
 const useMockAI = !apiKey;
 const client = apiKey ? new Mistral({ apiKey }) : null;
 
-// Tunables
+// Config
 const MODEL_NAME = 'mistral-large-latest';
-const TEMPERATURE = 0.25; // lower = more factual, consistent
-const MAX_TOKENS = 8500;  // bump slightly for longer chapters (adjust per plan)
+const TEMPERATURE = 0.25;
+const MAX_TOKENS = 8500;
+
+type GeneratedTheory = {
+  notes: string;
+  mermaid?: string;
+  examTag: string;
+  raw?: string;
+};
 
 export class TheoryGenerator {
-  /** Public entrypoint */
-  static async generateTheory(subject: string, topic: string, userId: string) {
+  /** Public entrypoint used in Course section */
+  static async generateTheory(
+    subject: string,
+    topic: string,
+    userId: string,
+    examLevel: string
+  ): Promise<string> {
     if (useMockAI) {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      return this.generateMockTheory(subject, topic);
+      const mock = this.generateMockReturn(subject, topic, examLevel);
+      return JSON.stringify(mock);
     }
 
     try {
-      const relevantContent = await this.retrieveRelevantContent(subject, topic, userId);
-      const prompt = this.getUnifiedPrompt(subject, topic, relevantContent);
+      const relevant = await this.retrieveRelevantContent(subject, topic, userId);
+      const prompt = this.buildPrompt(subject, topic, relevant, examLevel);
 
       const response = await client!.chat.complete({
         model: MODEL_NAME,
@@ -1189,7 +1547,7 @@ export class TheoryGenerator {
           {
             role: 'system',
             content:
-              'You are a senior competitive exam mentor and academic content creator. Follow instructions exactly. Never hallucinate. Use ONLY provided sources when present. Prefer descriptive paragraphs over bullets. Avoid one-liners.',
+              'You are a senior academic content creator for competitive and university exams. Follow instructions exactly. Use only provided sources if available.'
           },
           { role: 'user', content: prompt },
         ],
@@ -1197,284 +1555,211 @@ export class TheoryGenerator {
         max_tokens: MAX_TOKENS,
       });
 
-      const out = response.choices?.[0]?.message?.content?.trim();
-      return out && out.length > 0 ? out : this.generateMockTheory(subject, topic);
-    } catch (error) {
-      console.error('Error generating theory:', error);
-      return this.generateMockTheory(subject, topic);
+      const out = response.choices?.[0]?.message?.content?.trim() ?? '';
+      if (!out) {
+        return JSON.stringify(this.generateMockReturn(subject, topic, examLevel));
+      }
+
+      const parsed = this.parseToStructured(out, topic, examLevel);
+      parsed.mermaid = parsed.mermaid ?? this.generateMermaidFromHeadings(parsed.notes, topic);
+      parsed.examTag = parsed.examTag || this.getExamTag(examLevel);
+      parsed.notes = this.ensureExamTagInNotes(parsed.notes, parsed.examTag);
+      parsed.raw = out;
+
+      return JSON.stringify(parsed);
+    } catch (err) {
+      console.error('TheoryGenerator error:', err);
+      return JSON.stringify(this.generateMockReturn(subject, topic, examLevel));
     }
   }
 
-  /** RAG: Fetch uploaded materials with a relevance ranking pipeline. */
-  private static async retrieveRelevantContent(
-    subject: string,
-    topic: string,
-    userId: string,
-  ): Promise<string[]> {
+  /** Build prompt with exam-level customization */
+  private static buildPrompt(subject: string, topic: string, relevant: string[], examLevel: string): string {
+    const { instruction, tag } = this.getExamConfig(examLevel);
+    const hasSources = relevant.length > 0;
+
+    const srcHeader = hasSources
+      ? `You are given EXCERPTS from the learner's own study materials. Stay faithful to them.`
+      : `No user materials found. Use accurate standard references.`;
+
+    const contentContext = hasSources
+      ? relevant.map((s, i) => `SOURCE ${i + 1}:\n${s}`).join('\n\n----\n\n')
+      : '(no uploaded materials)';
+
+    return `
+${srcHeader}
+
+TASK:
+Write descriptive, exam-focused theory notes for:
+- Subject: ${subject}
+- Topic: ${topic}
+- Exam profile: ${examLevel}
+
+STYLE & DEPTH:
+${instruction}
+
+REQUIREMENTS:
+1) Prefer connected paragraphs over plain bullets.
+2) Use LaTeX ($...$ inline, $$...$$ display) for math.
+3) Add a "Quick Recap" at the end with 5–7 bullets.
+4) Include ONE mermaid diagram if useful (flowchart LR style).
+5) Do not hallucinate beyond provided sources when they exist.
+6) Output MUST be valid JSON with this shape:
+
+{
+  "notes": "<markdown, may include LaTeX and tables>",
+  "mermaid": "flowchart LR; ...",  // OPTIONAL
+  "examTag": "${tag}"
+}
+
+CONTEXT:
+${contentContext}
+`.trim();
+  }
+
+  /** Exam-specific config */
+  private static getExamConfig(examLevel: string): { instruction: string; tag: string } {
+    let instruction = '';
+    let tag = examLevel || 'General Knowledge';
+
+    switch (examLevel) {
+      case 'Board Exams (Class 12)':
+        instruction = 'NCERT-aligned clarity, stepwise derivations, board-style emphasis, precise definitions and diagrams.';
+        break;
+      case 'University Exams (B.Tech)':
+      case 'University Exams (B.Arch)':
+      case 'University Exams (BAMS)':
+      case 'University Exams (MBBS)':
+      case 'University Exams (BHMS)':
+      case 'University Exams (B.Sc Agriculture)':
+      case 'University Exams (B.Sc Veterinary)':
+        instruction = 'University depth with rigorous definitions, short and long answer preparation, applications and derivations.';
+        break;
+      case 'UPSC Civil Services':
+        instruction = 'Analytical, interdisciplinary, mains-ready explanations plus prelims fact precision. Add answer-writing angles.';
+        break;
+      case 'JEE Main/Advanced':
+        instruction = 'Problem-solving focus; derivations, formulas, traps, shortcuts, example setups.';
+        break;
+      case 'NEET UG':
+        instruction = 'Concept-first biology/chemistry; must-know facts; clinical correlation; diagram-friendly.';
+        break;
+      case 'SSC CGL':
+        instruction = 'High-yield facts, shortcuts, MCQ patterns, crisp explanations.';
+        break;
+      case 'Banking (SBI PO/Clerk)':
+        instruction = 'Quant/Reasoning/GA orientation; formula snippets; tricks; accuracy-driven notes.';
+        break;
+      case 'CAT':
+        instruction = 'Logical flow, quantitative reasoning, problem framing strategies, succinct concepts.';
+        break;
+      case 'GATE':
+        instruction = 'Graduate-level rigor; definitions, theorems, derivations, pitfalls in numericals.';
+        break;
+      default:
+        instruction = 'General exam-ready clarity; descriptive but precise.';
+        tag = 'General Knowledge';
+        break;
+    }
+    return { instruction, tag };
+  }
+
+  private static getExamTag(examLevel: string): string {
+    return this.getExamConfig(examLevel).tag;
+  }
+
+  private static ensureExamTagInNotes(notes: string, tag: string) {
+    const badge = `> **Exam Profile:** ${tag}\n\n`;
+    return notes.startsWith('> **Exam Profile:**') ? notes : badge + notes;
+  }
+
+  /** Parse JSON or fallback */
+  private static parseToStructured(out: string, topic: string, examLevel: string): GeneratedTheory {
+    try {
+      const first = out.indexOf('{');
+      const last = out.lastIndexOf('}');
+      if (first !== -1 && last !== -1) {
+        const json = out.slice(first, last + 1);
+        const parsed = JSON.parse(json);
+        return {
+          notes: String(parsed.notes ?? ''),
+          mermaid: parsed.mermaid ? String(parsed.mermaid) : undefined,
+          examTag: String(parsed.examTag ?? this.getExamTag(examLevel)),
+          raw: out,
+        };
+      }
+    } catch { /* ignore */ }
+
+    return {
+      notes: out,
+      examTag: this.getExamTag(examLevel),
+      mermaid: this.generateMermaidFromHeadings(out, topic),
+      raw: out,
+    };
+  }
+
+  /** Fetch relevant user-uploaded content from Supabase */
+  private static async retrieveRelevantContent(subject: string, topic: string, userId: string): Promise<string[]> {
     try {
       const { data: materials, error } = await supabase
         .from('uploaded_materials')
         .select('extracted_content, filename, processed_topics, exam_relevance_score')
         .eq('user_id', userId)
-        .gte('exam_relevance_score', 4); // slightly permissive threshold
+        .gte('exam_relevance_score', 4);
 
-      if (error) {
-        console.error('Supabase error retrieving uploaded materials:', error);
-        return [];
-      }
-      if (!materials || materials.length === 0) return [];
+      if (error || !materials?.length) return [];
 
-      // Normalize query terms
-      const subjectKey = subject.toLowerCase();
-      const topicKey = topic.toLowerCase();
+      const sKey = subject.toLowerCase();
+      const tKey = topic.toLowerCase();
 
-      type Item = {
-        content: string;
-        filename?: string;
-        processed_topics?: string[];
-        score: number;
-      };
+      const scored = materials.map((m: any) => {
+        const content = String(m.extracted_content || '');
+        const filename = String(m.filename || '').toLowerCase();
+        const topics: string[] = Array.isArray(m.processed_topics) ? m.processed_topics : [];
+        const text = content.toLowerCase();
 
-      const scored: Item[] = materials
-        .map((m: any) => {
-          const content: string = m.extracted_content || '';
-          const filename: string = (m.filename || '').toLowerCase();
-          const topics: string[] = Array.isArray(m.processed_topics) ? m.processed_topics : [];
-          const text = content.toLowerCase();
+        const subjectHit = Number(text.includes(sKey) || filename.includes(sKey) || topics.some(t => t?.toLowerCase?.().includes(sKey)));
+        const topicHit   = Number(text.includes(tKey) || filename.includes(tKey) || topics.some(t => t?.toLowerCase?.().includes(tKey)));
 
-          const subjectHit = Number(
-            text.includes(subjectKey) ||
-              filename.includes(subjectKey) ||
-              topics.some((t) => t?.toLowerCase?.().includes(subjectKey)),
-          );
-          const topicHit = Number(
-            text.includes(topicKey) ||
-              filename.includes(topicKey) ||
-              topics.some((t) => t?.toLowerCase?.().includes(topicKey)),
-          );
+        const score = topicHit * 2 + subjectHit + (m.exam_relevance_score || 0) * 0.25;
+        return { content, score };
+      }).sort((a, b) => b.score - a.score);
 
-          // Soft scoring: topic match weighted higher than subject match
-          const score = topicHit * 2 + subjectHit + (m.exam_relevance_score || 0) * 0.25;
-
-          return { content, filename: m.filename, processed_topics: topics, score };
-        })
-        .sort((a, b) => b.score - a.score);
-
-      // Take top N and extract relevant sections
       const top = scored.slice(0, 10);
       const snippets: string[] = [];
-
       for (const t of top) {
-        const snippet = this.extractRelevantSections(t.content, subject, topic);
-        if (snippet && snippet.length > 160) snippets.push(this.normalize(snippet));
-        if (snippets.length >= 6) break;
+        if (t.content && snippets.length < 5) snippets.push(this.normalize(t.content));
       }
-
-      // Deduplicate by simple semantic similarity on word sets
-      const unique = this.dedupeBySimilarity(snippets, 0.82);
-      return unique.slice(0, 5);
-    } catch (err) {
-      console.error('Error in retrieveRelevantContent:', err);
+      return snippets;
+    } catch (e) {
+      console.error('retrieveRelevantContent error:', e);
       return [];
     }
   }
 
-  /** Extract relevant sections with neighbor-window expansion for context. */
-  private static extractRelevantSections(content: string, subject: string, topic: string): string {
-    if (!content || content.trim().length < 30) return '';
-
-    const maxLen = 5200; // generous prompt budget per source
-    const cleaned = content.replace(/\u0000/g, '').replace(/\s+\n/g, '\n').trim();
-
-    const paras = cleaned
-      .split(/\n\s*\n/g)
-      .map((p) => p.trim())
-      .filter((p) => p.length > 30);
-
-    const sKey = subject.toLowerCase();
-    const tKey = topic.toLowerCase();
-
-    // rank paragraphs by presence of topic and subject
-    const ranks = paras.map((p, i) => {
-      const l = p.toLowerCase();
-      const score = (l.includes(tKey) ? 2 : 0) + (l.includes(sKey) ? 1 : 0);
-      return { i, p, score };
-    });
-
-    const sorted = ranks.sort((a, b) => b.score - a.score).slice(0, 8);
-
-    // collect with a window around top hits to preserve context
-    const take = new Set<number>();
-    for (const r of sorted) {
-      for (let j = Math.max(0, r.i - 1); j <= Math.min(paras.length - 1, r.i + 1); j++) {
-        take.add(j);
-      }
-    }
-
-    // build output up to maxLen
-    const chosen = Array.from(take).sort((a, b) => a - b).map((idx) => paras[idx]);
-
-    let out = '';
-    for (const chunk of chosen) {
-      if (out.length + chunk.length + 2 > maxLen) break;
-      out += chunk + '\n\n';
-    }
-
-    if (out.trim().length > 160) return out.trim();
-
-    // last resort: first few paragraphs
-    return paras.slice(0, 4).join('\n\n');
-  }
-
-  /** Simple text normalization */
   private static normalize(s: string) {
     return s.replace(/\s+/g, ' ').replace(/\u0000/g, '').trim();
   }
 
-  /** Very light similarity dedupe on word sets */
-  private static dedupeBySimilarity(snippets: string[], threshold = 0.85) {
-    const result: string[] = [];
-    for (const s of snippets) {
-      let isDup = false;
-      const setA = new Set(s.toLowerCase().split(/[^a-z0-9]+/g).filter(Boolean));
-      for (const r of result) {
-        const setB = new Set(r.toLowerCase().split(/[^a-z0-9]+/g).filter(Boolean));
-        const inter = new Set([...setA].filter((w) => setB.has(w)));
-        const union = new Set([...setA, ...setB]);
-        const sim = inter.size / Math.max(1, union.size);
-        if (sim >= threshold) { isDup = true; break; }
-      }
-      if (!isDup) result.push(s);
-    }
-    return result;
+  /** Generate fallback mermaid */
+  private static generateMermaidFromHeadings(notes: string, topic: string): string | undefined {
+    const headings = (notes.match(/^#{1,3}\s+.+$/gm) || []).map(h => h.replace(/^#{1,3}\s+/, '').trim());
+    const nodes = headings.length ? headings.slice(0, 6) : [topic, 'Concepts', 'Examples', 'Summary'];
+    const ids = nodes.map((n, i) => `N${i}`);
+    const lines = ['flowchart LR', ...ids.map((id, i) => `${id}[${nodes[i]}]`)];
+    for (let i = 0; i < ids.length - 1; i++) lines.push(`${ids[i]} --> ${ids[i + 1]}`);
+    return lines.join('\n');
   }
 
-  /**
-   * Unified Prompt Generator
-   * - With sources: STRICT source fidelity (no external facts)
-   * - Without sources: Same rich, descriptive style using standard consensus sources
-   */
-  private static getUnifiedPrompt(subject: string, topic: string, relevantContent: string[]): string {
-    const hasSources = Array.isArray(relevantContent) && relevantContent.length > 0;
-    const contentContext = hasSources ? relevantContent.join('\n\n---\n\n') : '(no uploaded materials)';
-
-    const DESCRIPTIVE_STYLE_GUIDE = `
-OUTPUT LENGTH & STYLE:
-- Target length: **1,600–2,600 words** (comprehensive chapter-like notes).
-- Write in **descriptive paragraphs**, not terse bullets.
-- If bullets are absolutely necessary, each bullet must be **2–3 full sentences**.
-- Progress naturally from **basics → intermediate → advanced** so a beginner can follow.
-- Use precise, exam-appropriate terminology, but always **explain terms in plain language** on first use.
-- Keep tone teacherly and clear; avoid filler or fluff.
-`;
-
-    const CORE_RULES = `
-MATHEMATICAL EXPRESSIONS & FORMATTING RULES:
-- Use LaTeX with $...$ for inline and $$...$$ for display.
-- Do NOT use \\\[...] or \\\( ... \\\) or equation environments.
-- Define every symbol and unit in plain words near first use.
-- Never repeat the same formula or definition.
-- Use clean Markdown: #, ##, ### for headings; **bold** for key terms; *italics* for emphasis.
-- When including currency or units inside math, wrap in \\text{ } (e.g., $\\text{₹}1200$ or $5 \\text{ m/s}$).
-`;
-
-    const SHARED_STRUCTURE = `
-REQUIRED STRUCTURE (Paragraph-first, SSC → UPSC Sync):
-# ${topic} in ${subject}
-
-## Introduction
-Write a gentle, beginner-friendly opening that defines the topic in plain language, gives brief context or historical background where relevant, and explains why exams care about it (SSC/Banking/UPSC).
-
-## Detailed Explanation (Progressive Flow)
-Explain all subtopics in a **continuous narrative** that starts simple and gradually adds depth. Use analogies, micro-examples, and short caselets. Make the transitions smooth so a reader never feels a jump in difficulty.
-
-## Key Ideas & Exam Concepts
-Summarize all essential definitions and principles **within paragraphs**. Insert relevance tags inline like [SSC/CHSL], [Banking/IBPS/RRB], [CDS/NDA/State PCS], [UPSC] where they naturally fit.
-
-## Formulas and Principles
-For each formula: present once with $$...$$, then explain symbols and meaning in words, and add a short, clear worked example or usage scenario. Keep math neat.
-
-## Applications & Case Studies
-Describe practical uses and exam-style applications in narrative form. Where suitable, include brief case studies or realistic scenarios and indicate which exams emphasize them.
-
-## Misconceptions & Clarifications
-Explain common mistakes learners make and the correct reasoning, using short paragraphs instead of one-liners.
-
-## Interlinking with Other Topics
-Describe high-yield connections to other chapters/subjects and why these edges are frequently tested. Mention exam focus where applicable.
-
-## Exam Preparation Strategy
-Give actionable guidance for tackling typical questions (definition, analysis, numerical/diagram-based if applicable), recall strategies, and quick checks for self-evaluation. Provide mnemonics and memory hooks in context.
-
-## Study Tips & Revision Plan
-Offer a short plan for moving from beginner → exam-ready: what to read, how to practice PYQs, spaced repetition cues, and how to integrate with mock tests.
-
-## Revision Quick Table  
-Provide a concise tabular summary with these columns:  
-- **Concept / Term**  
-- **Explanation (1–2 lines, no bullets)**  
-- **Formula / Example** (if applicable)  
-- **Exam Relevance** ([SSC], [UPSC], [Banking], [State PCS], etc.)
-
-`;
-
-    if (hasSources) {
-      return `You are an expert academic content creator and competitive exam mentor with 20+ years of experience in ${subject}.
-Create **AUTHENTIC, HIGH-QUALITY, BEGINNER-FRIENDLY yet EXAM-READY notes** for the topic "${topic}" in ${subject},
-**USING ONLY** the uploaded materials below. **Do not add external facts.** If any subtopic is missing, explicitly write: "The uploaded materials do not cover this subtopic." Expand explanations descriptively so a first-time learner understands everything.
-
-UPLOADED STUDY MATERIALS (PRIMARY SOURCE):
-${contentContext}
-
-CRITICAL CONTENT REQUIREMENTS:
-1) SOURCE FIDELITY: Extract and synthesize **only** what is verifiable from the uploaded materials. No hallucinations.
-2) SAME STYLE AS FALLBACK: Write in **long, descriptive paragraphs** (not terse bullets). Build from basic ideas to advanced insights smoothly.
-3) SSC → UPSC SYNC: Insert relevant coverage tags inline: [SSC CGL/CHSL], [Banking/IBPS/RRB], [CDS/NDA/State PCS], [UPSC].
-4) QUALITY OVER QUANTITY: Every line must add value; remove redundancy. No duplication of formulas/definitions/examples.
-5) GAP HONESTY: If something isn't present in sources, say so clearly.
-
-${DESCRIPTIVE_STYLE_GUIDE}
-${CORE_RULES}
-${SHARED_STRUCTURE}
-
-Only output the final, polished notes.`;
-    }
-
-    // No sources → Full syllabus oriented fallback with IDENTICAL rich style
-    return `You are an expert academic content creator and competitive exam mentor with 20+ years in ${subject}.
-There are **no uploaded materials**. Generate **comprehensive, descriptive, beginner→advanced notes** for "${topic}" in ${subject}, matching the same style you would use if sources were provided. Use standard, widely accepted references (NCERTs, Govt publications, and standard competitive exam texts) to ensure correctness.
-
-EXAM PREPARATION FOCUS:
-- Emphasize concepts that frequently appear in ${subject} competitive exams
-- Highlight common exam question patterns related to "${topic}"
-- Include memory aids, mnemonics, or quick recall techniques where applicable
-- Focus on problem-solving approaches and application methods
-- Mention common mistakes or misconceptions that students should avoid
-- **Integrate Problem-Solving Strategies**: Weave in practical problem-solving strategies relevant to competitive exams.
-- **Identify and Explain High-Yield Concepts**: Clearly identify and explain concepts that are frequently tested and have high weightage in exams.
-- **Connect Topics**: Suggest how this topic connects to other high-yield areas in the subject, fostering a holistic understanding.
-- **Topper's Strategy Integration**: Incorporate elements of proven study strategies (e.g., active recall, spaced repetition, weakness-first approach) into the study tips or content where naturally applicable.
-
-CONTENT RULES:
-- Write like a **chapter explanation**, not revision bullets.
-- Cover the **entire high-yield syllabus scope** for this topic (SSC → UPSC). If an item is *UPSC-only depth*, mark *(Advanced – UPSC only)*.
-- Start simple, then deepen naturally; explain every term on first use.
-- For formulas: present once in LaTeX, define symbols, and give one short worked example.
-- Include **mnemonics, misconceptions with clarifications, interlinking, and exam strategy**.
-- Insert exam tags naturally inline: [SSC CGL/CHSL], [Banking/IBPS/RRB], [CDS/NDA/State PCS], [UPSC].
-
-${DESCRIPTIVE_STYLE_GUIDE}
-${CORE_RULES}
-${SHARED_STRUCTURE}
-
-Only output the final, polished notes.`;
-  }
-
-  /** Legacy mock content for offline/dev */
-  private static generateMockTheory(subject: string, topic: string): string {
-    const header = `# ${topic} in ${subject}\n\n`;
-    const intro = `## Introduction\n${topic} is a foundational chapter in ${subject}. These notes provide beginner→advanced explanations with SSC→UPSC coverage.\n\n`;
-    const body = `## Detailed Explanation (Progressive Flow)\nThis is placeholder content used only in local mock mode. In production, notes are generated from uploaded materials or the fallback syllabus.\n\n## Key Ideas & Exam Concepts\nExplain key ideas in paragraphs with inline tags like [SSC] or [UPSC].\n\n## Formulas and Principles\nFor example: $$x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$$ where $a$, $b$, and $c$ are coefficients in a quadratic equation.\n\n## Applications & Case Studies\nTie concepts to realistic examples and exam questions.\n\n## Misconceptions & Clarifications\nAddress common errors and provide correct reasoning.\n\n## Interlinking with Other Topics\nDescribe how this topic links to adjacent chapters.\n\n## Exam Preparation Strategy\nActionable tips for typical question types and quick checks.\n\n## Study Tips & Revision Plan\nSpaced repetition, active recall, and PYQ strategy.\n`;
-    return header + intro + body;
+  /** Mock return */
+  private static generateMockReturn(subject: string, topic: string, examLevel: string): GeneratedTheory {
+    const tag = this.getExamTag(examLevel);
+    const notes = `# ${topic}\n\n**Subject:** ${subject}\n\nThis is placeholder content tailored for *${tag}*.`;
+    return {
+      notes: this.ensureExamTagInNotes(notes, tag),
+      mermaid: this.generateMermaidFromHeadings(notes, topic),
+      examTag: tag,
+      raw: notes,
+    };
   }
 }
