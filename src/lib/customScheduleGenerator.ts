@@ -245,13 +245,54 @@ export class CustomScheduleGenerator {
     studentProfile.subjects.forEach(subject => {
       const topics = syllabus[subject] || [];
       const isWeak = studentProfile.weakSubjects.includes(subject);
+      const isBeginnerLevel = studentProfile.currentLevel === 'beginner';
       
-      // Calculate how many times we'll cycle through this subject's topics
+      // Enhanced topic breakdown for different levels
+      let expandedTopics: string[] = [];
+      
+      if (isBeginnerLevel && topics.length > 0) {
+        // For beginners, break down each topic into smaller parts
+        topics.forEach(topic => {
+          expandedTopics.push(`${topic} - Introduction & Basics`);
+          expandedTopics.push(`${topic} - Core Concepts`);
+          expandedTopics.push(`${topic} - Examples & Applications`);
+          expandedTopics.push(`${topic} - Practice Problems`);
+        });
+      } else if (studentProfile.currentLevel === 'intermediate' && topics.length > 0) {
+        // For intermediate, moderate breakdown
+        topics.forEach(topic => {
+          expandedTopics.push(`${topic} - Theory & Concepts`);
+          expandedTopics.push(`${topic} - Advanced Applications`);
+          expandedTopics.push(`${topic} - Problem Solving`);
+        });
+      } else {
+        // For advanced, use topics as-is but add specific focus areas
+        topics.forEach(topic => {
+          expandedTopics.push(`${topic} - Mastery & Integration`);
+          expandedTopics.push(`${topic} - Advanced Problem Solving`);
+        });
+      }
+      
+      // Fallback if no topics available
+      if (expandedTopics.length === 0) {
+        expandedTopics = [
+          `${subject} - Fundamentals`,
+          `${subject} - Core Concepts`,
+          `${subject} - Applications`,
+          `${subject} - Practice & Review`
+        ];
+      }
+      
+      // Calculate cycles based on expanded topics and student level
       const subjectDays = Math.floor(totalDays / studentProfile.subjects.length);
-      const cycles = isWeak ? Math.ceil(subjectDays / topics.length * 1.5) : Math.ceil(subjectDays / topics.length);
+      let cycles = Math.ceil(subjectDays / expandedTopics.length);
+      
+      // Adjust cycles based on weakness and level
+      if (isWeak) cycles = Math.ceil(cycles * 1.4);
+      if (isBeginnerLevel) cycles = Math.ceil(cycles * 1.2);
       
       plan[subject] = {
-        topics: topics,
+        topics: expandedTopics,
         currentIndex: 0,
         totalCycles: Math.max(1, cycles)
       };
@@ -274,8 +315,8 @@ export class CustomScheduleGenerator {
     
     // Track revision schedule for spaced repetition
     const revisionTracker: Record<string, Date[]> = {};
-    
-    for (let dayIndex = 0; dayIndex < totalDays; dayIndex++) {
+    // Create a comprehensive fallback schedule even without syllabus
+    for (let i = 0; i < totalDays; i++) {
       const currentDate = new Date(today);
       currentDate.setDate(today.getDate() + dayIndex);
       
@@ -299,23 +340,46 @@ export class CustomScheduleGenerator {
         currentDate
       );
       
+      const weekNumber = Math.ceil((i + 1) / 7);
+      const isBeginnerLevel = studentProfile.currentLevel === 'beginner';
+      
+      // Create more specific fallback topics
+      const subjectIndex = i % studentProfile.subjects.length;
+      const primarySubject = studentProfile.subjects[subjectIndex];
+      const topicNumber = Math.floor(i / studentProfile.subjects.length) + 1;
+      
+      let specificTopics: string[];
+      if (isBeginnerLevel) {
+        specificTopics = [
+          `${primarySubject} - Chapter ${topicNumber}: Introduction & Basic Concepts`,
+          `${primarySubject} - Chapter ${topicNumber}: Fundamental Principles`,
+          `${primarySubject} - Chapter ${topicNumber}: Simple Examples & Practice`
+        ];
+      } else {
+        specificTopics = [
+          `${primarySubject} - Topic ${topicNumber}: Core Theory`,
+          `${primarySubject} - Topic ${topicNumber}: Applications & Problem Solving`,
+          `${primarySubject} - Topic ${topicNumber}: Advanced Concepts`
+        ];
+      }
       // Create day schedule
       const daySchedule: DaySchedule = {
         date: currentDate.toISOString().split('T')[0],
         dayOfWeek: currentDate.toLocaleDateString('en-US', { weekday: 'long' }),
         subjects: daySubjects,
-        totalHours: studentProfile.dailyAvailableHours,
+          subject: primarySubject,
         focusArea: this.getDayFocusArea(daySubjects, studyPhase),
-        motivationalNote: this.getMotivationalNote(dayIndex, weekNumber, studyPhase, studentProfile),
-        weeklyGoal: this.getWeeklyGoal(weekNumber, studyPhase, studentProfile),
-        studyPhase,
-        difficultyLevel: this.getDifficultyLevel(dayIndex, totalDays, studyPhase)
+          timeSlot: studentProfile.studyPattern === 'morning' ? "6:00 AM - 12:00 PM" : 
+                   studentProfile.studyPattern === 'evening' ? "4:00 PM - 10:00 PM" : "9:00 AM - 3:00 PM",
+          topics: specificTopics,
+          priority: studentProfile.weakSubjects?.includes(primarySubject) ? "high" : "medium",
+          studyType: dayOfWeek === "Sunday" ? "revision" : "new-concepts",
       };
       
       schedule.push(daySchedule);
-      
-      // Update revision tracker
-      this.updateRevisionTracker(revisionTracker, daySubjects, currentDate);
+        focusArea: `${primarySubject} - ${isBeginnerLevel ? 'Foundation Building' : 'Concept Mastery'}`,
+        motivationalNote: `Day ${i + 1}: Focus on ${primarySubject} fundamentals. ${isBeginnerLevel ? 'Take your time to understand each concept thoroughly.' : 'Build strong conceptual understanding.'}`,
+        weeklyGoal: `Week ${weekNumber}: Master ${primarySubject} basics and build confidence`
     }
 
     return schedule;
@@ -333,40 +397,110 @@ export class CustomScheduleGenerator {
     revisionTracker: Record<string, Date[]>,
     currentDate: Date
   ): SubjectSchedule[] {
-    const subjects: SubjectSchedule[] = [];
+  // Enhanced fallback schedule generation using syllabusBank
     const isWeekend = weeklyPattern.type === 'revision' || weeklyPattern.type === 'mock-test';
     
     // Handle weekend mock tests
     if (weeklyPattern.type === 'mock-test' && studentProfile.mockTestFrequency !== 'daily') {
       return this.generateMockTestSchedule(studentProfile, currentDate);
     }
-    
-    // Calculate subject priorities and time allocation
+  // Enhanced topic tracking with sub-topic progression
+  const topicProgress: Record<string, { mainIndex: number; subIndex: number; lastStudied: Date | null }> = {};
+  subjects.forEach(sub => (topicProgress[sub] = { mainIndex: 0, subIndex: 0, lastStudied: null }));
+  
+  const isBeginnerLevel = studentProfile.currentLevel === 'beginner';
+  const isIntermediateLevel = studentProfile.currentLevel === 'intermediate';
     const subjectPriorities = this.calculateSubjectPriorities(studentProfile, studyPhase);
     const timeAllocation = this.calculateTimeAllocation(studentProfile, subjectPriorities);
     
     // Generate time slots
     const timeSlots = this.generateTimeSlots(studentProfile, timeAllocation);
+    const weekNumber = Math.ceil((i + 1) / 7);
+    const isWeekend = dayOfWeek === 'Saturday' || dayOfWeek === 'Sunday';
     
     let slotIndex = 0;
     
     // Allocate subjects based on priority and time
     for (const { subject, priority, allocatedHours } of subjectPriorities) {
-      if (slotIndex >= timeSlots.length || allocatedHours <= 0) break;
+      const progress = topicProgress[subject];
       
+      // Enhanced topic selection based on level and progression
+      let specificTopics: string[];
+      
+      if (isBeginnerLevel) {
+        // For beginners, break down each chapter into smaller parts
+        const mainChapter = chapters[progress.mainIndex % chapters.length];
+        const subTopicLabels = ['Introduction', 'Basic Concepts', 'Examples', 'Simple Practice'];
+        const currentSubTopic = subTopicLabels[progress.subIndex % subTopicLabels.length];
+        
+        specificTopics = [
+          `${mainChapter} - ${currentSubTopic}`,
+          `${mainChapter} - Step-by-step Understanding`
+        ];
+        
+        // Advance sub-topic index
+        progress.subIndex++;
+        if (progress.subIndex >= subTopicLabels.length) {
+          progress.subIndex = 0;
+          progress.mainIndex++;
+        }
+      } else if (isIntermediateLevel) {
+        // For intermediate, moderate breakdown
+        const mainChapter = chapters[progress.mainIndex % chapters.length];
+        const subTopicLabels = ['Theory & Concepts', 'Applications', 'Problem Solving'];
+        const currentSubTopic = subTopicLabels[progress.subIndex % subTopicLabels.length];
+        
+        specificTopics = [
+          `${mainChapter} - ${currentSubTopic}`,
+          `${mainChapter} - Practice & Analysis`
+        ];
+        
+        // Advance sub-topic index
+        progress.subIndex++;
+        if (progress.subIndex >= subTopicLabels.length) {
+          progress.subIndex = 0;
+          progress.mainIndex++;
+        }
+      } else {
+        // For advanced, use full chapters with specific focus
+        const mainChapter = chapters[progress.mainIndex % chapters.length];
+        specificTopics = [
+          `${mainChapter} - Advanced Concepts & Integration`,
+          `${mainChapter} - Complex Problem Solving`
+        ];
+        
+        progress.mainIndex++;
+      }
       const topics = this.getTopicsForDay(
         subject, 
         topicPlan[subject], 
         studyPhase, 
         weeklyPattern.type,
-        dayIndex
+      progress.lastStudied = currentDate;
       );
+      // Generate time slots based on study pattern
+      const getTimeSlot = (subjectIndex: number, hours: number) => {
+        const baseHour = studentProfile.studyPattern === 'morning' ? 6 :
+                        studentProfile.studyPattern === 'evening' ? 16 :
+                        studentProfile.studyPattern === 'night' ? 20 : 9;
+        const startHour = baseHour + (subjectIndex * 2);
+        const endHour = startHour + hours;
+        
+        const formatHour = (hour: number) => {
+          const adjustedHour = hour % 24;
+          const period = adjustedHour >= 12 ? 'PM' : 'AM';
+          const displayHour = adjustedHour === 0 ? 12 : adjustedHour > 12 ? adjustedHour - 12 : adjustedHour;
+          return `${displayHour}:00 ${period}`;
+        };
+        
+        return `${formatHour(startHour)} - ${formatHour(endHour)}`;
+      };
       
       const subjectSchedule: SubjectSchedule = {
         subject,
         hours: allocatedHours,
-        timeSlot: timeSlots[slotIndex],
-        topics,
+        timeSlot: getTimeSlot(dailySubjects.length, allocatedHours),
+        topics: specificTopics,
         priority,
         studyType: this.getStudyType(weeklyPattern.type, studyPhase, priority),
         breakAfter: studentProfile.breakPreference,
@@ -534,7 +668,7 @@ export class CustomScheduleGenerator {
     dayIndex: number
   ): string[] {
     if (!subjectPlan || !subjectPlan.topics.length) {
-      return [`${subject} - General Study`];
+      return [`${subject} - Fundamentals & Basic Concepts`];
     }
     
     const topics: string[] = [];
@@ -545,21 +679,36 @@ export class CustomScheduleGenerator {
     const primaryTopic = allTopics[currentIndex % allTopics.length];
     topics.push(primaryTopic);
     
-    // Add secondary topic based on study type and phase
+    // Enhanced secondary topic selection based on study type and phase
     if (studyType === 'practice' || studyType === 'integration') {
-      // Add a previous topic for practice
-      const prevIndex = Math.max(0, currentIndex - 1);
-      const secondaryTopic = allTopics[prevIndex % allTopics.length];
-      if (secondaryTopic !== primaryTopic) {
-        topics.push(`${secondaryTopic} - Practice & Application`);
+      // Add a previous topic for practice/revision
+      if (currentIndex > 0) {
+        const prevIndex = currentIndex - 1;
+        const secondaryTopic = allTopics[prevIndex % allTopics.length];
+        if (secondaryTopic !== primaryTopic) {
+          // Make revision topic more specific
+          const baseSecondaryTopic = secondaryTopic.split(' - ')[0];
+          topics.push(`${baseSecondaryTopic} - Revision & Practice`);
+        }
+      }
+    } else if (studyType === 'new-concepts') {
+      // For new concepts, add a complementary subtopic if available
+      const nextIndex = (currentIndex + 1) % allTopics.length;
+      if (nextIndex !== currentIndex && allTopics[nextIndex]) {
+        const nextTopic = allTopics[nextIndex];
+        const baseNextTopic = nextTopic.split(' - ')[0];
+        topics.push(`${baseNextTopic} - Preview & Preparation`);
       }
     }
     
-    // Add phase-specific enhancements
+    // Add phase-specific enhancements with more specific topics
+    const basePrimaryTopic = primaryTopic.split(' - ')[0];
     if (studyPhase === 'mastery') {
-      topics.push(`${subject} - Advanced Problem Solving`);
+      topics.push(`${basePrimaryTopic} - Advanced Problem Solving & Integration`);
     } else if (studyPhase === 'revision') {
-      topics.push(`${subject} - Quick Revision & PYQs`);
+      topics.push(`${basePrimaryTopic} - Quick Revision & Previous Year Questions`);
+    } else if (studyPhase === 'foundation') {
+      topics.push(`${basePrimaryTopic} - Foundation Building & Examples`);
     }
     
     return topics;
@@ -648,7 +797,7 @@ export class CustomScheduleGenerator {
     if (availableSlots.length === 0) return revisionSessions;
     
     // Check which topics need revision based on spaced repetition
-    const topicsForRevision: string[] = [];
+    const topicsForRevision: { topic: string; daysSince: number }[] = [];
     
     Object.entries(revisionTracker).forEach(([topic, dates]) => {
       const lastStudied = dates[dates.length - 1];
@@ -658,7 +807,7 @@ export class CustomScheduleGenerator {
       
       // Check if topic needs revision based on spaced repetition intervals
       if (this.TOPPERS_PRINCIPLES.SPACED_REPETITION.includes(daysSinceLastStudy)) {
-        topicsForRevision.push(topic);
+        topicsForRevision.push({ topic, daysSince: daysSinceLastStudy });
       }
     });
     
@@ -666,16 +815,25 @@ export class CustomScheduleGenerator {
     if (topicsForRevision.length > 0 && availableSlots.length > 0) {
       const revisionHours = Math.min(1, studentProfile.dailyAvailableHours * 0.2);
       
+      // Sort by urgency (more days since last study = higher priority)
+      topicsForRevision.sort((a, b) => b.daysSince - a.daysSince);
+      
+      // Create specific revision topics
+      const specificRevisionTopics = topicsForRevision.slice(0, 3).map(item => {
+        const baseTopic = item.topic.split(' - ')[0];
+        return `${baseTopic} - Spaced Repetition Review (${item.daysSince} days ago)`;
+      });
+      
       revisionSessions.push({
         subject: 'Spaced Repetition Review',
         hours: revisionHours,
         timeSlot: availableSlots[0],
-        topics: topicsForRevision.slice(0, 3), // Limit to 3 topics per session
+        topics: specificRevisionTopics,
         priority: 'medium',
         studyType: 'revision',
         breakAfter: 10,
         difficultyLevel: 'easy',
-        expectedOutcome: 'Reinforce previously learned concepts through spaced repetition'
+        expectedOutcome: `Strengthen memory retention for ${topicsForRevision.length} previously studied topics`
       });
     }
     
@@ -1075,25 +1233,43 @@ export class CustomScheduleGenerator {
     if (studentProfile.motivationLevel === 'high') probability += 10;
     else if (studentProfile.motivationLevel === 'low') probability -= 10;
     
-    // Clamp between 0 and 100
-    return Math.max(0, Math.min(100, Math.round(probability)));
+        studyType: isWeekend ? "revision" : "new-concepts",
+        breakAfter: studentProfile.breakPreference || 15,
+        difficultyLevel: isBeginnerLevel ? 'easy' : isIntermediateLevel ? 'medium' : 'hard',
+        expectedOutcome: isBeginnerLevel ? 
+          `Understand basic concepts of ${specificTopics[0].split(' - ')[0]}` :
+          `Master and apply concepts from ${specificTopics[0].split(' - ')[0]}`
   }
 
   /**
-   * Generate study tips based on toppers' strategies
+    // Enhanced mock test scheduling
    */
   static generateToppersStudyTips(studentProfile: StudentProfile): string[] {
     const tips: string[] = [
-      '🎯 **80-20 Rule**: Focus 80% of your time on topics that yield 80% of the marks',
+      (isWeekend && weekNumber % 2 === 0) // Every alternate weekend
       '🔄 **Spaced Repetition**: Review topics at 1 day, 3 days, 1 week, and 1 month intervals',
+      const mockTestTopics = isBeginnerLevel ? [
+        "Basic Concepts Review",
+        "Fundamental Problem Solving",
+        "Confidence Building Assessment"
+      ] : [
+        `${studentProfile.examType} - Full Length Mock Test`,
+        "Comprehensive Performance Analysis",
+        "Strategic Improvement Planning"
+      ];
+      
       '🧠 **Active Recall**: Test yourself without looking at notes - most effective learning method',
-      '⏰ **Peak Hours**: Study your weakest subjects during your peak energy hours',
-      '📝 **Error Log**: Maintain a detailed log of all mistakes and review weekly',
-      '🎪 **Mock Test Strategy**: Treat every mock test as the real exam',
-      '💪 **Consistency > Intensity**: 6 hours daily for 100 days beats 12 hours for 50 days',
+        subject: isBeginnerLevel ? "Practice Assessment" : "Full Mock Test",
+        hours: Math.min(studentProfile.dailyAvailableHours * 0.6, isBeginnerLevel ? 2 : 4),
+        timeSlot: studentProfile.studyPattern === 'morning' ? "9:00 AM - 1:00 PM" : "2:00 PM - 6:00 PM",
+        topics: mockTestTopics,
       '🎨 **Multi-sensory Learning**: Use visual, auditory, and kinesthetic methods together'
     ];
-    
+        breakAfter: 30,
+        difficultyLevel: isBeginnerLevel ? 'easy' : 'medium',
+        expectedOutcome: isBeginnerLevel ? 
+          "Build confidence and identify learning gaps" :
+          "Simulate exam conditions and analyze performance"
     // Add personalized tips based on profile
     if (studentProfile.weakSubjects.length > 0) {
       tips.push(`🔥 **Weak Subject Focus**: Dedicate first 2 hours of study to ${studentProfile.weakSubjects.join(', ')}`);
@@ -1102,9 +1278,13 @@ export class CustomScheduleGenerator {
     if (studentProfile.currentLevel === 'beginner') {
       tips.push('🏗️ **Foundation First**: Master basics before attempting advanced topics');
     }
-    
-    if (studentProfile.motivationLevel === 'low') {
-      tips.push('🎉 **Small Wins**: Celebrate completing each topic to build momentum');
+      focusArea: dailySubjects.length > 0 ? 
+        `${dailySubjects[0].subject} - ${isBeginnerLevel ? 'Foundation Building' : 'Concept Mastery'}` :
+        `${studentProfile.examType} - Comprehensive Study`,
+      motivationalNote: isBeginnerLevel ?
+        `Day ${i + 1}: Take your time to understand each concept thoroughly. Quality over speed!` :
+        `Day ${i + 1}: Build on yesterday's learning. Consistency creates excellence!`,
+      weeklyGoal: `Week ${weekNumber}: ${isBeginnerLevel ? 'Build strong foundations in' : 'Master key concepts across'} ${subjects.slice(0, 2).join(' & ')}`
     }
     
     return tips;
