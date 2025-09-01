@@ -1322,6 +1322,7 @@ import { ArrowLeft, BookOpen, Brain, Loader, Play, FileText, Lightbulb, Target, 
 import { AIService } from '../../lib/mistralAI';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
+import { useAuth } from '../../hooks/useAuth'; 
 import RetryPopup from '../Common/RetryPopup'; // Import the new popup component
 
 
@@ -1332,6 +1333,9 @@ const TheoryView: React.FC<{ userId: string }> = ({ userId }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
   const [showRetryPopup, setShowRetryPopup] = useState(false); // New state for popup
+
+
+  const { user, loading: authLoading } = useAuth();
 
   // Redirect if no parameters
   if (!subjectParam || !topicParam) {
@@ -1357,7 +1361,7 @@ const TheoryView: React.FC<{ userId: string }> = ({ userId }) => {
   };
 
   const fetchTheory = async () => { // Extracted fetch logic into its own function
-    if (!subject || !topic || !userId) return;
+    if (!subject || !topic || !user || !userId) return;
 
     setLoading(true);
     setError('');
