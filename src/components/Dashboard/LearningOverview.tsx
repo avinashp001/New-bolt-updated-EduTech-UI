@@ -132,7 +132,7 @@ const LearningOverview: React.FC<LearningOverviewProps> = ({
           <AreaChart data={chartData}>
             <Area
               type="monotone"
-              dataKey="points"
+              dataKey="tasks"
               stroke="#3b82f6"
               fill="#3b82f6"
               fillOpacity={0.3}
@@ -169,7 +169,7 @@ const LearningOverview: React.FC<LearningOverviewProps> = ({
             />
             <Line 
               type="monotone" 
-              dataKey="tasks" 
+              dataKey="points" 
               stroke="#f59e0b" 
               strokeWidth={3}
               dot={{ fill: '#f59e0b', strokeWidth: 2, r: 4 }}
@@ -177,11 +177,11 @@ const LearningOverview: React.FC<LearningOverviewProps> = ({
             />
             <Line 
               type="monotone" 
-              dataKey="points" 
-              stroke="#10b981" 
+              dataKey="tasks" 
+              stroke="#3b82f6" 
               strokeWidth={3}
-              dot={{ fill: '#10b981', strokeWidth: 2, r: 4 }}
-              activeDot={{ r: 6, fill: '#10b981' }}
+              dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
+              activeDot={{ r: 6, fill: '#3b82f6' }}
             />
           </AreaChart>
         </ResponsiveContainer>
