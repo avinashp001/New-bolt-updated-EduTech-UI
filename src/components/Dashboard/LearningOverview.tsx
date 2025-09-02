@@ -1,6 +1,6 @@
 import React from 'react';
 import { TrendingUp, TrendingDown, MoreHorizontal } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
+import { AreaChart, Area, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
 
 interface LearningOverviewProps {
   studySessions: any[];
@@ -129,7 +129,14 @@ const LearningOverview: React.FC<LearningOverviewProps> = ({
       {/* Chart */}
       <div className="h-64 relative">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartData}>
+          <AreaChart data={chartData}>
+            <Area
+              type="monotone"
+              dataKey="points"
+              stroke="#3b82f6"
+              fill="#3b82f6"
+              fillOpacity={0.3}
+              />
             <XAxis 
               dataKey="date" 
               axisLine={false}
@@ -163,10 +170,10 @@ const LearningOverview: React.FC<LearningOverviewProps> = ({
             <Line 
               type="monotone" 
               dataKey="tasks" 
-              stroke="#3b82f6" 
+              stroke="#f59e0b" 
               strokeWidth={3}
               dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
-              activeDot={{ r: 6, fill: '#3b82f6' }}
+              activeDot={{ r: 6, fill: '#f59e0b' }}
             />
             <Line 
               type="monotone" 
