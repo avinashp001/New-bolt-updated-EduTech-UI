@@ -79,7 +79,7 @@ const PerformanceRing: React.FC<PerformanceRingProps> = ({
             <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-2">
               <Target className="w-4 h-4 text-white" />
             </div>
-            <div className="text-xl dark:text-white/80 font-bold text-slate-800">{overallProgress}%</div>
+            <div className="text-lg dark:text-white/80 font-bold text-slate-800">{overallProgress}%</div>
             
           </div>
         </div>
