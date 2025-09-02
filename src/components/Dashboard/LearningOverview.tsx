@@ -183,7 +183,7 @@ const LearningOverview: React.FC<LearningOverviewProps> = ({
               dot={{ fill: '#10b981', strokeWidth: 2, r: 4 }}
               activeDot={{ r: 6, fill: '#10b981' }}
             />
-          </LineChart>
+          </AreaChart>
         </ResponsiveContainer>
 
         {/* Hover tooltip indicator */}
