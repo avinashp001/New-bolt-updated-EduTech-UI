@@ -146,7 +146,7 @@ export const router = createBrowserRouter(
         <Route path="courses" element={<CourseListWrapper />} />
         <Route path="courses/:subject" element={<CourseDetail />} />
         <Route path="courses/:subject/theory/:topic" element={<TheoryViewWrapper />} />
-        <Route path="courses/theory-quiz" element={<TheoryQuizSessionWrapper />} />
+        <Route path="courses/:subject/theory-quiz/:topic" element={<TheoryQuizSessionWrapper />} />
         <Route path="generate-theory" element={<TheoryGeneratorPage />} />
         <Route path="settings" element={<SettingsPage />} />
       </Route>
