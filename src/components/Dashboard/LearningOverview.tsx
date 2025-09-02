@@ -172,7 +172,7 @@ const LearningOverview: React.FC<LearningOverviewProps> = ({
               dataKey="tasks" 
               stroke="#f59e0b" 
               strokeWidth={3}
-              dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
+              dot={{ fill: '#f59e0b', strokeWidth: 2, r: 4 }}
               activeDot={{ r: 6, fill: '#f59e0b' }}
             />
             <Line 
