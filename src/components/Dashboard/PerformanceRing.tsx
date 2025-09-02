@@ -40,15 +40,14 @@ const PerformanceRing: React.FC<PerformanceRingProps> = ({
             cy="100"
             r={radius}
             fill="none"
-            stroke="#e2e8f0"
+            stroke="#3b82f6"
             strokeWidth="7"
           />
           <circle
             cx="100"
             cy="100"
-            r={radius - 20}
             fill="none"
-            stroke="#e2e8f0"
+            stroke="#3b82f6"
             strokeWidth="6"
           />
           
