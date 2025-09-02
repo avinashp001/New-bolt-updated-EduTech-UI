@@ -43,6 +43,14 @@ const PerformanceRing: React.FC<PerformanceRingProps> = ({
             stroke="#3b82f6"
             strokeWidth="7"
           />
+          <circle
+            cx="100"
+            cy="100"
+            r={radius - 20}
+            fill="none"
+            stroke="#3b82f6"
+            strokeWidth="6"
+          />
           
           {/* Progress ring (outer) */}
           <circle
@@ -59,7 +67,7 @@ const PerformanceRing: React.FC<PerformanceRingProps> = ({
           />
           
           {/* Performance ring (inner) */}
-          <circle
+          {/* <circle
             cx="100"
             cy="100"
             fill="none"
@@ -69,7 +77,7 @@ const PerformanceRing: React.FC<PerformanceRingProps> = ({
             strokeDashoffset={performanceOffset}
             strokeLinecap="round"
             className="transition-all duration-1000 ease-out"
-          />
+          /> */}
         </svg>
         
         {/* Center content */}
