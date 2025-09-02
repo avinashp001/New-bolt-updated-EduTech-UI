@@ -66,10 +66,10 @@ const StudyTimeHeatmap: React.FC<StudyTimeHeatmapProps> = ({ studySessions }) =>
   const getIntensityColor = (intensity: number) => {
     const normalizedIntensity = intensity / maxIntensity;
     if (normalizedIntensity === 0) return 'bg-slate-100';
-    if (normalizedIntensity <= 0.25) return 'bg-blue-200';
-    if (normalizedIntensity <= 0.5) return 'bg-blue-400';
-    if (normalizedIntensity <= 0.75) return 'bg-blue-600';
-    return 'bg-blue-800';
+    if (normalizedIntensity <= 0.25) return 'bg-orange-200';
+    if (normalizedIntensity <= 0.5) return 'bg-orange-400';
+    if (normalizedIntensity <= 0.75) return 'bg-red-500';
+    return 'bg-red-700';
   };
 
   // Calculate best and worst performance times
@@ -86,7 +86,7 @@ const StudyTimeHeatmap: React.FC<StudyTimeHeatmapProps> = ({ studySessions }) =>
   );
 
   return (
-    <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border border-white/20 shadow-xl rounded-2xl p-6">
+    <div className="grid grid-col-9 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border border-white/20 shadow-xl rounded-2xl p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h3 className="text-xl dark:text-white/80 font-bold text-slate-800">Study Time</h3>
