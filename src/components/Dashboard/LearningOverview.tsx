@@ -148,7 +148,7 @@ const LearningOverview: React.FC<LearningOverviewProps> = ({
               dataKey="fullDate" 
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 11, fill: '#64748b' }}
+              tick={{ fontSize: 10, fill: '#64748b' }}
             />
             <YAxis hide />
             <Tooltip 
