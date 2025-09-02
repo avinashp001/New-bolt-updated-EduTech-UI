@@ -86,7 +86,7 @@ const StudyTimeHeatmap: React.FC<StudyTimeHeatmapProps> = ({ studySessions }) =>
   );
 
   return (
-    <div className="grid grid-col-9 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border border-white/20 shadow-xl rounded-2xl p-6">
+    <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border border-white/20 shadow-xl rounded-2xl p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h3 className="text-xl dark:text-white/80 font-bold text-slate-800">Study Time</h3>
@@ -99,7 +99,7 @@ const StudyTimeHeatmap: React.FC<StudyTimeHeatmapProps> = ({ studySessions }) =>
 
       {/* Heatmap Grid */}
       <div className="mb-6">
-        <div className="grid grid-cols-7 gap-1 mb-2">
+        <div className="grid grid-cols-9 gap-1 mb-2">
           {heatmapData.map((day, dayIndex) => (
             <div key={dayIndex} className="text-center">
               <div className="text-xs font-medium text-slate-600 dark:text-white/80 mb-2">{day.day}</div>
