@@ -43,14 +43,6 @@ const PerformanceRing: React.FC<PerformanceRingProps> = ({
             stroke="#3b82f6"
             strokeWidth="7"
           />
-          <circle
-            cx="100"
-            cy="100"
-            r={radius - 20}
-            fill="none"
-            stroke="#3b82f6"
-            strokeWidth="6"
-          />
           
           {/* Progress ring (outer) */}
           <circle
