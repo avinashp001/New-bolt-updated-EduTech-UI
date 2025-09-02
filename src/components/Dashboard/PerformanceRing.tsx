@@ -41,7 +41,7 @@ const PerformanceRing: React.FC<PerformanceRingProps> = ({
             r={radius}
             fill="none"
             stroke="#3b82f6"
-            strokeWidth="7"
+            strokeWidth="9"
           />
 
           
