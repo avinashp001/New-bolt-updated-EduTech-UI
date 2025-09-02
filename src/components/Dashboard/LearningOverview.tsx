@@ -137,8 +137,15 @@ const LearningOverview: React.FC<LearningOverviewProps> = ({
               fill="#3b82f6"
               fillOpacity={0.3}
               />
+            <Area
+              type="monotone"
+              dataKey="points"
+              stroke="f59e0b"
+              fill="f59e0b"
+              fillOpacity={0.3}
+              />
             <XAxis 
-              dataKey="date" 
+              dataKey="fullDate" 
               axisLine={false}
               tickLine={false}
               tick={{ fontSize: 12, fill: '#64748b' }}
