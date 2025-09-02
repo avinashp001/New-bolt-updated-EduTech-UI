@@ -70,10 +70,9 @@ const PerformanceRing: React.FC<PerformanceRingProps> = ({
           <circle
             cx="100"
             cy="100"
-            r={radius - 20}
             fill="none"
-            stroke="#f59e0b"
-            strokeWidth="6"
+            stroke="#3b82f6"
+            strokeWidth="7"
             strokeDasharray={circumference}
             strokeDashoffset={performanceOffset}
             strokeLinecap="round"
