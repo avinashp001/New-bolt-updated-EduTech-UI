@@ -47,7 +47,7 @@ const PerformanceRing: React.FC<PerformanceRingProps> = ({
 
           {/* Define circular gradient */}
   <defs>
-    <linearGradient id="progressGradient" gradientTransform="rotate(90)">
+    <linearGradient id="progressGradient">
       <stop offset="0%" stopColor="#f97316" />
       <stop offset="25%" stopColor="#f97316" />
       {/* Remaining 75% Green */}
