@@ -154,7 +154,9 @@ const AITestSession: React.FC = () => {
     } catch (error) {
       console.error('Error processing file:', error);
       const errorMessage = error instanceof Error ? error.message : 'Error processing the file. Please try again.';
-      alert(errorMessage);
+      // alert(errorMessage);
+      setError(errorMessage);
+  setShowRetryPopup(true);
     } finally {
       setIsGeneratingTest(false);
     }
@@ -326,6 +328,8 @@ const AITestSession: React.FC = () => {
     } catch (error) {
       console.error('Error analyzing test:', error);
       alert('Error analyzing test results. Please try again.');
+      setError(error);
+  setShowRetryPopup(true);
     } finally {
       setIsAnalyzing(false);
     }
