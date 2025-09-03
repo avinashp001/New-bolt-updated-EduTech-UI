@@ -309,7 +309,7 @@ const RealTimeAnalytics: React.FC<RealTimeAnalyticsProps> = ({ userId }) => {
       </div>
 
       {/* Recent Activity */}
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+      <div className="p-3 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
         <h3 className="text-base lg:text-lg font-semibold text-slate-800 mb-4">Recent Study Sessions</h3>
         <div className="space-y-3">
           {loading ? ( // Conditional rendering for loading state
