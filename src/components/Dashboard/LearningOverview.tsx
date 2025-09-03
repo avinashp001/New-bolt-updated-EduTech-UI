@@ -142,7 +142,7 @@ const LearningOverview: React.FC<LearningOverviewProps> = ({
               dataKey="points"
               stroke="#f59e0b"
               fill="#f59e0b"
-              fillOpacity={0.2}
+              fillOpacity={0.3}
               />
             <XAxis 
               dataKey="fullDate" 
