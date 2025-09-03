@@ -560,7 +560,6 @@ html {
 @media (max-width: 450px) {
   .max-[450px]:flex-col {
     flex-direction: column; /* switch to column */
-    gap: 1.5rem; /* space-y-6 equivalent */
   }
 }
 
