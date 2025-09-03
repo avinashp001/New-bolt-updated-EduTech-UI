@@ -1751,7 +1751,7 @@ const TheoryView: React.FC<{ userId: string }> = ({ userId }) => {
           </div>
         </div>
 
-        <div className="p-6 bg-white">
+        <div className="max-[400px]:p-2 p-6 bg-white">
           <MathRenderer content={memoizedFormattedContent} /> {/* Use memoized content */}
         </div>
       </div>
