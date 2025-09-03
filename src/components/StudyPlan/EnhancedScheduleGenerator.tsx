@@ -344,7 +344,12 @@ useEffect(() => {
         studentProfile
       );
     } catch (error) {
-      console.error("Error saving schedule:", error);
+      // console.error("Error saving schedule:", error);
+      openError(
+        "Save Failed",
+        "We couldn't save your schedule. Please try again.",
+        generateDetailedSchedule
+      );
     }
 
     setShowExistingSchedule(false); // Hide existing schedule when new one is generated
