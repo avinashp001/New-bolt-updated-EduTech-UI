@@ -566,6 +566,12 @@ html {
   }
 }
 
+@media (max-width: 450px) {
+  .min-p-4{
+    padding: 1rem;
+  }
+}
+
 
 
 /* .markdown-body td p,
