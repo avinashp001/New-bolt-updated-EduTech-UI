@@ -69,7 +69,7 @@ const LoaderOverlay: React.FC<LoaderOverlayProps> = ({ isOpen, message, subMessa
             <span className="text-sm">Personalization</span>
           </div>
         </div>
-        <div className="flex items-center mt-4 mx-auto space-x-2 font-semibold text-slate-500">
+        <div className="flex items-center mt-4 w-auto mx-auto space-x-2 font-semibold text-slate-500">
           <AlertTriangle className="w-4 h-4 text-orange-600"/>
           <span className="text-sm text-orange-500">Do not go back while your schedule is generating</span>
         </div>
