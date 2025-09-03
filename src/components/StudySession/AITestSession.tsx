@@ -691,7 +691,7 @@ const AITestSession: React.FC = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6 p-3">
       {/* Header */}
       <div className="bg-gradient-to-r from-purple-500 to-pink-600 p-6 rounded-2xl text-white">
         <div className="flex items-center space-x-3 mb-4">
