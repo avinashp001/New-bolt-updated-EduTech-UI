@@ -1211,7 +1211,7 @@ useEffect(() => {
   // Show existing schedule option if available
   if (studyPlan && !showExistingSchedule && existingSchedule && existingSchedule.length > 0) {
     return (
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="max-w-4xl mx-auto space-y-6 p-2">
         <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 text-center">
           <Calendar className="w-16 h-16 text-blue-600 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-slate-800 mb-4">Existing Schedule Found</h2>
