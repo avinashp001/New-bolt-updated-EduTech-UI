@@ -2131,7 +2131,7 @@ const TheoryQuizSession: React.FC = () => {
     const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
 
     return (
-      <div className="max-w-4xl mx-auto space-y-6 p-2">
+      <div className="max-w-4xl mx-auto space-y-6 p-3">
         {/* Test Header */}
         <div className="bg-gradient-to-r from-indigo-600 to-purple-700 p-6 rounded-2xl text-white">
           <div className="flex items-center justify-between mb-4">
