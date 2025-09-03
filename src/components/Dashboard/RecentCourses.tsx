@@ -99,7 +99,7 @@ const RecentCourses: React.FC<RecentCoursesProps> = ({ progressReports, studySes
             <div
               key={course.subject}
               onClick={() => navigate(`/app/courses/${encodeURIComponent(course.subject)}`)}
-              className="flex items-center justify-between p-4 hover:bg-slate-50 rounded-xl transition-all cursor-pointer group"
+              className="flex items-center justify-between p-4 hover:bg-slate-50 rounded-xl transition-all cursor-pointer group max-[400px]:p-2"
             >
               <div className="flex items-center space-x-4">
                 <div className={`w-10 h-10 ${colorScheme.bg} rounded-xl flex items-center justify-center text-white text-lg`}>
