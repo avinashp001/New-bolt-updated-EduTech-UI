@@ -316,7 +316,7 @@ const CourseDetail: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
+    <div className="max-w-7xl mx-auto space-y-8 p-3">
       {/* Enhanced Header */}
       <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 p-4 rounded-3xl text-white shadow-2xl">
         <div className="absolute inset-0 bg-black/10"></div>
