@@ -564,6 +564,9 @@ html {
   .max-p-4{
     padding: 1rem;
   }
+  .max-p-2 {
+    padding: 0.5rem;
+  }
 }
 
 @media (max-width: 450px) {
