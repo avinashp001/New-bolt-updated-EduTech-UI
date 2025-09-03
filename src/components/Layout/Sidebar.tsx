@@ -32,13 +32,13 @@ const Sidebar: React.FC<SidebarProps> = ({
   const menuItems = [
     { id: 'dashboard', icon: Home, label: 'Dashboard', path: '/app/dashboard' },
     { id: 'courses', icon: BookOpen, label: 'My Courses', path: '/app/courses' },
-    { id: 'schedule', icon: Calendar, label: 'Study Planner', path: '/app/enhanced-schedule' },
     { id: 'weekly-tracker', icon: Target, label: 'Weekly Assessment', path: '/app/weekly-tracker' },
     { id: 'timer-session', icon: Clock, label: 'Study Timer', path: '/app/timer-session' },
     { id: 'generate-theory', icon: BookOpen, label: 'Generate Theory', path: '/app/generate-theory' },
     { id: 'ai-test', icon: Brain, label: 'AI Assessment', path: '/app/ai-test' },
     { id: 'analytics', icon: BarChart3, label: 'Analytics', path: '/app/analytics' },
     { id: 'ai-mentor', icon: Brain, label: 'AI Mentor', path: '/app/ai-mentor' },
+    { id: 'schedule', icon: Calendar, label: 'Study Planner', path: '/app/enhanced-schedule' },
     { id: 'settings', icon: Settings, label: 'Settings', path: '/app/settings' },
     { id: 'logout', icon: LogOut, label: 'Log Out', path: null },
   ];
