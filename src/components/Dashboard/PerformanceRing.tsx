@@ -1,5 +1,5 @@
 import React from 'react';
-import { Award, Target, CheckCircle } from 'lucide-react';
+import { Award, Target, CheckCircle, Trophy } from 'lucide-react';
 
 interface PerformanceRingProps {
   overallProgress: number;
