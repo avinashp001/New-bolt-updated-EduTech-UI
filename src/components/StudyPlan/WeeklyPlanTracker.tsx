@@ -543,7 +543,7 @@ const WeeklyPlanTracker: React.FC = () => {
                   <Brain className="w-3 h-3 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-3xl max-[400px]:text-xl font-bold">Week {currentWeek} Assessment</h2>
+                  <h2 className="text-3xl max-text-xl font-bold">Week {currentWeek} Assessment</h2>
                   <p className="text-purple-100 max-[400px]:text-sm text-lg">Content-based evaluation for {activeSubject}</p>
                 </div>
               </div>
