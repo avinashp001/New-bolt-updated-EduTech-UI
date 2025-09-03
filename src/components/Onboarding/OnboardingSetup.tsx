@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Brain, Target, Calendar, BookOpen, CheckCircle, ArrowRight, Award, Zap, Rocket, TrendingUp, AlertTriangle, RefreshCw } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
@@ -11,6 +11,8 @@ const OnboardingSetup: React.FC = () => {
   const { updateSettings, loading: settingsLoading } = useSettings();
   const navigate = useNavigate();
   const { showSuccess, showError } = useNotification();
+
+  const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   // Add error boundary state
   const [hasError, setHasError] = useState(false);
