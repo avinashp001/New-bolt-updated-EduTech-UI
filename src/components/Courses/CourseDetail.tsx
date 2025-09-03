@@ -324,7 +324,7 @@ const CourseDetail: React.FC = () => {
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full translate-y-32 -translate-x-32"></div>
         
         <div className="relative z-10">
-          <div className="flex items-start mb-5 max-[450px]:flex-col">
+          <div className="flex items-start mb-5 max-flex-col">
             <button
               onClick={() => navigate('/app/courses')}
               className="p-2 hover:bg-white/10 rounded-2xl transition-all duration-300 hover:scale-110"
