@@ -1214,7 +1214,7 @@ const WeeklyPlanTracker: React.FC = () => {
 
       {/* Enhanced Week Navigation */}
       <div className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
-        <div className="max-[400px]:px-2 max-[400px]:py-4 p-8">
+        <div className="max-px-2 max-py-4 p-8">
           <div className="flex items-center justify-between">
             <button
               onClick={() => {
