@@ -1194,7 +1194,7 @@ Would you like me to create a personalized study plan based on this material or 
                           ? 'bg-gradient-to-r dark:from-gray-600 dark:to-gray-600 from-blue-500 to-indigo-600 text-white'
                           : message.type === 'insight'
                             ? 'bg-gradient-to-r from-purple-50 to-pink-50 text-slate-800 border border-purple-200'
-                            : 'bg-white dark:bg-teal-900 dark:text-white/90 text-slate-800 border border-slate-200'
+                            : 'bg-white dark:bg-gradient-to-r dark:from-teal-50 dark:to-rose-50 dark:text-slate-800/90 text-slate-800 border border-slate-200'
                         }`}
                     >
                       {/* Message Content */}
