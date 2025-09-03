@@ -396,7 +396,7 @@ const FAQPage: React.FC = () => {
         </div>
 
         {/* Still Need Help Section */}
-        <div className="mt-16 bg-gradient-to-r from-slate-900 to-slate-800 rounded-3xl p-12 text-white text-center">
+        <div className="max-[400px]:p-4 mt-16 bg-gradient-to-r from-slate-900 to-slate-800 rounded-3xl p-12 text-white text-center">
           <h2 className="text-3xl font-bold mb-4">Still Need Help?</h2>
           <p className="text-slate-300 text-lg mb-8 max-w-2xl mx-auto">
             Can't find the answer you're looking for? Our expert support team is ready to provide personalized assistance.
