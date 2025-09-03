@@ -652,7 +652,7 @@ const WeeklyPlanTracker: React.FC = () => {
             <div className="w-px h-8 bg-slate-300"></div>
             <div className="text-center">
               <div className="text-sm dark:text-slate-200 text-slate-600 mb-1">Time</div>
-              <div className="text-lg font-bold dark:text-slate-400 text-slate-800 max-[350px]:text-sm">
+              <div className="text-lg font-bold dark:text-slate-400 text-slate-800 max-text-sm">
                 {testStartTime ? Math.floor((Date.now() - testStartTime.getTime()) / 1000 / 60) : 0}m
               </div>
             </div>
