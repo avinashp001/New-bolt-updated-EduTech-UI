@@ -1072,7 +1072,7 @@ const WeeklyPlanTracker: React.FC = () => {
           {/* Enhanced File Upload */}
           <div
             {...getRootProps()}
-            className={`relative border-2 border-dashed rounded-3xl max-py-5 max-[450px]:px-2 p-12 text-center transition-all duration-300 cursor-pointer ${
+            className={`relative border-2 border-dashed rounded-3xl max-py-5 max-px-2 p-12 text-center transition-all duration-300 cursor-pointer ${
               !uploadingSubject
                 ? 'border-slate-200 bg-slate-50 cursor-not-allowed opacity-50'
                 : isDragActive 
