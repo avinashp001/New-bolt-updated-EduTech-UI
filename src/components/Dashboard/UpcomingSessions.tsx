@@ -255,9 +255,6 @@ const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({
                   }}
                   className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors"
                 >
-              <div className="text-xs text-slate-500">
-                {session.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-              </div>
                 </button>
             </div>
           </div>
