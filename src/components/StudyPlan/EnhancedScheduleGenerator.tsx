@@ -276,7 +276,12 @@ useEffect(() => {
     );
 
     if (!parsedSchedule || !parsedSchedule.dailySchedule) {
-      alert("❌ Could not generate a valid schedule. Please try again.");
+      // alert("❌ Could not generate a valid schedule. Please try again.");
+      openError(
+        "Schedule Generation Failed",
+        "We couldn't generate your schedule. Please try again.",
+        generateDetailedSchedule // 🔁 retry
+      );
       return;
     }
 
