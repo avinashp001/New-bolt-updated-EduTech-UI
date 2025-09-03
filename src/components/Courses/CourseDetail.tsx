@@ -597,7 +597,7 @@ const CourseDetail: React.FC = () => {
       </div>
 
       {/* Enhanced Achievement Section */}
-      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-3xl p-8 text-white shadow-2xl">
+      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-3xl max-p-4 p-8 text-white shadow-2xl">
         <div className="flex items-center space-x-4 mb-8">
           <div className="w-12 h-12 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center">
             <Trophy className="w-6 h-6 text-white" />
