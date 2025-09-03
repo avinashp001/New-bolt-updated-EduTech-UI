@@ -562,6 +562,7 @@ html {
     flex-direction: column; /* switch to column */
     gap: 1.5rem; /* space-y-6 equivalent */
   }
+}
 
 /* .markdown-body td p,
 .markdown-body th p {
