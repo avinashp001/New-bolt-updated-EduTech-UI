@@ -171,7 +171,7 @@ const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({
         {upcomingSessions.map((session, index) => (
           <div
             key={session.id}
-            className={`p-4 rounded-xl border-2 transition-all hover:shadow-md cursor-pointer ${getStatusColor(session)}`}
+            className={`max-[400px]:p-3 p-4 rounded-xl border-2 transition-all hover:shadow-md cursor-pointer ${getStatusColor(session)}`}
             onClick={() => navigate(`/app/courses/${encodeURIComponent(session.subject)}`)}
           >
             <div className="flex items-center justify-between">
