@@ -205,7 +205,6 @@ const AITestSession: React.FC = () => {
       // const correctAnswers = userAnswers.reduce((count, answer, index) => {
       //   return answer === questions[index]?.correctAnswer ? count + 1 : count;
       // }, 0);
-      
       // const score = Math.round((correctAnswers / questions.length) * 100);
 
       // Calculate basic results
@@ -313,6 +312,8 @@ const AITestSession: React.FC = () => {
       if (quizAttemptError) {
         console.error('Error saving quiz attempt:', quizAttemptError);
         alert('Error saving detailed quiz attempt. Please check console.');
+        setError(quizAttemptError);
+        setShowRetryPopup(true);
       }
         
         // Save high-level summary to study_sessions (existing)
@@ -327,7 +328,7 @@ const AITestSession: React.FC = () => {
 
     } catch (error) {
       console.error('Error analyzing test:', error);
-      alert('Error analyzing test results. Please try again.');
+      // alert('Error analyzing test results. Please try again.');
       setError(error);
   setShowRetryPopup(true);
     } finally {
