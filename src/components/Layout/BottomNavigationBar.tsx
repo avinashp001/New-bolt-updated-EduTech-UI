@@ -53,7 +53,7 @@ const BottomNavigationBar: React.FC = () => {
 
               {/* Label: gradient text when active */}
               <span
-                className={`max-[450px]:text-xs font-semibold transition-colors duration-200 ${
+                className={`max-[450px]:text-xs font-bold transition-colors duration-200 ${
                   active
                     ? 'text-transparent font-semibold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text'
                     : 'text-grey-600 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-300'
