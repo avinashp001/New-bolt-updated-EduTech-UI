@@ -1169,7 +1169,7 @@ const WeeklyPlanTracker: React.FC = () => {
             </div>
           </div>
           
-          <div className="p-8">
+          <div className="p-8 max-[400px]:p-5">
             <div className="space-y-4">
               {fetchedWeeklyAssessments.map((test) => (
                 <div key={test.id} className="group flex items-center justify-between p-6 bg-gradient-to-r from-slate-50 to-gray-50 rounded-2xl border border-slate-200 hover:shadow-lg hover:from-slate-100 hover:to-gray-100 transition-all duration-300">
