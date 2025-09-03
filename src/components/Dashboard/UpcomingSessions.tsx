@@ -92,18 +92,21 @@ const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({
   const upcomingSessions = getUpcomingSessions();
 
   const getSubjectIcon = (subject: string) => {
-    const icons: Record<string, string> = {
-      'Mathematics': '📐',
-      'Physics': '⚛️',
-      'Chemistry': '🧪',
-      'Biology': '🧬',
-      'English': '📚',
-      'Quantitative Aptitude': '📊',
-      'Reasoning': '🧠',
-      'General Knowledge': '💡'
-    };
-    return icons[subject] || '📖';
-  };
+  const Icon = icons[subject] || BookOpen; // fallback
+  return <Icon className="w-6 h-6 text-blue-600" />; 
+};
+
+  
+  const icons: Record<string, React.ElementType> = {
+  Mathematics: Calculator,
+  Physics: Atom,
+  Chemistry: FlaskConical,
+  Biology: Dna,
+  English: Book,
+  'Quantitative Aptitude': Calculator, // pick suitable
+  Reasoning: Brain,
+  'General Knowledge': Lightbulb,
+};
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
