@@ -87,7 +87,7 @@ const PerformanceRing: React.FC<PerformanceRingProps> = ({
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center">
             <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-2">
-              <Target className="w-4 h-4 text-white" />
+              <Trophy className="w-4 h-4 text-white" />
             </div>
             
           </div>
