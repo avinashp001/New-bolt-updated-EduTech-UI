@@ -93,7 +93,7 @@ const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({
 
   const getSubjectIcon = (subject: string) => {
   const Icon = icons[subject] || BookOpen; // fallback
-  return <Icon className="w-6 h-6 text-blue-600" />; 
+  return <Icon className="w-6 h-6 font-semibold text-white" />; 
 };
   
   const icons: Record<string, React.ElementType> = {
