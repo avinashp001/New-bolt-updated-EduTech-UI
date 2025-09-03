@@ -1,5 +1,5 @@
 import React from 'react';
-import { Award, Target, CheckCircle, Trophy } from 'lucide-react';
+import { Award, Target, CheckCircle, CircleGauge } from 'lucide-react';
 
 interface PerformanceRingProps {
   overallProgress: number;
@@ -90,7 +90,7 @@ const PerformanceRing: React.FC<PerformanceRingProps> = ({
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center">
             <div className="w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-2">
-              <Trophy className="w-6 h-6 text-slate-800 dark:text-white" />
+              <CircleGauge className="w-6 h-6 text-slate-800 dark:text-white" />
             </div>
             
           </div>
