@@ -190,7 +190,8 @@ const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({
                     <Clock className="w-3 h-3 text-slate-500" />
                     <span className="text-xs text-slate-500"
                       style={{fontSize:"0.66rem"}}>{session.timeSlot}</span>
-                    <span className="text-xs text-slate-500">• {session.duration}</span>
+                    <span className="text-xs text-slate-500"
+                      style={{fontSize:"0.66rem"}}>• {session.duration}</span>
                   </div>
                 </div>
               </div>
