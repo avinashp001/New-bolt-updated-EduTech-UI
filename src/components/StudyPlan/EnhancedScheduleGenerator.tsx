@@ -251,6 +251,7 @@ useEffect(() => {
   }
 
   setIsGenerating(true);
+  setIsGeneratingSchedule(true);
 
   try {
     // Calculate total weeks until exam
