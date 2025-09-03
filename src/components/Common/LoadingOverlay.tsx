@@ -61,8 +61,8 @@ const LoaderOverlay: React.FC<LoaderOverlayProps> = ({ isOpen, message, subMessa
         </p>
         <div className="flex items-center justify-center space-x-6">
           <div className="flex items-center space-x-2 text-slate-500">
-            <RocketIcon className="w-5 h-5" />
-            <span>Optimization</span>
+            <RocketIcon className="w-4 h-4" />
+            <span className="text-sm">Optimization</span>
           </div>
           <div className="flex items-center space-x-2 text-slate-500">
             <Target className="w-5 h-5" />
