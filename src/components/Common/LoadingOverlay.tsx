@@ -38,7 +38,7 @@
 
 
 import React from 'react';
-import { Brain, RocketIcon, Target, TriangleAlert } from 'lucide-react';
+import { Brain, RocketIcon, Target, AlertTriangle } from 'lucide-react';
 
 interface LoaderOverlayProps {
   isOpen: boolean;
@@ -70,7 +70,7 @@ const LoaderOverlay: React.FC<LoaderOverlayProps> = ({ isOpen, message, subMessa
           </div>
         </div>
         <div>
-          <TriangleAlert className="w-4 h-4"/>
+          <AlertTriangle className="w-4 h-4"/>
           <span className="text-sm text-italic text-orange-500">Do not go back while your schedule is generating</span>
         </div>
       </div>
