@@ -7,16 +7,16 @@ const BottomNavigationBar: React.FC = () => {
   const location = useLocation();
 
   const navItems = [
-    { id: 'home', label: 'Home', icon: Home, path: '/dashboard' },
-    { id: 'courses', label: 'Courses', icon: LibraryBig, path: '/courses' },
-    { id: 'assessment', label: 'Assessment', icon: BookOpenCheck, path: '/weekly-tracker' },
-    { id: 'schedule', label: 'Schedule', icon: Calendar, path: '/enhanced-schedule' },
-    { id: 'ai-mentor', label: 'Mentor', icon: UserCircle, path: '/ai-mentor' },
+    { id: 'home', label: 'Home', icon: Home, path: '/app/dashboard' },
+    { id: 'courses', label: 'Courses', icon: LibraryBig, path: '/app/courses' },
+    { id: 'assessment', label: 'Assessment', icon: BookOpenCheck, path: '/app/weekly-tracker' },
+    { id: 'schedule', label: 'Schedule', icon: Calendar, path: '/app/enhanced-schedule' },
+    { id: 'ai-mentor', label: 'Mentor', icon: UserCircle, path: '/app/ai-mentor' },
   ];
 
   const isActiveRoute = (path: string) => {
-    if (path === '/dashboard') {
-      return location.pathname === '/' || location.pathname === '/dashboard';
+    if (path === '/app/dashboard') {
+      return location.pathname === '/' || location.pathname === '/app/dashboard';
     }
     return location.pathname.startsWith(path);
   };
