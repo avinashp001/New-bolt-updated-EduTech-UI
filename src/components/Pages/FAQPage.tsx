@@ -434,7 +434,7 @@ const FAQPage: React.FC = () => {
               <h3 className="font-bold mb-2">Community Support</h3>
               <p className="text-slate-300 text-sm mb-4">Connect with fellow students and mentors</p>
               <a
-                href="/community"
+                href="/app/community"
                 className="inline-flex items-center space-x-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
               >
                 <Users className="w-4 h-4" />
