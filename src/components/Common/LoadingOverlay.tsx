@@ -65,8 +65,8 @@ const LoaderOverlay: React.FC<LoaderOverlayProps> = ({ isOpen, message, subMessa
             <span className="text-sm">Optimization</span>
           </div>
           <div className="flex items-center space-x-2 text-slate-500">
-            <Target className="w-5 h-5" />
-            <span>Personalization</span>
+            <Target className="w-4 h-4" />
+            <span className="text-sm">Personalization</span>
           </div>
         </div>
       </div>
