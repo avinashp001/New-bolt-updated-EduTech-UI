@@ -95,7 +95,6 @@ const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({
   const Icon = icons[subject] || BookOpen; // fallback
   return <Icon className="w-6 h-6 text-blue-600" />; 
 };
-
   
   const icons: Record<string, React.ElementType> = {
   Mathematics: Calculator,
