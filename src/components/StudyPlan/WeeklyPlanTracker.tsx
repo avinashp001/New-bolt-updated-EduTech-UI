@@ -1223,7 +1223,7 @@ const WeeklyPlanTracker: React.FC = () => {
                 initializeWeeklyAssessments(prevWeek);
               }}
               disabled={currentWeek <= 1}
-              className="max-[400px]:px-2 max-[400px]:py-1 flex items-center space-x-2 bg-gradient-to-r from-slate-500 to-gray-600 text-white px-6 py-3 rounded-2xl font-semibold hover:from-slate-600 hover:to-gray-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-105"
+              className="max-px-2 max-py-1 flex items-center space-x-2 bg-gradient-to-r from-slate-500 to-gray-600 text-white px-6 py-3 rounded-2xl font-semibold hover:from-slate-600 hover:to-gray-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-105"
             >
               <ChevronLeft className="w-5 h-5" />
               <span className="max-[400px]:text-xs">Previous Week</span>
