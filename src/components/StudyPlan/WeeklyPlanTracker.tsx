@@ -1029,7 +1029,7 @@ const WeeklyPlanTracker: React.FC = () => {
           </h3>
         </div>
         
-        <div className="p-8 max-[450px]:p-6">
+        <div className="p-8 max-p-6">
           {uploadingSubject && (
             <div className="mb-6 p-6 bg-gradient-to-r from-purple-50 to-indigo-50 border-2 border-purple-200 rounded-2xl">
               <div className="flex items-center justify-between">
