@@ -24,7 +24,8 @@ import {
   Timer,
   Rocket,
   Eye,
-  ArrowRight
+  ArrowRight,
+  Loader
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useProgress } from '../../hooks/useProgress';
@@ -36,13 +37,13 @@ interface DailyMilestone {
   day: number;
   date: string;
   topic: string;
-  description: string;
+  // description: string;
   estimatedHours: number;
   difficulty: 'easy' | 'medium' | 'hard';
   completed: boolean;
   score?: number;
   completedAt?: string;
-  subtopics: string[];
+  // subtopics: string[];
   learningObjectives: string[];
 }
 
@@ -107,24 +108,23 @@ const CourseDetail: React.FC = () => {
                   day: index + 1,
                   date: milestoneDate.toISOString().split('T')[0],
                   topic: topic.replace(`${decodedSubject} - `, ''),
-                  description: `Master ${topic} with comprehensive understanding and practical application`,
                   estimatedHours: subjectData.hours || 2,
                   difficulty: index < subjectSchedules.length * 0.3 ? 'easy' :
                              index < subjectSchedules.length * 0.7 ? 'medium' : 'hard',
                   completed: isCompleted,
                   score: avgScore,
                   completedAt: isCompleted ? topicSessions[0]?.created_at : undefined,
-                  subtopics: [
-                    `${topic} - Theory`,
-                    `${topic} - Examples`,
-                    `${topic} - Practice Problems`,
-                    `${topic} - Applications`
-                  ],
+                  // subtopics: [
+                  //   `${topic} - Theory`,
+                  //   `${topic} - Examples`,
+                  //   `${topic} - Practice Problems`,
+                  //   `${topic} - Applications`
+                  // ],
                   learningObjectives: [
                     `Understand core concepts of ${topic}`,
-                    `Apply ${topic} principles to solve problems`,
-                    `Analyze real-world applications of ${topic}`,
-                    `Evaluate different approaches in ${topic}`
+                    // `Apply ${topic} principles to solve problems`,
+                    // `Analyze real-world applications of ${topic}`,
+                    // `Evaluate different approaches in ${topic}`
                   ]
                 });
               });
@@ -148,11 +148,11 @@ const CourseDetail: React.FC = () => {
             day: index + 1,
             date: new Date(Date.now() + index * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
             topic,
-            description: `Master ${topic} with comprehensive understanding`,
+            // description: `Master ${topic} with comprehensive understanding`,
             estimatedHours: 2,
             difficulty: index < 2 ? 'easy' : index < 4 ? 'medium' : 'hard',
             completed: false,
-            subtopics: [`${topic} - Theory`, `${topic} - Practice`],
+            // subtopics: [`${topic} - Theory`, `${topic} - Practice`],
             learningObjectives: [`Understand ${topic}`, `Apply ${topic} concepts`]
           });
         });
@@ -263,7 +263,7 @@ const CourseDetail: React.FC = () => {
           <div className="flex flex-col items-center justify-center py-16">
             <div className="relative mb-8">
               <div className="animate-spin rounded-full h-20 w-20 border-4 border-blue-200 border-t-blue-600"></div>
-              <Brain className="w-10 h-10 text-blue-600 absolute top-5 left-5" />
+              <Loader className="w-10 h-10 text-blue-600 absolute top-5 left-5" />
             </div>
             <h3 className="text-2xl font-bold text-slate-800 mb-4">Loading Your Learning Path...</h3>
             <p className="text-slate-600 text-center max-w-md">
@@ -324,26 +324,26 @@ const CourseDetail: React.FC = () => {
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full translate-y-32 -translate-x-32"></div>
         
         <div className="relative z-10">
-          <div className="flex items-start space-x-6 mb-8 min-[350px]:flex-col">
+          <div className="flex items-start space-x-6 mb-5 min-[350px]:flex-col">
             <button
               onClick={() => navigate('/app/courses')}
-              className="p-3 hover:bg-white/10 rounded-2xl transition-all duration-300 hover:scale-110"
+              className="p-2 hover:bg-white/10 rounded-2xl transition-all duration-300 hover:scale-110"
             >
               <ArrowLeft className="w-6 h-6" />
             </button>
-            <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center text-xl">
+            <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center text-xl">
               {subjectIcons[decodedSubject] || '📖'}
             </div>
             <div style={{marginLeft: '0.7rem !important'}}>
-              <h2 className="text-3xl font-bold mb-2">{decodedSubject}</h2>
-              <p className="text-indigo-100 text-lg">Daily milestones & intelligent progress tracking</p>
-              <div className="flex items-center space-x-4 mt-3 text-sm">
+              <h2 className="text-2xl font-bold mb-1">{decodedSubject}</h2>
+              <p className="text-indigo-100 text-sm">Daily milestones & intelligent progress tracking</p>
+              <div className="flex items-center space-x-4 mt-2 text-sm">
                 <div className="flex items-center space-x-2">
-                  <Brain className="w-4 h-4" />
+                  <Brain className="w-3 h-3" />
                   <span>Smart Learning</span>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Target className="w-4 h-4" />
+                <div className="flex items-center text-sm space-x-2">
+                  <Target className="w-3 h-3" />
                   <span>Personalized Milestones</span>
                 </div>
               </div>
@@ -353,26 +353,24 @@ const CourseDetail: React.FC = () => {
           {/* Animated Stats Grid */}
           <div className="grid grid-cols-2 lg:grid-cols-5 gap-6">
             <div className="bg-white/10 backdrop-blur-md rounded-2xl pl-4 pr-4 pt-4 pb-4 text-center transform hover:scale-105 transition-all duration-300">
-              <div className="text-3xl font-bold mb-2 bg-gradient-to-r from-white to-indigo-100 bg-clip-text text-transparent">
+              <div className="text-xl font-bold mb-2 bg-gradient-to-r from-white to-indigo-100 bg-clip-text text-transparent">
                 {animatedStats.completionPercentage}%
               </div>
               <div className="text-indigo-100 text-xs font-medium">Complete</div>
-              <div className="mt-2 w-full bg-white/20 rounded-full h-2">
+              <div className="mt-1 w-full bg-white/20 rounded-full h-1">
                 <div 
-                  className="bg-white h-2 text-sm rounded-full transition-all duration-1000 ease-out"
+                  className="bg-white h-1 text-sm rounded-full transition-all duration-1000 ease-out"
                   style={{ width: `${animatedStats.completionPercentage}%` }}
                 />
               </div>
             </div>
             
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl pt-4 pr-4 pl-4 pb-4 text-center transform hover:scale-105 transition-all duration-300">
-              <div className="text-3xl font-bold mb-2 bg-gradient-to-r from-white to-green-100 bg-clip-text text-transparent">
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl pt-4 pr-4 pl-4 text-center transform hover:scale-105 transition-all duration-300">
+              <div className="text-xl font-bold mb-1 bg-gradient-to-r from-white to-green-100 bg-clip-text text-transparent">
                 {animatedStats.completedMilestones}
               </div>
-              <div className="text-indigo-100 text-xs font-medium">Milestones</div>
-              <div className="mt-2 flex items-center justify-center">
-                <Trophy className="w-4 h-4 text-xs text-yellow-300" />
-              </div>
+              <div className="flex flex-center justify-center text-indigo-100 text-xs font-medium"
+              style={{alignItems:"center"}}><Trophy className="w-3 h-3 mx-2 text-xs text-yellow-300"/>Milestones</div>
             </div>
             
             {/* <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 text-center transform hover:scale-105 transition-all duration-300">
@@ -385,27 +383,22 @@ const CourseDetail: React.FC = () => {
               </div>
             </div> */}
             
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 text-center transform hover:scale-105 transition-all duration-300">
-              <div className="text-3xl font-bold mb-2 bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl pt-4 pr-4 pl-4 pb-0 text-center transform hover:scale-105 transition-all duration-300">
+              <div className="text-xl font-bold mb-2 bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
                 {animatedStats.avgPerformance}/10
               </div>
-              <div className="text-indigo-100 text-xs font-medium">Avg Score</div>
-              <div className="mt-2 flex items-center justify-center">
-                <Award className="w-4 h-4 text-xs text-blue-300" />
-              </div>
+              <div className="flex justify-center text-indigo-100 text-xs font-medium"
+              style={{alignItems:"center"}}><Award className="w-3 h-3 mx-2 text-xs text-blue-300"/>Avg Score</div>
             </div>
             
             <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 text-center transform hover:scale-105 transition-all duration-300">
               <div className="flex items-center justify-center space-x-2 mb-2">
-                <Flame className="w-6 h-6 text-orange-300 animate-pulse" />
-                <div className="text-3xl font-bold bg-gradient-to-r from-white to-orange-100 bg-clip-text text-transparent">
+                <Flame className="w-4 h-4 text-orange-300 animate-pulse" />
+                <div className="text-xl font-bold bg-gradient-to-r from-white to-orange-100 bg-clip-text text-transparent">
                   {animatedStats.streak}
                 </div>
               </div>
-              <div className="text-indigo-100 text-xs font-medium">Day Streak</div>
-              <div className="mt-2 text-xs text-orange-200">
-                {animatedStats.streak >= 7 ? 'On Fire! 🔥' : 'Keep Going! 💪'}
-              </div>
+              <div className="text-orange-200 text-xs font-medium">{animatedStats.streak >= 7 ? 'On Fire! 🔥' : 'Keep Going! 💪'}</div>
             </div>
           </div>
         </div>
@@ -448,7 +441,7 @@ const CourseDetail: React.FC = () => {
               </span>
             </div>
             <div className="relative">
-              <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
+              <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
                 <div 
                   className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 h-4 rounded-full transition-all duration-1000 ease-out"
                   style={{ 
@@ -466,7 +459,7 @@ const CourseDetail: React.FC = () => {
           </div>
 
           {/* Enhanced Milestones Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-12">
             {weekMilestones.map((milestone, index) => (
               <div
                 key={milestone.id}
@@ -476,44 +469,46 @@ const CourseDetail: React.FC = () => {
                   milestone.completed
                     ? 'border-green-300 bg-gradient-to-br from-green-50 to-emerald-50'
                     : 'border-slate-200 bg-white hover:border-blue-300 hover:shadow-xl'
-                } ${hoveredMilestone === milestone.id ? 'scale-105' : ''}`}
+                } ${hoveredMilestone === milestone.id ? 'scale-30' : ''}`}
               >
                 {/* Day Badge */}
-                <div className="absolute -top-4 -left-4 w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-2xl flex items-center justify-center text-lg font-bold shadow-lg">
+                <div className="absolute -top-3 -left-2 w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-2xl flex items-center justify-center text-lg font-bold shadow-lg">
                   {milestone.day}
                 </div>
 
                 {/* Completion Status */}
-                <div className="absolute -top-4 -right-4">
+                <div className="absolute -top-3 -right-1">
                   {milestone.completed ? (
-                    <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-2xl flex items-center justify-center shadow-lg">
+                    <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-2xl flex items-center justify-center shadow-lg">
                       <CheckCircle className="w-6 h-6" />
                     </div>
                   ) : (
-                    <div className="w-12 h-12 bg-gradient-to-r from-slate-300 to-gray-400 text-white rounded-2xl flex items-center justify-center shadow-lg">
+                    <div className="w-8 h-8 bg-gradient-to-r from-slate-300 to-gray-400 text-white rounded-2xl flex items-center justify-center shadow-lg">
                       <Clock className="w-5 h-5" />
                     </div>
                   )}
                 </div>
 
                 {/* Content */}
-                <div className="mt-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-xl font-bold text-slate-800 group-hover:text-indigo-600 transition-colors">
+                <div className="mt-2">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-bold text-slate-800 group-hover:text-indigo-600 transition-colors"
+                    style={{fontSize: "1rem"}}>
                       {milestone.topic}
                     </h4>
                     <div className="flex items-center space-x-2">
-                      <div className={`px-3 py-1 rounded-full text-xs font-bold border ${getDifficultyColor(milestone.difficulty)}`}>
+                      <div className={`px-3 py-1 rounded-full font-bold border ${getDifficultyColor(milestone.difficulty)}`}
+                      style={{fontSize: "0.65rem"}}>
                         {getDifficultyIcon(milestone.difficulty)} {milestone.difficulty.toUpperCase()}
                       </div>
                     </div>
                   </div>
 
-                  <p className="text-slate-600 text-sm mb-6 leading-relaxed">{milestone.description}</p>
+                  {/* <p className="text-slate-600 text-sm mb-6 leading-relaxed">{milestone.description}</p> */}
 
                   {/* Learning Objectives */}
-                  <div className="mb-6">
-                    <h5 className="text-sm font-bold text-slate-700 mb-3 flex items-center space-x-2">
+                  {/* <div className="mb-6">
+                    <h5 className="text-sm font-bold text-slate-700 mt-2 mb-1 flex items-center space-x-2">
                       <Target className="w-4 h-4 text-blue-500" />
                       <span>Learning Objectives</span>
                     </h5>
@@ -525,18 +520,18 @@ const CourseDetail: React.FC = () => {
                         </div>
                       ))}
                     </div>
-                  </div>
+                  </div> */}
 
                   {/* Stats */}
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center space-x-4 text-sm text-slate-600">
                       <div className="flex items-center space-x-1">
-                        <Clock className="w-4 h-4" />
-                        <span>{milestone.estimatedHours}h</span>
+                        <Clock className="w-3 h-3" />
+                        <span className="text-xs">{milestone.estimatedHours}h</span>
                       </div>
                       <div className="flex items-center space-x-1">
-                        <Calendar className="w-4 h-4" />
-                        <span>{new Date(milestone.date).toLocaleDateString()}</span>
+                        <Calendar className="w-3 h-3" />
+                        <span className="text-xs">{new Date(milestone.date).toLocaleDateString()}</span>
                       </div>
                     </div>
                     {milestone.completed && milestone.score && (
@@ -553,37 +548,37 @@ const CourseDetail: React.FC = () => {
                       <div className="space-y-3">
                         <button
                           onClick={() => navigate(`/app/courses/${encodeURIComponent(decodedSubject)}/theory/${encodeURIComponent(milestone.topic)}`)}
-                          className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-2xl font-semibold hover:from-green-600 hover:to-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center space-x-2"
+                          className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white px-5 py-2 rounded-2xl font-semibold hover:from-green-600 hover:to-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center space-x-2"
                         >
-                          <Eye className="w-5 h-5" />
-                          <span>Review Content</span>
+                          <Eye className="w-3 h-3" />
+                          <span className='text-sm'>Review Content</span>
                         </button>
                         <button
                           onClick={() => navigate(`/app/courses/${encodeURIComponent(decodedSubject)}/theory-quiz/${encodeURIComponent(milestone.topic)}`, { 
                             state: { initialSubject: decodedSubject, initialTopic: milestone.topic }
                           })}
-                          className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-2xl font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center space-x-2"
+                          className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-5 py-2 rounded-2xl font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center space-x-2"
                         >
-                          <BarChart3 className="w-5 h-5" />
-                          <span>Re-evaluate</span>
+                          <BarChart3 className="w-3 h-3" />
+                          <span className='text-sm'>Re-evaluate</span>
                         </button>
                       </div>
                     ) : (
                       <div className="space-y-3">
                         <button
                           onClick={() => navigate(`/app/courses/${encodeURIComponent(decodedSubject)}/theory/${encodeURIComponent(milestone.topic)}`)}
-                          className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-2xl font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center space-x-2"
+                          className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-5 py-2 rounded-2xl font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center space-x-2"
                         >
-                          <Play className="w-5 h-5" /><span>Start Learning</span>
+                          <Play className="w-3 h-3" /><span className='text-sm'>Start Learning</span>
                         </button>
                         <button
                           onClick={() => navigate('/app/weekly-tracker', { 
                             state: { initialSubject: decodedSubject, initialTopic: milestone.topic }
                           })}
-                          className="w-full border-2 border-blue-500 text-blue-600 px-6 py-3 rounded-2xl font-semibold hover:bg-blue-50 transition-all duration-300 hover:shadow-lg transform hover:scale-105 flex items-center justify-center space-x-2"
+                          className="w-full border-2 border-blue-500 text-blue-600 px-5 py-2 rounded-2xl font-semibold hover:bg-blue-50 transition-all duration-300 hover:shadow-lg transform hover:scale-105 flex items-center justify-center space-x-2"
                         >
-                          <Zap className="w-5 h-5" />
-                          <span>Quick Assessment</span>
+                          <Zap className="w-3 h-3" />
+                          <span className='text-sm'>Quick Assessment</span>
                         </button>
                       </div>
                     )}
