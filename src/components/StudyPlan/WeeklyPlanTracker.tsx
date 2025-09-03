@@ -663,7 +663,7 @@ const WeeklyPlanTracker: React.FC = () => {
             disabled={userAnswers[currentQuestionIndex] === -1}
             className="flex items-center space-x-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white max-px-4 px-6 py-3 rounded-2xl font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-105"
           >
-            <span className='max-[350px]:text-sm'>{currentQuestionIndex === questions.length - 1 ? 'Finish Assessment' : 'Next'}</span>
+            <span className='max-text-sm'>{currentQuestionIndex === questions.length - 1 ? 'Finish Assessment' : 'Next'}</span>
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
