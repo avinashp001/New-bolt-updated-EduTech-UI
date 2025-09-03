@@ -201,7 +201,7 @@ useEffect(() => {
     'SSC CGL': ['Quantitative Aptitude', 'English Language', 'General Intelligence & Reasoning', 'General Awareness', 'Statistics', 'Finance & Accounts'],
     'Banking (SBI PO/Clerk)': ['Quantitative Aptitude', 'Reasoning Ability', 'English Language', 'General Awareness', 'Computer Knowledge', 'Marketing', 'Management'],
     'JEE Main/Advanced': ['Physics', 'Chemistry', 'Mathematics'],
-    'NEET': ['Physics', 'Chemistry', 'Biology (Botany)', 'Biology (Zoology)'],
+    'NEET': ['Physics', 'Chemistry', 'Biology', 'Biology'],
     'CAT': ['Quantitative Ability', 'Verbal Ability & Reading Comprehension', 'Data Interpretation & Logical Reasoning'],
     'GATE': ['Engineering Mathematics', 'General Aptitude', 'Technical Subject', 'Previous Year Papers'],
     'Board Exams (Class 12)': ['Mathematics', 'Physics', 'Chemistry', 'Biology', 'English', 'Computer Science', 'Economics', 'Accountancy'],
