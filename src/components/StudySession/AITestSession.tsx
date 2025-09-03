@@ -806,7 +806,9 @@ const AITestSession: React.FC = () => {
         </div>
       </div>
       {showRetryPopup && (
-  <RetryPopup 
+  <RetryPopup
+    isOpen={showRetryPopup}
+    title="Failed to Generate Theory"
     message={error} 
     onRetry={() => {
       setShowRetryPopup(false);
