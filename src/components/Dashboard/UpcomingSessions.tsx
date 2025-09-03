@@ -200,7 +200,7 @@ const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({
                     <Target className="w-4 h-4 text-white" />
                   </div>
                 ) : (
-                  <button className="w-8 h-8 text-xs bg-green-500 rounded-lg flex items-center justify-center hover:bg-blue-700 transition-colors">
+                  <button className="w-10 h-6 text-xs bg-green-500 rounded-lg flex items-center justify-center hover:bg-blue-700 transition-colors">
                     <span className="w-6 h-4 text-white ml-0.5" 
                       onClick={(e) => {
                     e.stopPropagation();
