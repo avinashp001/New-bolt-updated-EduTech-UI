@@ -140,8 +140,8 @@ const LearningOverview: React.FC<LearningOverviewProps> = ({
             <Area
               type="monotone"
               dataKey="points"
-              stroke="f59e0b"
-              fill="f59e0b"
+              stroke="#f59e0b"
+              fill="#f59e0b"
               fillOpacity={0.2}
               />
             <XAxis 
