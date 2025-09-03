@@ -354,10 +354,14 @@ useEffect(() => {
 
     setShowExistingSchedule(false); // Hide existing schedule when new one is generated
   } catch (error) {
-    console.error("Error generating schedule:", error);
-    alert("Error generating schedule. Please try again.");
+    openError(
+      "Schedule Generation Failed",
+      "Unexpected error occurred. Please try again.",
+      generateDetailedSchedule
+    );
   } finally {
     setIsGenerating(false);
+    setIsGeneratingSchedule(false); // Stop loading
   }
 };
 
