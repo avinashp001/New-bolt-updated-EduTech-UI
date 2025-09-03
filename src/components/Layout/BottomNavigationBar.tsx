@@ -41,7 +41,7 @@ const BottomNavigationBar: React.FC = () => {
             <button
               key={item.id}
               onClick={() => navigate(item.path)}
-              className="flex flex-col items-center justify-center flex-1 h-full text-sm font-medium"
+              className="flex flex-col items-center justify-center flex-1 h-full text-xs font-medium"
               aria-label={item.label}
             >
               {/* Icon: use gradient stroke when active; otherwise inherit currentColor */}
