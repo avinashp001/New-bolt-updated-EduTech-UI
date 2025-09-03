@@ -56,7 +56,7 @@ const RecentCourses: React.FC<RecentCoursesProps> = ({ progressReports, studySes
 
   if (recentSubjects.length === 0) {
     return (
-      <div className="bg-white/90 backdrop-blur-sm border border-white/20 shadow-xl rounded-2xl p-4">
+      <div className="bg-white/90 backdrop-blur-sm border border-white/20 shadow-xl rounded-2xl max-[400px]:p-3 p-6">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-xl font-bold text-slate-800">Recent Courses</h3>
           <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
