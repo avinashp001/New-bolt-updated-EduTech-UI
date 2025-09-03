@@ -451,7 +451,7 @@ const Footer: React.FC = () => {
           </div>
           
           {/* Additional Legal & Compliance */}
-          <div className="mt-6 pt-6 border-t border-slate-800">
+          <div className="max-[600px]:mb-4 mt-6 pt-6 border-t border-slate-800">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-slate-500">
               <div>
                 <p className="mb-2">
