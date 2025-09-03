@@ -800,6 +800,17 @@ const AITestSession: React.FC = () => {
           </div>
         </div>
       </div>
+      {showRetryPopup && (
+  <RetryPopup 
+    message={error} 
+    onRetry={() => {
+      setShowRetryPopup(false);
+      resetTest(); // optional: reset to upload phase
+    }} 
+    onClose={() => setShowRetryPopup(false)} 
+  />
+)}
+
     </div>
   );
 };
