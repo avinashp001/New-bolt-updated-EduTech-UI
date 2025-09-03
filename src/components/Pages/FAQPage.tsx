@@ -367,7 +367,7 @@ const FAQPage: React.FC = () => {
                 
                 {openFAQ === faq.id && (
                   <div className="px-6 pb-6">
-                    <div className="pl-12 pr-4 max-[400px]:p-2">
+                    <div className="pl-12 pr-4 max-[400px]:p-1">
                       <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-200">
                         <p className="text-slate-700 leading-relaxed">{faq.answer}</p>
                       </div>
