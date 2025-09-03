@@ -81,7 +81,7 @@ const RealTimeAnalytics: React.FC<RealTimeAnalyticsProps> = ({ userId }) => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="p-3 bg-gradient-to-r from-blue-600 to-purple-700 p-6 rounded-2xl text-white">
+      <div className="m-3 bg-gradient-to-r from-blue-600 to-purple-700 p-6 rounded-2xl text-white">
         <h2 className="text-2xl font-bold mb-2">Real-Time Analytics Dashboard</h2>
         <p className="text-blue-100">Track your study progress with detailed insights and performance metrics</p>
       </div>
