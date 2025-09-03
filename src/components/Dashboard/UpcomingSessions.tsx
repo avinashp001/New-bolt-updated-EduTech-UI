@@ -102,7 +102,7 @@ const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({
   Chemistry: FlaskConical,
   Biology: Dna,
   English: BookOpen,
-  'Quantitative Aptitude': Calculator, // pick suitable
+  'Quantitative Aptitude': DraftingCompass, // pick suitable
   Reasoning: Brain,
   'General Knowledge': Lightbulb,
 };
