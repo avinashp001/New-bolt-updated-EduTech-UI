@@ -46,7 +46,7 @@ const BottomNavigationBar: React.FC = () => {
             >
               {/* Icon: use gradient stroke when active; otherwise inherit currentColor */}
               <item.icon
-                className=" w-6 h-6 max-[450px]:w-5 max-[450px]:h-5 mb-1 transition-transform duration-200"
+                className="w-6 h-6 max-[450px]:w-5 max-[450px]:h-5 mb-1 transition-transform duration-200"
                 stroke={active ? 'url(#navGradient)' : '#d1d1d1'}
                 // optional subtle emphasis on active
                 style={{ transform: active ? 'scale(1.05)' : undefined }}
