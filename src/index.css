@@ -561,7 +561,12 @@ html {
   .max-flex-col {
     flex-direction: column ! important; /* switch to column */
   }
+  .max-p-4{
+    padding: 1rem;
+  }
 }
+
+
 
 /* .markdown-body td p,
 .markdown-body th p {
