@@ -205,7 +205,7 @@ const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({
                       onClick={(e) => {
                     e.stopPropagation();
                     navigate(`/app/courses/${encodeURIComponent(session.subject)}/theory/${encodeURIComponent(session.topic)}`);
-                  }}/>
+                  }}>Join</span>
                   </button>
                 )}
               </div>
