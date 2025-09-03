@@ -41,7 +41,7 @@ const PerformanceRing: React.FC<PerformanceRingProps> = ({
             r={radius}
             fill="none"
              stroke="#e5e7eb"
-            strokeWidth="9"
+            strokeWidth="10"
           />
 
 
@@ -62,7 +62,7 @@ const PerformanceRing: React.FC<PerformanceRingProps> = ({
     r={radius}
     fill="none"
     stroke="url(#progressGradient)"
-    strokeWidth="9"
+    strokeWidth="10"
     strokeDasharray={circumference}
     strokeDashoffset={progressOffset}
     strokeLinecap="round"
