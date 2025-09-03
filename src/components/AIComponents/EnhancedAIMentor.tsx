@@ -1189,7 +1189,7 @@ Would you like me to create a personalized study plan based on this material or 
 
                     {/* Message Bubble */}
                     <div
-                      className={`relative p-4 max-[400px]:max-w-[100%] mt-2 dark:border-gray-500 rounded-2xl shadow-lg transition-all duration-300 hover:shadow-xl ${
+                      className={`relative p-4 max-[400px]:max-w-[100%] mt-2 dark:border-gray-500 rounded-2xl shadow-lg transition-all duration-300 hover:shadow-lg ${
                         message.role === 'user'
                           ? 'bg-gradient-to-r dark:from-gray-600 dark:to-gray-600 from-blue-500 to-indigo-600 text-white'
                           : message.type === 'insight'
