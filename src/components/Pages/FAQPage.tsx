@@ -317,7 +317,22 @@ const FAQPage: React.FC = () => {
               <a href="#faq-section">
                 <button
                   key={category.id}
-                  onClick={() => setActiveCategory(category.id)}
+                  onClick={() => {
+    // 1️⃣ Update active category state
+    setActiveCategory(category.id);
+
+    // 2️⃣ Smooth scroll to the section with margin
+    const section = document.getElementById("faq-section");
+    if (section) {
+      const yOffset = -100; // 👈 leave 100px space above
+      const y =
+        section.getBoundingClientRect().top +
+        window.pageYOffset +
+        yOffset;
+
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
+  }}
                   className={`p-4 rounded-xl transition-all duration-300 ${
                     activeCategory === category.id
                       ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg scale-105'
