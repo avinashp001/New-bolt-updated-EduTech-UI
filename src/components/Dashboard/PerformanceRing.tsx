@@ -49,9 +49,9 @@ const PerformanceRing: React.FC<PerformanceRingProps> = ({
   <defs>
     <linearGradient id="progressGradient">
       <stop offset="0%" stopColor="#f97316" />
-      <stop offset="50%" stopColor="#f97316" />
+      <stop offset="25%" stopColor="#f97316" />
       {/* Remaining 75% Green */}
-      <stop offset="50%" stopColor="#67b037" />
+      <stop offset="75%" stopColor="#67b037" />
       <stop offset="100%" stopColor="#67b037" />
     </linearGradient>
   </defs>
@@ -66,7 +66,7 @@ const PerformanceRing: React.FC<PerformanceRingProps> = ({
     fill="none"
     stroke="url(#progressGradient)"
     strokeWidth="10"
-    strokeDasharray={2 * Math.PI * 90}
+    strokeDasharray={circumference}
     strokeDashoffset={progressOffset}
     strokeLinecap="round"
     className="transition-all duration-1000 ease-out"
