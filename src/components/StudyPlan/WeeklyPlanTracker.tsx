@@ -645,7 +645,7 @@ const WeeklyPlanTracker: React.FC = () => {
           <div className="flex items-center space-x-3">
             <div className="text-center">
               <div className="text-sm dark:text-slate-200 text-slate-600 mb-1">Progress</div>
-              <div className="text-lg font-bold dark:text-green-400 text-slate-800 max-[350px]:text-sm">
+              <div className="text-lg font-bold dark:text-green-400 text-slate-800 max-text-sm">
                 {userAnswers.filter(a => a !== -1).length} / {questions.length}
               </div>
             </div>
