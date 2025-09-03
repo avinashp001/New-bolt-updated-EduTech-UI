@@ -805,7 +805,7 @@ const WeeklyPlanTracker: React.FC = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
+    <div className="max-w-7xl mx-auto p-3 space-y-8">
       {/* Enhanced Header */}
       <div className="relative overflow-hidden bg-gradient-to-br dark:from-slate-800 dark:via-gray-800 dark:to-slate-900 from-cyan-800 via-sky-800 to-blue-900 p-5 rounded-3xl text-white shadow-2xl">
         <div className="absolute inset-0 bg-black/10"></div>
