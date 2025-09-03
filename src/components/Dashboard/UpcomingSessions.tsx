@@ -186,9 +186,9 @@ const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({
                   <div className="text-xs text-slate-600">
                     {session.topic.length > 20 ? session.topic.substring(0, 20) + '...' : session.topic}
                   </div>
-                  <div className="flex text-xs items-center space-x-2 mt-1">
+                  <div className="flex items-center space-x-2 mt-1">
                     <Clock className="w-3 h-3 text-slate-500" />
-                    <span className="text-xs text-slate-500">{session.timeSlot}</span>
+                    <span className="text-xxs text-slate-500">{session.timeSlot}</span>
                     <span className="text-xs text-slate-500">• {session.duration}</span>
                   </div>
                 </div>
