@@ -34,6 +34,7 @@ import OnboardingSetup from './components/Onboarding/OnboardingSetup'
 import RootRedirector from './components/Common/RootRedirector';
 import ExamCategoryPage from './components/Pages/ExamCategoryPage';
 import TheoryGeneratorPage from './components/Theory/TheoryGeneratorPage';
+import ScrollToTop from './components/Common/ScrollToTop';
 
 // Auth Layout Component - handles authentication checks
 const AuthLayout: React.FC = () => {
@@ -67,7 +68,12 @@ const AuthLayout: React.FC = () => {
   }
   
   console.log('User authenticated and onboarded, rendering main app');
-  return <App />;
+   return (
+    <>
+      <ScrollToTop /> 
+      <App />
+    </>
+  );
 };
 
 // Dashboard wrapper to pass userId
