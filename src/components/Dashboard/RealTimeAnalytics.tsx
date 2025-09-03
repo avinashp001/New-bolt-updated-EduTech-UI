@@ -232,7 +232,7 @@ const RealTimeAnalytics: React.FC<RealTimeAnalyticsProps> = ({ userId }) => {
       </div>
 
       {/* Charts Row 2 */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+      <div className="p-3 grid grid-cols-1 xl:grid-cols-2 gap-6">
         {/* Subject Time Distribution */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
           <h3 className="text-base lg:text-lg font-semibold text-slate-800 mb-4">Time Distribution by Subject</h3>
