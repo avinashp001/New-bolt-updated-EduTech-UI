@@ -532,7 +532,7 @@ const CourseList: React.FC = () => {
 
 
       {/* Learning Insights Panel */}
-      <div className="bg-gradient-to-r mt-8 from-slate-900 via-slate-800 to-slate-900 rounded-3xl p-8 text-white shadow-2xl">
+      <div className="bg-gradient-to-r mt-8 from-slate-900 via-slate-800 to-slate-900 rounded-3xl p-8 min-p-4 text-white shadow-2xl">
         <div className="flex items-center space-x-4 mb-6">
           <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-purple-500 rounded-xl flex items-center justify-center">
             <Zap className="w-6 h-6 text-white" />
