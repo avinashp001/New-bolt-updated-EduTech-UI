@@ -431,7 +431,7 @@ const CourseDetail: React.FC = () => {
           </div>
         </div>
 
-        <div className="p-8 min-[350px]:p-4 space-y-8">
+        <div className="p-8 min-p-4 space-y-8">
           {/* Week Progress */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
