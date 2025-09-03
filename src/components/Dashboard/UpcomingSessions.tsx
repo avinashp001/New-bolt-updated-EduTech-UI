@@ -1,5 +1,5 @@
 import React from 'react';
-import { MoreHorizontal, Play, Clock, BookOpen, Target, Calendar, AlertCircle, Globe, History, HandCoins, Landmark, DraftingCompass, Brain, Atom, Dna, FlaskConical } from 'lucide-react';
+import { MoreHorizontal, Play, Clock, BookOpen, Target, Calendar, AlertCircle, Globe, History, HandCoins, Landmark, DraftingCompass, Brain, Atom, Dna, FlaskConical, Lightbulb } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface UpcomingSessionsProps {
