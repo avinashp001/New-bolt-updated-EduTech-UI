@@ -8,6 +8,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useProgress } from '../../hooks/useProgress';
 import { useDetailedSchedule } from '../../hooks/useDetailedSchedule';
 import { supabase } from '../../lib/supabase';
+import RetryPopup from '../Common/RetryPopup';
 
 
 interface Question {
