@@ -1328,7 +1328,7 @@ Would you like me to create a personalized study plan based on this material or 
                       onChange={(e) => setCurrentMessage(e.target.value)}
                       onKeyPress={handleKeyPress}
                       placeholder="Ask your mentor anything about your studies..."
-                      className="w-full p-4 border-2 border-slate-200 rounded-2xl focus:ring-4 focus:ring-green-500/20 focus:border-green-500 transition-all duration-300 resize-none text-slate-800 placeholder-slate-400"
+                      className="max-[400px]:text-xs text-sm w-full p-4 border-2 border-slate-200 rounded-2xl focus:ring-4 focus:ring-green-500/20 focus:border-green-500 transition-all duration-300 resize-none text-slate-800 placeholder-slate-400"
                       rows={2}
                       disabled={isProcessing || isSendingMessage || isAnalyzing} // Disable if processing, sending, or analyzing
                     />
