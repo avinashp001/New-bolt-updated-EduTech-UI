@@ -557,6 +557,12 @@ html {
   @apply bg-slate-100 dark:bg-slate-700;
 }
 
+@media (max-width: 450px) {
+  .max-[450px]:flex-col {
+    flex-direction: column; /* switch to column */
+    gap: 1.5rem; /* space-y-6 equivalent */
+  }
+
 /* .markdown-body td p,
 .markdown-body th p {
   line-height: normal !important; 
