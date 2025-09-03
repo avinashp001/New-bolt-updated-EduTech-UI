@@ -406,7 +406,7 @@ const FAQPage: React.FC = () => {
             <div className="bg-slate-700/50 rounded-2xl p-6 border border-slate-600">
               <Brain className="w-8 h-8 text-blue-400 mx-auto mb-4" />
               <h3 className="font-bold mb-2">Mentor Chat</h3>
-              <p className="text-slate-300 text-sm mb-4">Get instant answers from our AI mentor</p>
+              <p className="text-slate-300 text-sm mb-4">Get instant answers from our expert mentor</p>
               <a
                 href="/app/ai-mentor"
                 className="inline-flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
