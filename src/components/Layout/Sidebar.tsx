@@ -40,11 +40,12 @@ const Sidebar: React.FC<SidebarProps> = ({
     { id: 'analytics', icon: BarChart3, label: 'Analytics', path: '/app/analytics' },
     { id: 'ai-mentor', icon: Brain, label: 'AI Mentor', path: '/app/ai-mentor' },
     { id: 'settings', icon: Settings, label: 'Settings', path: '/app/settings' },
+    { id: 'logout', icon: LogOut, label: 'Log Out', path: null },
   ];
 
   const bottomItems = [
     { id: 'support', icon: HelpCircle, label: 'Help & Support', path: '/faq' },
-    { id: 'logout', icon: LogOut, label: 'Log Out', path: null },
+    
   ];
 
   const handleItemClick = (item: any) => {
