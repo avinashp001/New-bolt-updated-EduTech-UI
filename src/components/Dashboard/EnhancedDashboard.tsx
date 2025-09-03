@@ -198,7 +198,7 @@ const EnhancedDashboard: React.FC = () => {
         />
         
         {/* Welcome Section */}
-        <div className="bg-white/90 backdrop-blur-sm border border-white/20 shadow-xl rounded-2xl p-6">
+        {/* <div className="bg-white/90 backdrop-blur-sm border border-white/20 shadow-xl rounded-2xl p-6">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between space-y-4 lg:space-y-0">
             <div className="flex space-x-4">
               <div className="w-16 h-10 mt-3 bg-gradient-to-r from-sky-800 to-emerald-900 rounded-xl flex items-center justify-center">
@@ -239,7 +239,7 @@ const EnhancedDashboard: React.FC = () => {
             </div>
           </div>
 
-        </div>
+        </div> */}
 
         {/* Main Analytics Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
