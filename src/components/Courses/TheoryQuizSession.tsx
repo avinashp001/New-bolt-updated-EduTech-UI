@@ -2406,7 +2406,7 @@ const TheoryQuizSession: React.FC = () => {
           </div>
                   {/* Detailed Question Review */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-200">
-          <h3 className="text-lg font-semibold text-slate-800 mb-6 flex items-center space-x-2">
+          <h3 className="text-lg ml-2 mt-2 font-semibold text-slate-800 mb-6 flex items-center space-x-2">
             <BookOpen className="w-5 h-5 text-blue-600" />
             <span>Question-by-Question Review</span>
           </h3>
