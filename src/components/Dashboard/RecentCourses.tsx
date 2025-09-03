@@ -80,7 +80,7 @@ const RecentCourses: React.FC<RecentCoursesProps> = ({ progressReports, studySes
   }
 
   return (
-    <div className="bg-white/90 backdrop-blur-sm border border-white/20 shadow-xl rounded-2xl p-6">
+    <div className="bg-white/90 backdrop-blur-sm border border-white/20 shadow-xl rounded-2xl p-6 max-[400px]:p-4">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h3 className="text-xl font-bold text-slate-800">Recent Courses</h3>
