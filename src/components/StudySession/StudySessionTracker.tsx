@@ -112,7 +112,7 @@ const StudySessionTracker: React.FC = () => {
   });
 
   return (
-    <div className="max-w-4xl mx-auto space-y-4 lg:space-y-6">
+    <div className="max-w-4xl max-p-2 mx-auto space-y-4 lg:space-y-6">
       {/* Success Message */}
       {showSuccess && (
         <div className="bg-green-50 border border-green-200 rounded-xl p-3 lg:p-4 flex items-center space-x-3">
