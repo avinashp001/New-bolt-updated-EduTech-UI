@@ -27,6 +27,20 @@ import SEOHead from '../SEO/SEOHead';
 const MyMap = () => {
   const position: [number, number] = [28.6139, 77.2090]; // New Delhi coords
 
+  return (
+    <MapContainer center={position} zoom={13} className="h-full w-full">
+      <TileLayer
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        attribution='&copy; OpenStreetMap contributors'
+      />
+      <Marker position={position}>
+        <Popup>123 Education Street, New Delhi</Popup>
+      </Marker>
+    </MapContainer>
+  );
+}; // ✅ CLOSE this before ContactPage
+
+
 const ContactPage: React.FC = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -545,15 +559,7 @@ const ContactPage: React.FC = () => {
                   </div>
                 </div> */}
                <div className="bg-slate-100 rounded-2xl h-64 mb-6 overflow-hidden">
-      <MapContainer center={position} zoom={13} className="h-full w-full">
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; OpenStreetMap contributors'
-        />
-        <Marker position={position}>
-          <Popup>123 Education Street, New Delhi</Popup>
-        </Marker>
-      </MapContainer>
+      <MyMap/>
     </div>
                 <div className="space-y-4">
                   <div className="flex items-center space-x-3">
