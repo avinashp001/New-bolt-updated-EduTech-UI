@@ -2,6 +2,8 @@ import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 import { Clock, Activity, Target, TrendingUp, BookOpen, Award } from 'lucide-react';
 import { useProgress } from '../../hooks/useProgress';
+import { useDetailedSchedule } from '../../hooks/useDetailedSchedule';
+
 
 interface RealTimeAnalyticsProps {
   userId: string;
