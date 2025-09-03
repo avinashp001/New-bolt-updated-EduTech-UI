@@ -1,5 +1,7 @@
 
 import React, { useState } from 'react';
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
 import { 
   Mail, 
   Phone, 
@@ -20,8 +22,7 @@ import {
   Lightbulb
 } from 'lucide-react';
 import SEOHead from '../SEO/SEOHead';
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
+
 
 const MyMap = () => {
   const position: [number, number] = [28.6139, 77.2090]; // New Delhi coords
