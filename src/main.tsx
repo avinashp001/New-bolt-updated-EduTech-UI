@@ -8,6 +8,7 @@ import { NotificationProvider } from './context/NotificationContext';
 import ErrorBoundary from './components/Common/ErrorBoundary';
 import { router } from './router';
 import './index.css';
+import 'leaflet/dist/leaflet.css';
 import 'katex/dist/katex.min.css';
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
