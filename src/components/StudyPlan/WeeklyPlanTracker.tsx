@@ -1226,12 +1226,12 @@ const WeeklyPlanTracker: React.FC = () => {
               className="max-px-2 max-py-1 flex items-center space-x-2 bg-gradient-to-r from-slate-500 to-gray-600 text-white px-6 py-3 rounded-2xl font-semibold hover:from-slate-600 hover:to-gray-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-105"
             >
               <ChevronLeft className="w-5 h-5" />
-              <span className="max-[400px]:text-xs">Previous Week</span>
+              <span className="max-text-xs">Previous Week</span>
             </button>
             
             <div className="text-center">
-              <div className="max-[400px]:text-lg text-3xl font-bold text-slate-800 mb-2">Week {currentWeek}</div>
-              <div className="max-[400px]:text-xs text-slate-600">
+              <div className="max-text-lg text-3xl font-bold text-slate-800 mb-2">Week {currentWeek}</div>
+              <div className="max-text-xs text-slate-600">
                 {getWeekProgress(currentWeek).completed} of {getWeekProgress(currentWeek).total} subjects completed
               </div>
               <div className="mt-2 max-[400px]:w-24 w-32 bg-slate-200 rounded-full h-2 mx-auto">
