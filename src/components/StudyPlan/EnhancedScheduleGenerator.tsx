@@ -242,7 +242,11 @@ useEffect(() => {
 
   const generateDetailedSchedule = async () => {
   if (!studentProfile.examType || studentProfile.subjects.length === 0 || !studentProfile.examDate || !user) {
-    alert('Please fill in all required fields.');
+    // alert('Please fill in all required fields.');
+    openError(
+      "Missing Information",
+      "Please fill in all required fields before generating your schedule."
+    );
     return;
   }
 
