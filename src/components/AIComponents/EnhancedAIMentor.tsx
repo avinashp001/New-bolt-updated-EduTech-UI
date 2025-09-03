@@ -1256,7 +1256,7 @@ Would you like me to create a personalized study plan based on this material or 
               {/* Typing Indicator */}
               {isAnalyzing && (
                 <div className="flex justify-start mr-8"
-                  style={{marginRight: "1rem"}}>
+                  style={{marginRight: ".8rem"}}>
                   <div className="flex items-start space-x-3">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-600 flex items-center justify-center shadow-lg">
                       <Brain className="w-5 h-5 text-white" />
@@ -1273,7 +1273,7 @@ Would you like me to create a personalized study plan based on this material or 
 
               {isTyping && (
                 <div className="flex justify-start mr-8"
-                  style={{marginRight: "1rem"}}>
+                  style={{marginRight: ".8rem"}}>
                   <div className="flex items-start space-x-3">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-r from-green-500 to-emerald-600 flex items-center justify-center shadow-lg">
                       <Bot className="w-5 h-5 text-white" />
