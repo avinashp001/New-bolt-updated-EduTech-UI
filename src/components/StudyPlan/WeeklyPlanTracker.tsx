@@ -1249,7 +1249,7 @@ const WeeklyPlanTracker: React.FC = () => {
                 initializeWeeklyAssessments(nextWeek);
               }}
               disabled={currentWeek >= studyPlan.total_duration_weeks}
-              className="max-[400px]:px-3 max-[400px]:py-1 flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-2xl font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-105"
+              className="max-px-3 max-py-1 flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-2xl font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-105"
             >
               <span className="max-[400px]:text-xs">Next Week</span>
               <ChevronRight className="w-5 h-5" />
