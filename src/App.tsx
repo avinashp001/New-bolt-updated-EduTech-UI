@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 import { useAuth } from './hooks/useAuth';
 import Sidebar from './components/Layout/Sidebar';
+import BottomNavigationBar from './components/Layout/BottomNavigationBar';
 import Footer from './components/Layout/Footer';
 import NavigationBreadcrumb from './components/Common/NavigationBreadcrumb';
 
@@ -56,6 +57,7 @@ function App() {
       <div className={`${sidebarOpen ? 'lg:ml-64' : 'lg:ml-0'} transition-all duration-300`}>
         <Footer />
       </div>
+      <BottomNavigationBar />
     </div>
   );
 }
