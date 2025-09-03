@@ -314,12 +314,10 @@ const FAQPage: React.FC = () => {
             <h2 className="text-xl font-bold text-slate-800 mb-6 text-center">Browse by Category</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               {categories.map((category) => (
+              <a href="faq-section">
                 <button
                   key={category.id}
-                  onClick={() => {
-                    document.getElementById("about-section")?.scrollIntoView({ behavior: "smooth" });
-                    setActiveCategory(category.id)
-                  }}
+                  onClick={() => setActiveCategory(category.id)}
                   className={`p-4 rounded-xl transition-all duration-300 ${
                     activeCategory === category.id
                       ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg scale-105'
@@ -330,6 +328,7 @@ const FAQPage: React.FC = () => {
                   <div className="font-medium text-sm">{category.name}</div>
                   <div className="text-xs opacity-75 mt-1">{category.count} questions</div>
                 </button>
+                </a>
               ))}
             </div>
           </div>
