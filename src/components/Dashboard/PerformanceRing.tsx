@@ -89,7 +89,7 @@ const PerformanceRing: React.FC<PerformanceRingProps> = ({
         {/* Center content */}
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center">
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-2">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-2">
               <Trophy className="w-4 h-4 text-white" />
             </div>
             
@@ -119,7 +119,7 @@ const PerformanceRing: React.FC<PerformanceRingProps> = ({
       <div className="space-y-3">
         <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-slate-950 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
               <Target className="w-4 h-4 text-white" />
             </div>
             <div>
