@@ -8,7 +8,6 @@ import { robustParseWithRetry } from "../../utils/jsonParser";
 import RetryPopup from '../Common/RetryPopup';
 import LoadingOverlay from '../Common/LoadingOverlay';
 
-
 interface StudentProfile {
   currentLevel: 'beginner' | 'intermediate' | 'advanced';
   weakSubjects: string[];
