@@ -79,7 +79,7 @@ const EnhancedDashboard: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-        <div className="max-w-7xl mx-auto max-[400px]:p-4 p-6">
+        <div className="max-w-7xl mx-auto p-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {[1, 2, 3, 4, 5, 6].map(i => (
               <div key={i} className="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-sm animate-pulse">
