@@ -327,9 +327,12 @@ useEffect(() => {
         .single();
 
       if (scheduleError) {
-        console.error("Error saving detailed schedule:", scheduleError);
-      } else {
-        console.log("✅ New schedule saved:", newSchedule);
+        // console.error("Error saving detailed schedule:", scheduleError);
+      openError(
+          "Save Failed",
+          "We generated your schedule but couldn't save it. Try again.",
+          () => generateDetailedSchedule()
+        );
       }
 
       // Also save/update the study plan
