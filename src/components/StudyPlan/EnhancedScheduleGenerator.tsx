@@ -893,7 +893,7 @@ useEffect(() => {
   // Show existing schedule if available
   if (showExistingSchedule && existingSchedule && existingSchedule.length > 0) {
     return (
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-7xl p-2 mx-auto space-y-6">
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-6 rounded-2xl text-white">
           <div className="flex items-center space-x-3 mb-4">
