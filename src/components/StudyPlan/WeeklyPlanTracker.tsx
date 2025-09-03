@@ -503,7 +503,7 @@ const WeeklyPlanTracker: React.FC = () => {
   if (!studyPlan) {
     return (
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white p-8 rounded-3xl shadow-xl border border-slate-200 text-center">
+        <div className="bg-white p-6 rounded-3xl shadow-xl border border-slate-200 text-center">
           <div className="w-24 h-24 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <Calendar className="w-12 h-12 text-blue-600" />
           </div>
@@ -532,35 +532,35 @@ const WeeklyPlanTracker: React.FC = () => {
     return (
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Enhanced Test Header */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 p-8 rounded-3xl text-white shadow-2xl">
+        <div className="relative overflow-hidden bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 p-3 rounded-3xl text-white shadow-2xl">
           <div className="absolute inset-0 bg-black/10"></div>
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-32 translate-x-32"></div>
           
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center space-x-4">
-                <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-                  <Brain className="w-8 h-8 text-white" />
+                <div className="w-14 h-7 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                  <Brain className="w-3 h-3 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-3xl font-bold">Week {currentWeek} Assessment</h2>
-                  <p className="text-purple-100 text-lg">Content-based evaluation for {activeSubject}</p>
+                  <h2 className="text-3xl max-[400px]:text-xl font-bold">Week {currentWeek} Assessment</h2>
+                  <p className="text-purple-100 max-[400px]:text-sm text-lg">Content-based evaluation for {activeSubject}</p>
                 </div>
               </div>
-              <div className="text-right">
-                <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4">
-                  <p className="text-purple-100 text-sm">Question {currentQuestionIndex + 1} of {questions.length}</p>
-                  <p className="text-white font-bold text-lg">{activeSubject}</p>
-                  <p className="text-purple-200 text-xs mt-1">📄 {fileName}</p>
+              <div className="text-left">
+                <div className="bg-white/20 backdrop-blur-sm rounded-xl p-2">
+                  <p className="text-purple-100 text-xs">Question {currentQuestionIndex + 1} of {questions.length}</p>
+                  <p className="text-white font-bold text-sm">{activeSubject}</p>
+                  <p className="text-purple-200 text-xs mt-1">{fileName}</p>
                 </div>
               </div>
             </div>
             
             {/* Enhanced Progress Bar */}
             <div className="relative">
-              <div className="w-full bg-purple-400/30 rounded-full h-4 overflow-hidden">
+              <div className="w-full bg-purple-400/30 rounded-full h-2 overflow-hidden">
                 <div 
-                  className="bg-gradient-to-r from-white to-purple-100 h-4 rounded-full transition-all duration-500 flex items-center justify-end pr-3"
+                  className="bg-gradient-to-r from-white to-purple-100 h-2 rounded-full transition-all duration-500 flex items-center justify-end pr-3"
                   style={{ width: `${progress}%` }}
                 >
                   <span className="text-purple-600 text-xs font-bold">{Math.round(progress)}%</span>
@@ -578,17 +578,17 @@ const WeeklyPlanTracker: React.FC = () => {
 
         {/* Enhanced Question Card */}
         <div className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
-          <div className="bg-gradient-to-r from-slate-50 to-gray-50 px-8 py-6 border-b border-slate-200">
+          <div className="bg-gradient-to-r from-slate-50 to-gray-50 px-4 py-3 border-b border-slate-200">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <BookOpen className="w-6 h-6 text-indigo-600" />
-                <span className="text-lg font-bold text-slate-800">{currentQuestion.topic}</span>
+                <span className="text-sm font-bold text-slate-800">{currentQuestion.topic}</span>
               </div>
               <div className="flex items-center space-x-3">
-                <div className="px-4 py-2 bg-indigo-100 text-indigo-800 rounded-full text-sm font-bold">
+                <div className="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-xs font-bold">
                   Question {currentQuestionIndex + 1}
                 </div>
-                <div className="px-4 py-2 bg-purple-100 text-purple-800 rounded-full text-sm font-bold">
+                <div className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-bold">
                   Content-Based
                 </div>
               </div>
@@ -596,17 +596,17 @@ const WeeklyPlanTracker: React.FC = () => {
           </div>
 
           <div className="p-8">
-            <h3 className="text-xl font-bold text-slate-800 leading-relaxed mb-8">
+            <h3 className="text-lg font-bold text-slate-800 leading-relaxed mb-6">
               {currentQuestion.question}
             </h3>
 
             {/* Enhanced Options */}
-            <div className="space-y-4">
+            <div className="space-y-2">
               {currentQuestion.options.map((option: string, index: number) => (
                 <button
                   key={index}
                   onClick={() => handleAnswerSelect(index)}
-                  className={`w-full p-6 text-left rounded-2xl border-2 transition-all duration-300 hover:shadow-lg ${
+                  className={`w-full p-4 text-left rounded-2xl border-2 transition-all duration-300 hover:shadow-lg ${
                     userAnswers[currentQuestionIndex] === index
                       ? 'border-indigo-500 bg-gradient-to-r from-indigo-50 to-purple-50 text-indigo-800 shadow-lg scale-105'
                       : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50 hover:scale-102'
@@ -636,23 +636,23 @@ const WeeklyPlanTracker: React.FC = () => {
           <button
             onClick={handlePreviousQuestion}
             disabled={currentQuestionIndex === 0}
-            className="flex items-center space-x-2 px-6 py-3 border-2 border-slate-300 text-slate-700 rounded-2xl font-semibold hover:bg-slate-50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center space-x-2 max-[350px]:px-3 px-6 py-3 border-2 border-slate-300 text-slate-700 rounded-2xl font-semibold hover:bg-slate-50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ChevronLeft className="w-5 h-5" />
-            <span>Previous</span>
+            <span className='max-[350px]:text-sm'>Previous</span>
           </button>
           
-          <div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-3">
             <div className="text-center">
-              <div className="text-sm text-slate-600 mb-1">Progress</div>
-              <div className="text-lg font-bold text-slate-800">
+              <div className="text-sm dark:text-slate-200 text-slate-600 mb-1">Progress</div>
+              <div className="text-lg font-bold dark:text-green-400 text-slate-800 max-[350px]:text-sm">
                 {userAnswers.filter(a => a !== -1).length} / {questions.length}
               </div>
             </div>
             <div className="w-px h-8 bg-slate-300"></div>
             <div className="text-center">
-              <div className="text-sm text-slate-600 mb-1">Time</div>
-              <div className="text-lg font-bold text-slate-800">
+              <div className="text-sm dark:text-slate-200 text-slate-600 mb-1">Time</div>
+              <div className="text-lg font-bold dark:text-slate-400 text-slate-800 max-[350px]:text-sm">
                 {testStartTime ? Math.floor((Date.now() - testStartTime.getTime()) / 1000 / 60) : 0}m
               </div>
             </div>
@@ -661,9 +661,9 @@ const WeeklyPlanTracker: React.FC = () => {
           <button
             onClick={handleNextQuestion}
             disabled={userAnswers[currentQuestionIndex] === -1}
-            className="flex items-center space-x-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-3 rounded-2xl font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-105"
+            className="flex items-center space-x-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white max-[350px]:px-4 px-6 py-3 rounded-2xl font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-105"
           >
-            <span>{currentQuestionIndex === questions.length - 1 ? 'Finish Assessment' : 'Next'}</span>
+            <span className='max-[350px]:text-sm'>{currentQuestionIndex === questions.length - 1 ? 'Finish Assessment' : 'Next'}</span>
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
@@ -807,35 +807,35 @@ const WeeklyPlanTracker: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto space-y-8">
       {/* Enhanced Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 p-8 rounded-3xl text-white shadow-2xl">
+      <div className="relative overflow-hidden bg-gradient-to-br dark:from-slate-800 dark:via-gray-800 dark:to-slate-900 from-cyan-800 via-sky-800 to-blue-900 p-5 rounded-3xl text-white shadow-2xl">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -translate-y-48 translate-x-48"></div>
         
         <div className="relative z-10">
           <div className="flex items-center space-x-4 mb-6">
-            <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-              <Calendar className="w-8 h-8 text-white" />
+            <div className="w-20 h-10 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+              <Calendar className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-3xl font-bold">Weekly Progress Tracker</h2>
-              <p className="text-blue-100 text-lg">
-                AI-powered weekly assessments for {studyPlan.exam_type} preparation
+              <h2 className="text-2xl font-bold">Weekly Progress Tracker</h2>
+              <p className="text-blue-100 text-sm">
+                Your weekly assessments for {studyPlan.exam_type} preparation
               </p>
             </div>
           </div>
           
-          <div className="grid grid-cols-3 gap-6">
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 text-center">
-              <div className="text-4xl font-bold mb-2">{animatedWeekStats.totalWeeks}</div>
-              <div className="text-blue-100 text-sm">Total Weeks</div>
+          <div className="grid max-[500px]:grid-cols-2 grid-cols-3 gap-6">
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl max-[400px]:p-4 p-6 text-center">
+              <div className="text-2xl font-bold mb-2">{animatedWeekStats.totalWeeks}</div>
+              <div className="text-blue-100 max-[400px]:text-xs text-sm">Total Weeks</div>
             </div>
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 text-center">
-              <div className="text-4xl font-bold mb-2">{animatedWeekStats.completedWeeks}</div>
-              <div className="text-blue-100 text-sm">Completed</div>
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl max-[400px]:p-4 p-6 text-center">
+              <div className="text-2xl font-bold mb-2">{animatedWeekStats.completedWeeks}</div>
+              <div className="text-blue-100 max-[400px]:text-xs text-sm">Completed</div>
             </div>
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 text-center">
-              <div className="text-4xl font-bold mb-2">{animatedWeekStats.currentProgress}%</div>
-              <div className="text-blue-100 text-sm">Progress</div>
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl max-[400px]:p-4 p-6 text-center">
+              <div className="text-2xl font-bold mb-2">{animatedWeekStats.currentProgress}%</div>
+              <div className="text-blue-100 max-[400px]:text-xs text-sm">Progress</div>
             </div>
           </div>
         </div>
@@ -852,7 +852,7 @@ const WeeklyPlanTracker: React.FC = () => {
           </div>
         </div>
 
-        <div className="p-8">
+        <div className="p-4">
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mb-8">
             {Array.from({ length: Math.min(8, studyPlan.total_duration_weeks) }, (_, index) => {
               const week = index + 1;
@@ -1029,7 +1029,7 @@ const WeeklyPlanTracker: React.FC = () => {
           </h3>
         </div>
         
-        <div className="p-8">
+        <div className="p-8 max-[450px]:p-6">
           {uploadingSubject && (
             <div className="mb-6 p-6 bg-gradient-to-r from-purple-50 to-indigo-50 border-2 border-purple-200 rounded-2xl">
               <div className="flex items-center justify-between">
@@ -1072,7 +1072,7 @@ const WeeklyPlanTracker: React.FC = () => {
           {/* Enhanced File Upload */}
           <div
             {...getRootProps()}
-            className={`relative border-2 border-dashed rounded-3xl p-12 text-center transition-all duration-300 cursor-pointer ${
+            className={`relative border-2 border-dashed rounded-3xl max-[450px]:py-5 max-[450px]:px-2 p-12 text-center transition-all duration-300 cursor-pointer ${
               !uploadingSubject
                 ? 'border-slate-200 bg-slate-50 cursor-not-allowed opacity-50'
                 : isDragActive 
@@ -1197,9 +1197,9 @@ const WeeklyPlanTracker: React.FC = () => {
                     </div>
                   </div>
                   
-                  <div className="flex items-center space-x-3">
+                  <div className="max-[450px]:flex-col justify-center flex items-center space-x-3">
                     <button className="p-2 hover:bg-slate-200 rounded-lg transition-colors group-hover:scale-110">
-                      <Eye className="w-5 h-5 text-slate-600" />
+                      <Eye className="w-5 h-5 text-slate-600 ml-2" />
                     </button>
                     <button className="p-2 hover:bg-slate-200 rounded-lg transition-colors group-hover:scale-110">
                       <Download className="w-5 h-5 text-slate-600" />
@@ -1214,7 +1214,7 @@ const WeeklyPlanTracker: React.FC = () => {
 
       {/* Enhanced Week Navigation */}
       <div className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
-        <div className="p-8">
+        <div className="max-[400px]:px-2 max-[400px]:py-4 p-8">
           <div className="flex items-center justify-between">
             <button
               onClick={() => {
@@ -1223,18 +1223,18 @@ const WeeklyPlanTracker: React.FC = () => {
                 initializeWeeklyAssessments(prevWeek);
               }}
               disabled={currentWeek <= 1}
-              className="flex items-center space-x-2 bg-gradient-to-r from-slate-500 to-gray-600 text-white px-6 py-3 rounded-2xl font-semibold hover:from-slate-600 hover:to-gray-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-105"
+              className="max-[400px]:px-2 max-[400px]:py-1 flex items-center space-x-2 bg-gradient-to-r from-slate-500 to-gray-600 text-white px-6 py-3 rounded-2xl font-semibold hover:from-slate-600 hover:to-gray-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-105"
             >
               <ChevronLeft className="w-5 h-5" />
-              <span>Previous Week</span>
+              <span className="max-[400px]:text-xs">Previous Week</span>
             </button>
             
             <div className="text-center">
-              <div className="text-4xl font-bold text-slate-800 mb-2">Week {currentWeek}</div>
-              <div className="text-slate-600">
+              <div className="max-[400px]:text-lg text-3xl font-bold text-slate-800 mb-2">Week {currentWeek}</div>
+              <div className="max-[400px]:text-xs text-slate-600">
                 {getWeekProgress(currentWeek).completed} of {getWeekProgress(currentWeek).total} subjects completed
               </div>
-              <div className="mt-2 w-32 bg-slate-200 rounded-full h-2 mx-auto">
+              <div className="mt-2 max-[400px]:w-24 w-32 bg-slate-200 rounded-full h-2 mx-auto">
                 <div 
                   className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full transition-all duration-500"
                   style={{ width: `${(getWeekProgress(currentWeek).completed / Math.max(getWeekProgress(currentWeek).total, 1)) * 100}%` }}
@@ -1249,9 +1249,9 @@ const WeeklyPlanTracker: React.FC = () => {
                 initializeWeeklyAssessments(nextWeek);
               }}
               disabled={currentWeek >= studyPlan.total_duration_weeks}
-              className="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-2xl font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-105"
+              className="max-[400px]:px-3 max-[400px]:py-1 flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-2xl font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:scale-105"
             >
-              <span>Next Week</span>
+              <span className="max-[400px]:text-xs">Next Week</span>
               <ChevronRight className="w-5 h-5" />
             </button>
           </div>
