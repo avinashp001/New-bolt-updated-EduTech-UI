@@ -222,7 +222,7 @@ const CourseList: React.FC = () => {
       return {
         status: 'Mastered',
         icon: Crown,
-        color: 'text-yellow-600',
+        color: 'text-yellow-800',
         bgColor: 'bg-gradient-to-r from-yellow-50 to-amber-50',
         borderColor: 'border-yellow-200'
       };
@@ -230,7 +230,7 @@ const CourseList: React.FC = () => {
       return {
         status: 'In Progress',
         icon: TrendingUp,
-        color: 'text-emerald-600',
+        color: 'text-emerald-700',
         bgColor: 'bg-gradient-to-r from-emerald-50 to-green-50',
         borderColor: 'border-emerald-200'
       };
@@ -238,17 +238,17 @@ const CourseList: React.FC = () => {
       return {
         status: 'Started',
         icon: Play,
-        color: 'text-blue-600',
+        color: 'text-blue-800',
         bgColor: 'bg-gradient-to-r from-blue-50 to-sky-50',
-        borderColor: 'border-blue-200'
+        borderColor: 'border-blue-500'
       };
     } else {
       return {
         status: 'Start Learning',
         icon: Sparkles,
-        color: 'text-slate-600',
+        color: 'text-slate-800',
         bgColor: 'bg-gradient-to-r from-slate-50 to-gray-50',
-        borderColor: 'border-slate-200'
+        borderColor: 'border-slate-500'
       };
     }
   };
@@ -348,15 +348,15 @@ const CourseList: React.FC = () => {
               onMouseEnter={() => setHoveredCard(subject)}
               onMouseLeave={() => setHoveredCard(null)}
               onClick={() => navigate(`/app/courses/${encodeURIComponent(subject)}`)}
-              className={`group relative bg-white rounded-3xl shadow-lg border-2 cursor-pointer transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 ${statusInfo.borderColor} ${
-                isHovered ? 'scale-105' : ''
+              className={`group relative bg-white rounded-2xl shadow-lg border-2 cursor-pointer transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 ${statusInfo.borderColor} ${
+                isHovered ? 'scale-104' : ''
               }`}
               style={{
     background: isHovered
       ? `linear-gradient(135deg, ${statusInfo.bgColor
-          .replace('bg-gradient-to-r ', '')
+          .replace('bg-gradient-to-r', '')
           .replace('from-', '')
-          .replace(' to-', ', ')})`
+          .replace('to-', '')}`
       : 'white', 
   }}
             >
@@ -379,19 +379,19 @@ const CourseList: React.FC = () => {
                 </div>
               )}
 
-              <div className="p-8">
+              <div className="p-6">
                 {/* Subject Header */}
-                <div className="flex items-center space-x-4 mb-6">
-                  <div className={`w-20 h-20 bg-gradient-to-br ${getSubjectGradient(index)} rounded-3xl flex items-center justify-center text-4xl shadow-lg transform transition-all duration-300 ${
-                    isHovered ? 'rotate-12 scale-110' : ''
+                <div className="flex items-center space-x-4 mb-3">
+                  <div className={`w-10 h-10 bg-gradient-to-br ${getSubjectGradient(index)} rounded-3xl flex items-center justify-center text-2xl shadow-lg transform transition-all duration-300 ${
+                    isHovered ? 'rotate-6 scale-102' : ''
                   }`}>
                     {subjectIcons[subject] || '📖'}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-xl font-bold text-slate-800 mb-1 group-hover:text-indigo-600 transition-colors">
+                    <h3 className="text-lg font-bold text-slate-800 mb-1 group-hover:text-indigo-600 transition-colors">
                       {subject}
                     </h3>
-                    <p className="text-slate-500 text-sm">{stats.units} learning units</p>
+                    <p className="text-slate-500 text-xs">{stats.units} learning units</p>
                     <div className="flex items-center space-x-2 mt-2">
                       <div className="flex items-center space-x-1">
                         <Users className="w-3 h-3 text-slate-400" />
@@ -410,11 +410,11 @@ const CourseList: React.FC = () => {
                 </div>
 
                 {/* Dynamic Progress Visualization */}
-                <div className="mb-6">
+                <div className="mb-4">
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-sm font-semibold text-slate-700">Learning Progress</span>
                     <div className="flex items-center space-x-2">
-                      <span className="text-lg font-bold text-slate-800">{stats.completionPercentage}%</span>
+                      <span className="text-base font-bold text-slate-800">{stats.completionPercentage}%</span>
                       {stats.completionPercentage > 0 && (
                         <TrendingUp className="w-4 h-4 text-green-500" />
                       )}
@@ -422,9 +422,9 @@ const CourseList: React.FC = () => {
                   </div>
                   
                   <div className="relative">
-                    <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
+                    <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
                       <div 
-                        className={`h-3 rounded-full transition-all duration-1000 ease-out bg-gradient-to-r ${
+                        className={`h-2 rounded-full transition-all duration-1000 ease-out bg-gradient-to-r ${
                           stats.completionPercentage >= 80 ? 'from-yellow-400 to-orange-500' :
                           stats.completionPercentage >= 50 ? 'from-emerald-400 to-green-500' :
                           stats.completionPercentage > 0 ? 'from-blue-400 to-indigo-500' : 'from-slate-300 to-slate-400'
@@ -448,59 +448,57 @@ const CourseList: React.FC = () => {
                 </div>
 
                 {/* Enhanced Stats Grid */}
-                <div className="grid grid-cols-3 gap-4 mb-6">
-                  <div className="text-center p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
-                    <div className="flex items-center justify-center space-x-1 mb-2">
+                <div className="grid grid-cols-3 gap-4 mb-4">
+                  <div className="border border-blue-500 border-1 text-center p-1 bg-slate-50    rounded-xl hover:bg-slate-100 transition-colors">
+                    <div className="flex items-center justify-center space-x-1 mb-1">
                       <Clock className="w-4 h-4 text-blue-600" />
-                      <span className="text-lg font-bold text-slate-800">{stats.totalHours}h</span>
+                      <span className="text-sm font-bold text-slate-800">{stats.totalHours}h</span>
                     </div>
                     <span className="text-xs text-slate-500 font-medium">Study Time</span>
                     {stats.totalHours > 0 && (
-                      <div className="mt-1 text-xs text-blue-600">+{Math.round(stats.totalHours * 10)}pts</div>
+                      <div className="font-bold text-xs text-blue-600">+{Math.round(stats.totalHours * 10)}pts</div>
                     )}
                   </div>
                   
-                  <div className="text-center p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
-                    <div className="flex items-center justify-center space-x-1 mb-2">
+                  <div className="text-center border border-blue-500 border-1 p-1 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                    <div className="flex items-center justify-center space-x-1 mb-1">
                       <Award className="w-4 h-4 text-purple-600" />
-                      <span className="text-lg font-bold text-slate-800">{stats.avgPerformance}/10</span>
+                      <span className="text-sm font-bold text-slate-800">{stats.avgPerformance}/10</span>
                     </div>
                     <span className="text-xs text-slate-500 font-medium">Avg Score</span>
                     {stats.avgPerformance >= 8 && (
-                      <div className="mt-1 text-xs text-purple-600">Excellent!</div>
+                      <div className="mt-1 font-bold text-xs text-green-600">Excellent!</div>
                     )}
                   </div>
                   
-                  <div className="text-center p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
-                    <div className="flex items-center justify-center space-x-1 mb-2">
+                  <div className="border border-blue-500 border-1 text-center p-1 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                    <div className="flex items-center justify-center space-x-1 mb-1">
                       <Flame className="w-4 h-4 text-orange-500" />
-                      <span className="text-lg font-bold text-slate-800">{stats.streak}</span>
+                      <span className="text-sm font-bold text-slate-800">{stats.streak}</span>
                     </div>
                     <span className="text-xs text-slate-500 font-medium">Day Streak</span>
                     {stats.streak >= 7 && (
-                      <div className="mt-1 text-xs text-orange-600">On Fire! 🔥</div>
+                      <div className="mt-1 text-xs font-bold text-orange-600">On Fire! 🔥</div>
                     )}
                   </div>
                 </div>
 
                 {/* Enhanced Status Badge */}
                 <div className="flex justify-center mb-4">
-                  <div className={`px-6 py-3 rounded-2xl ${statusInfo.bgColor} ${statusInfo.borderColor} border-2 transition-all duration-300 ${
-                    isHovered ? 'scale-110 shadow-lg' : ''
-                  }`}>
+                  <div className={`px-3 py-2 rounded-xl ${statusInfo.bgColor} ${statusInfo.borderColor} border-2 transition-all duration-300`}>
                     <div className="flex items-center space-x-2">
-                      <statusInfo.icon className={`w-5 h-5 ${statusInfo.color}`} />
-                      <span className={`font-bold ${statusInfo.color}`}>{statusInfo.status}</span>
+                      <statusInfo.icon className={`w-3 h-3 ${statusInfo.color}`} />
+                      <span className={`text-sm ${statusInfo.color}`}>{statusInfo.status}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Action Button */}
                 <div className="flex justify-center">
-                  <button className={`w-full py-4 px-6 bg-gradient-to-r ${getSubjectGradient(index)} text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2`}>
-                    <Play className="w-5 h-5" />
-                    <span>Continue Learning</span>
-                    <ArrowRight className="w-5 h-5" />
+                  <button className={`w-full py-2 px-4 bg-gradient-to-r ${getSubjectGradient(index)} text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2`}>
+                    <Play className="w-3 h-3" />
+                    <span className='text-sm'>Continue Learning</span>
+                    <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
               </div>
