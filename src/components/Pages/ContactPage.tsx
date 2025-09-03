@@ -20,6 +20,11 @@ import {
   Lightbulb
 } from 'lucide-react';
 import SEOHead from '../SEO/SEOHead';
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+
+const MyMap = () => {
+  const position: [number, number] = [28.6139, 77.2090]; // New Delhi coords
 
 const ContactPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -531,13 +536,24 @@ const ContactPage: React.FC = () => {
             <h2 className="text-2xl font-bold text-slate-800 text-center mb-8">Visit Our Office</h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <div>
-                <div className="bg-slate-100 rounded-2xl h-64 flex items-center justify-center mb-6">
+                {/* <div className="bg-slate-100 rounded-2xl h-64 flex items-center justify-center mb-6">
                   <div className="text-center">
                     <MapPin className="w-12 h-12 text-slate-400 mx-auto mb-4" />
                     <p className="text-slate-600">Interactive Map</p>
                     <p className="text-slate-500 text-sm">123 Education Street, New Delhi</p>
                   </div>
-                </div>
+                </div> */}
+               <div className="bg-slate-100 rounded-2xl h-64 mb-6 overflow-hidden">
+      <MapContainer center={position} zoom={13} className="h-full w-full">
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; OpenStreetMap contributors'
+        />
+        <Marker position={position}>
+          <Popup>123 Education Street, New Delhi</Popup>
+        </Marker>
+      </MapContainer>
+    </div>
                 <div className="space-y-4">
                   <div className="flex items-center space-x-3">
                     <MapPin className="w-5 h-5 text-blue-600" />
