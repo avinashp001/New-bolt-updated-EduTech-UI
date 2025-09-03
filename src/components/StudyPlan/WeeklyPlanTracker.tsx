@@ -824,7 +824,7 @@ const WeeklyPlanTracker: React.FC = () => {
             </div>
           </div>
           
-          <div className="grid max-[500px]:grid-cols-2 grid-cols-3 gap-6">
+          <div className="grid max-grid-cols-2 grid-cols-3 gap-6">
             <div className="bg-white/10 backdrop-blur-md rounded-2xl max-[400px]:p-4 p-6 text-center">
               <div className="text-2xl font-bold mb-2">{animatedWeekStats.totalWeeks}</div>
               <div className="text-blue-100 max-[400px]:text-xs text-sm">Total Weeks</div>
