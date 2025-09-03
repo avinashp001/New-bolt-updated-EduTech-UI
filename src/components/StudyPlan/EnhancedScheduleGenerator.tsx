@@ -262,7 +262,11 @@ useEffect(() => {
     const totalDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
 
     if (totalDays <= 0) {
-      alert('Exam date should be in the future.');
+      // alert('Exam date should be in the future.');
+      openError(
+        "Invalid Exam Date",
+        "Your exam date should be in the future."
+      );
       return;
     }
 
