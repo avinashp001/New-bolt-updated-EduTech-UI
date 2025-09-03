@@ -50,7 +50,7 @@ const NavigationBreadcrumb: React.FC = () => {
   }
 
   return (
-    <nav className="flex items-center space-x-2 text-sm text-slate-600 dark:text-slate-400 mb-6">
+    <nav className="flex pl-4 items-center space-x-2 text-xs text-slate-600 dark:text-slate-400 mt-4 mb-6">
       <Link 
         to="/" 
         className="flex items-center space-x-1 hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
