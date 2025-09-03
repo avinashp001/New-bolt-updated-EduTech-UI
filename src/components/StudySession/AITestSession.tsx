@@ -340,7 +340,7 @@ const AITestSession: React.FC = () => {
 
   if (testPhase === 'results' && testResult) {
     return (
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="max-w-4xl mx-auto space-y-6 p-3">
         {/* Results Header */}
         <div className="bg-gradient-to-r from-green-500 to-blue-600 p-6 rounded-2xl text-white">
           <div className="flex items-center space-x-3 mb-4">
