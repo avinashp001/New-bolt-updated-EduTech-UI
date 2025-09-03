@@ -17,7 +17,7 @@ const PerformanceRing: React.FC<PerformanceRingProps> = ({
   const pointsEarned = Math.round(studySessions.reduce((sum, session) => 
     sum + (session.performance_score * session.duration_minutes / 10), 0));
 
-  const radius = 70;
+  const radius = 60;
   const circumference = 2 * Math.PI * radius;
   const progressOffset = circumference - (overallProgress / 100) * circumference;
   const performanceOffset = circumference - (avgPerformance / 10) * circumference;
