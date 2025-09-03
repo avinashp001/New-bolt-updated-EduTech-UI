@@ -561,6 +561,14 @@ html {
   .max-flex-col {
     flex-direction: column ! important; /* switch to column */
   }
+  .max-px-2{
+    padding-left 0.5rem;
+    padding-right 0.5rem;
+  }
+  .max-py-4{
+    padding-top 1 rem;
+    padding-top 2 rem;
+  }
   .max-p-4{
     padding: 1rem;
   }
