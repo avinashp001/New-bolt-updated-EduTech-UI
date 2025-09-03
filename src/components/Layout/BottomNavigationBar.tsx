@@ -56,7 +56,7 @@ const BottomNavigationBar: React.FC = () => {
                 className={`max-[450px]:text-xs transition-colors duration-200 ${
                   active
                     ? 'text-transparent bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text'
-                    : 'text-slate-500 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-300'
+                    : 'text-grey-600 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-300'
                 }`}
               >
                 {item.label}
