@@ -51,7 +51,7 @@ const PerformanceRing: React.FC<PerformanceRingProps> = ({
       <stop offset="0%" stopColor="#f97316" />
       <stop offset="25%" stopColor="#f97316" />
       {/* Remaining 75% Green */}
-      <stop offset="75%" stopColor="#67b037" />
+      <stop offset="25%" stopColor="#67b037" />
       <stop offset="100%" stopColor="#67b037" />
     </linearGradient>
   </defs>
