@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, Clock, Check } from 'lucide-react';
 
 interface CalendarTrackerProps {
   studySessions: any[];
@@ -64,13 +64,49 @@ const CalendarTracker: React.FC<CalendarTrackerProps> = ({ studySessions }) => {
     setCurrentDate(newDate);
   };
 
-  const getStudyIntensityClass = (intensity: number) => {
-    if (intensity === 0) return 'bg-slate-100 text-slate-400';
-    if (intensity <= 1) return 'bg-green-200 text-green-800';
-    if (intensity <= 2) return 'bg-green-400 text-white';
-    if (intensity <= 3) return 'bg-green-600 text-white';
-    return 'bg-green-800 text-white';
-  };
+  // const getStudyIntensityClass = (intensity: number) => {
+  //   if (intensity === 0) return 'bg-slate-100 text-slate-400';
+  //   if (intensity <= 1) return 'bg-green-200 text-green-800';
+  //   if (intensity <= 2) return 'bg-green-400 text-white';
+  //   if (intensity <= 3) return 'bg-green-600 text-white';
+  //   return 'bg-green-800 text-white';
+  // };
+
+  const getDayClass = (day: any, hasScheduled: boolean) => {
+  if (!day) return "bg-transparent";
+
+  if (day.isToday) {
+    return "bg-blue-600 text-white ring-2 ring-blue-300";
+  }
+
+  if (hasScheduled) {
+    return "bg-purple-300 text-purple-900 border border-purple-500";
+  }
+
+  if (day.hasStudy) {
+    // If both tasks + points exist, use gradient
+    if (day.sessions > 0 && day.totalMinutes > 0) {
+      return "bg-gradient-to-br from-blue-500 to-green-500 text-white";
+    }
+
+    // Tasks only (blue scale)
+    if (day.sessions > 0) {
+      if (day.sessions <= 1) return "bg-blue-200 text-blue-800";
+      if (day.sessions <= 3) return "bg-blue-400 text-white";
+      return "bg-blue-600 text-white";
+    }
+
+    // Points only (orange scale, based on minutes studied)
+    if (day.totalMinutes > 0) {
+      if (day.totalMinutes < 60) return "bg-green-300 text-green-800";
+      if (day.totalMinutes < 180) return "bg-green-500 text-white";
+      return "bg-green-700 text-white";
+    }
+  }
+
+  return "bg-slate-100 text-slate-400"; // No study
+};
+
 
   return (
     <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border border-white/20 shadow-xl rounded-2xl p-6">
@@ -113,15 +149,36 @@ const CalendarTracker: React.FC<CalendarTrackerProps> = ({ studySessions }) => {
             <div key={index} className="aspect-square">
               {day ? (
                 <div
-                  className={`w-full h-full rounded-lg flex items-center justify-center text-sm font-medium transition-all cursor-pointer hover:scale-105 ${
-                    day.isToday 
-                      ? 'bg-blue-600 text-white ring-2 ring-blue-200' 
-                      : getStudyIntensityClass(day.intensity)
-                  }`}
-                  title={day.hasStudy ? `${day.sessions} sessions, ${Math.round(day.totalMinutes / 60 * 10) / 10}h` : 'No study'}
-                >
-                  {day.day}
-                </div>
+  className={`w-full h-full rounded-lg flex items-center justify-center text-sm font-medium transition-all cursor-pointer ${
+    getDayClass(day, studySessions.some(s => s.date === day.dateStr && s.type === "scheduled"))
+  }`}
+  title={
+    day.hasStudy
+      ? `${day.sessions} tasks, ${Math.round(day.totalMinutes / 60 * 10) / 10}h`
+      : studySessions.some(s => s.date === day.dateStr && s.type === "scheduled")
+      ? "Scheduled task"
+      : "No study"
+  }
+>
+  <div className="flex flex-col items-center">
+  <span>{day.day}</span>
+  
+  {/* Markers */}
+  <div className="absolute flex space-x-1 mt-1"
+  style={{top: "6.75rem", left: "12.5rem"}}>
+    {day.hasStudy && (
+      <span className="w-3 h-3 bg-orange-400 rounded-full border border-white"></span>
+    )}
+    {studySessions.some(
+      session => session.date === day.dateStr && session.type === "scheduled"
+    ) && (
+      <Clock className="w-3 h-3 text-purple-600" />
+    )}
+  </div>
+</div>
+
+</div>
+
               ) : (
                 <div className="w-full h-full"></div>
               )}
@@ -131,7 +188,7 @@ const CalendarTracker: React.FC<CalendarTrackerProps> = ({ studySessions }) => {
       </div>
 
       {/* Legend */}
-      <div className="flex items-center justify-between text-xs text-slate-500">
+      {/* <div className="flex items-center justify-between text-xs text-slate-500">
         <span>Less</span>
         <div className="flex items-center space-x-1">
           <div className="w-3 h-3 bg-slate-100 rounded"></div>
@@ -141,7 +198,30 @@ const CalendarTracker: React.FC<CalendarTrackerProps> = ({ studySessions }) => {
           <div className="w-3 h-3 bg-green-800 rounded"></div>
         </div>
         <span>More</span>
-      </div>
+      </div> */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs text-slate-500 mt-4">
+  <div className="flex items-center space-x-1">
+    <div className="w-3 h-3 bg-slate-100 rounded"></div>
+    <span>No study</span>
+  </div>
+  <div className="flex items-center space-x-1">
+    <div className="w-3 h-3 bg-green-300 rounded"></div>
+    <div className="w-3 h-3 bg-green-500 rounded"></div>
+    <div className="w-3 h-3 bg-green-700 rounded"></div>
+    <span>Points</span>
+  </div>
+  <div className="flex items-center space-x-1">
+    <div className="w-3 h-3 bg-blue-200 rounded"></div>
+    <div className="w-3 h-3 bg-blue-400 rounded"></div>
+    <div className="w-3 h-3 bg-blue-600 rounded"></div>
+    <span>Tasks</span>
+  </div>
+  <div className="flex items-center space-x-1">
+    <div className="w-3 h-3 bg-purple-300 border border-purple-500 rounded"></div>
+    <span>Scheduled</span>
+  </div>
+</div>
+
     </div>
   );
 };
