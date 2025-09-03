@@ -183,7 +183,7 @@ const GetStartedPage: React.FC = () => {
         </div>
 
         {/* Progress Steps */}
-        <div className="mb-16">
+        <div id="onboarding-progress" className="mb-16">
           <div className="flex items-center justify-center mb-12">
             <div className="flex items-center space-x-4">
               {steps.map((step, index) => (
