@@ -1424,6 +1424,18 @@ useEffect(() => {
           </div>
         </div>
       </div>
+      <LoadingOverlay isOpen={isGenerating} />
+      <RetryPopup
+  isOpen={popup.isOpen}
+  title={popup.title}
+  message={popup.message}
+  onTryAgain={() => {
+    setPopup({ ...popup, isOpen: false });
+    // generateDetailedSchedule(); // re-call your schedule generator
+    // if (fn) fn();
+  }}
+  onCancel={() => setPopup({ ...popup, isOpen: false })}
+/>
     </div>
   );
 };
