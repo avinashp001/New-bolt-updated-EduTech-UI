@@ -206,9 +206,9 @@ const SkillRadarChart: React.FC<SkillRadarChartProps> = ({ progressReports }) =>
       <div className="bg-white/70 dark:bg-slate-900 backdrop-blur-sm border border-white/20 shadow-xl rounded-2xl p-6">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="text-xl font-bold dark:text-white/80 text-slate-800">Skill Developed</h3>
+            <h3 className="text-xl font-bold dark:text-white/80 text-slate-800">Subject Performance</h3>
             <button
-              onClick={() => window.location.href = '/analytics'}
+              onClick={() => window.location.href = '/app/analytics'}
               className="text-blue-600 dark:text-sky-600/80 text-sm font-medium hover:text-blue-700 transition-colors"
             >
               See Details
