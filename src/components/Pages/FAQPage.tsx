@@ -316,7 +316,10 @@ const FAQPage: React.FC = () => {
               {categories.map((category) => (
                 <button
                   key={category.id}
-                  onClick={() => setActiveCategory(category.id)}
+                  onClick={() => {
+                    document.getElementById("about-section")?.scrollIntoView({ behavior: "smooth" });
+                    setActiveCategory(category.id)
+                  }}
                   className={`p-4 rounded-xl transition-all duration-300 ${
                     activeCategory === category.id
                       ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg scale-105'
