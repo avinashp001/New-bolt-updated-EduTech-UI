@@ -405,7 +405,7 @@ const FAQPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div className="bg-slate-700/50 rounded-2xl p-6 border border-slate-600">
               <Brain className="w-8 h-8 text-blue-400 mx-auto mb-4" />
-              <h3 className="font-bold mb-2">AI Mentor Chat</h3>
+              <h3 className="font-bold mb-2">Mentor Chat</h3>
               <p className="text-slate-300 text-sm mb-4">Get instant answers from our AI mentor</p>
               <a
                 href="/app/ai-mentor"
