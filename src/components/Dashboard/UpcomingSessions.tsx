@@ -248,14 +248,6 @@ const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({
                   {session.priority}
                 </span>
               </div>
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/app/courses/${encodeURIComponent(session.subject)}/theory/${encodeURIComponent(session.topic)}`);
-                  }}
-                  className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors"
-                >
-                </button>
             </div>
           </div>
         ))}
