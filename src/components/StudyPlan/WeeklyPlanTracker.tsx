@@ -1234,7 +1234,7 @@ const WeeklyPlanTracker: React.FC = () => {
               <div className="max-text-xs text-slate-600">
                 {getWeekProgress(currentWeek).completed} of {getWeekProgress(currentWeek).total} subjects completed
               </div>
-              <div className="mt-2 max-[400px]:w-24 w-32 bg-slate-200 rounded-full h-2 mx-auto">
+              <div className="mt-2 max-w-24 w-32 bg-slate-200 rounded-full h-2 mx-auto">
                 <div 
                   className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full transition-all duration-500"
                   style={{ width: `${(getWeekProgress(currentWeek).completed / Math.max(getWeekProgress(currentWeek).total, 1)) * 100}%` }}
