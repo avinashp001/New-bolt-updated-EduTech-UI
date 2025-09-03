@@ -38,7 +38,7 @@ const MyMap = () => {
       </Marker>
     </MapContainer>
   );
-}; // ✅ CLOSE this before ContactPage
+};
 
 
 const ContactPage: React.FC = () => {
