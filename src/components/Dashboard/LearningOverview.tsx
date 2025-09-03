@@ -135,7 +135,7 @@ const LearningOverview: React.FC<LearningOverviewProps> = ({
               dataKey="tasks"
               stroke="#3b82f6"
               fill="#3b82f6"
-              fillOpacity={0.3}
+              fillOpacity={0.7}
               />
             <Area
               type="monotone"
