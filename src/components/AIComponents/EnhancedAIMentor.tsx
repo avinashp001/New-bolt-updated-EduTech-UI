@@ -1467,7 +1467,7 @@ Would you like me to create a personalized study plan based on this material or 
       )}
 
       {/* Expert Mentor Features */}
-      <div className="bg-white dark:bg-teal-950/60 dark:text-white/80 dark:border-teal-900 rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
+      <div className="hidden md-block bg-white dark:bg-teal-950/60 dark:text-white/80 dark:border-teal-900 rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
         <div className="bg-gradient-to-r dark:from-emerald-900/50 dark:to-emerald-900/20 from-slate-50 to-gray-50 px-8 py-6 dark:border-emerald-900 border-b border-slate-200">
           <h3 className="text-2xl dark:text-white/80 font-bold text-slate-800 mb-2">Expert Mentor Features</h3>
           <p className="dark:text-white/80 text-slate-600">Leverage 15+ years of mentoring experience with comprehensive data analysis</p>
