@@ -1373,7 +1373,7 @@ Would you like me to create a personalized study plan based on this material or 
 
       {/* AI Insights Panel */}
       {user?.id && (
-        <div className="bg-gradient-to-r from-indigo-900 via-purple-900 to-pink-900 rounded-3xl p-8 text-white shadow-2xl">
+        <div className="bg-gradient-to-r from-indigo-900 via-purple-900 to-pink-900 rounded-3xl p-8 text-white shadow-2xl hidden md:block">
           <div className="flex items-center space-x-4 mb-6">
             <div className="w-14 h-10 bg-gradient-to-r from-green-600 to-emerald-800 rounded-xl flex items-center justify-center">
               <User className="w-5 h-5 text-white" />
