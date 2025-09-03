@@ -187,7 +187,7 @@ const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({
                     {session.topic.length > 20 ? session.topic.substring(0, 20) + '...' : session.topic}
                   </div>
                   <div className="flex items-center space-x-2 mt-1">
-                    <Clock className="w-3 h-3 text-slate-500" />
+                    <Clock className="w-2 h-2 text-slate-500" />
                     <span className="text-xs text-slate-500"
                       style={{fontSize:"0.66rem"}}>{session.timeSlot}</span>
                     <span className="text-xs text-slate-500"
