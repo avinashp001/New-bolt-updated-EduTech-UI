@@ -200,8 +200,8 @@ const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({
                     <Target className="w-4 h-4 text-white" />
                   </div>
                 ) : (
-                  <button className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors">
-                    <Play className="w-4 h-4 text-white ml-0.5" 
+                  <button className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors">
+                    <span className="w-4 h-4 text-white ml-0.5" 
                       onClick={(e) => {
                     e.stopPropagation();
                     navigate(`/app/courses/${encodeURIComponent(session.subject)}/theory/${encodeURIComponent(session.topic)}`);
