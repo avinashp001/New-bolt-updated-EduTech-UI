@@ -50,6 +50,10 @@ const AITestSession: React.FC = () => {
   const [testStartTime, setTestStartTime] = useState<Date | null>(null);
   const [testPhase, setTestPhase] = useState<'upload' | 'test' | 'results'>('upload');
 
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>('');
+  const [showRetryPopup, setShowRetryPopup] = useState(false);
+  
   const subjects = [
     'Mathematics', 'Physics', 'Chemistry', 'Biology',
     'History', 'Geography', 'Economics', 'Political Science',
