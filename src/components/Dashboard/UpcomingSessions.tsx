@@ -154,7 +154,7 @@ const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({
   }
 
   return (
-    <div className="bg-white/90 backdrop-blur-sm border border-white/20 shadow-xl rounded-2xl p-6">
+    <div className="bg-white/90 backdrop-blur-sm border border-white/20 shadow-xl rounded-2xl p-6 max-[400px]:p-4">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-xl font-bold text-slate-800">Upcoming Sessions</h3>
         <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
