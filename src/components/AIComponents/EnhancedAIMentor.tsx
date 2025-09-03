@@ -1263,7 +1263,7 @@ Would you like me to create a personalized study plan based on this material or 
                     </div>
                     <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 p-4 rounded-2xl shadow-lg">
                       <div className="flex items-center space-x-2">
-                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-purple-400 border-t-purple-600"></div>
+                        <div className="animate-spin rounded-full max-[400]:w-6 h-4 w-4 border-2 border-purple-400 border-t-purple-600"></div>
                         <span className="text-purple-800 text-sm font-medium">Analyzing your comprehensive study data...</span>
                       </div>
                     </div>
