@@ -44,20 +44,30 @@ const PerformanceRing: React.FC<PerformanceRingProps> = ({
             strokeWidth="9"
           />
 
+
+          {/* Define circular gradient */}
+  <defs>
+    <linearGradient id="progressGradient" gradientTransform="rotate(90)">
+      <stop offset="0%" stopColor="#3b82f6" />   {/* blue */}
+      <stop offset="100%" stopColor="#f97316" /> {/* orange */}
+    </linearGradient>
+  </defs>
+
           
-          {/* Progress ring (outer) */}
-          <circle
-            cx="100"
-            cy="100"
-            r={radius}
-            fill="none"
-            stroke="#3b82f6"
-            strokeWidth="7"
-            strokeDasharray={circumference}
-            strokeDashoffset={progressOffset}
-            strokeLinecap="round"
-            className="transition-all duration-1000 ease-out"
-          />
+         
+  {/* Progress circle */}
+  <circle
+    cx="100"
+    cy="100"
+    r={radius}
+    fill="none"
+    stroke="url(#progressGradient)"
+    strokeWidth="9"
+    strokeDasharray={circumference}
+    strokeDashoffset={progressOffset}
+    strokeLinecap="round"
+    className="transition-all duration-1000 ease-out"
+  />
           
           {/* Performance ring (inner) */}
           {/* <circle
