@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Calendar, UserCircle, LibraryBig, BookOpenCheck } from 'lucide-react';
+import { Home, Calendar, UserCircle, LibraryBig, BookOpenCheck, MessageCircleQuestion } from 'lucide-react';
 
 const BottomNavigationBar: React.FC = () => {
   const navigate = useNavigate();
@@ -12,6 +12,7 @@ const BottomNavigationBar: React.FC = () => {
     { id: 'assessment', label: 'Assessment', icon: BookOpenCheck, path: '/app/weekly-tracker' },
     { id: 'schedule', label: 'Schedule', icon: Calendar, path: '/app/enhanced-schedule' },
     { id: 'ai-mentor', label: 'Mentor', icon: UserCircle, path: '/app/ai-mentor' },
+    { id: 'help', label: 'Support', icon: MessageCircleQuestion, path: '/app/faq' },
   ];
 
   const isActiveRoute = (path: string) => {
