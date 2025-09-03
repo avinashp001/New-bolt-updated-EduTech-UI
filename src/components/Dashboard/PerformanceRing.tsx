@@ -100,7 +100,7 @@ const PerformanceRing: React.FC<PerformanceRingProps> = ({
         <div className="text-center">
           <div className="flex items-center justify-center space-x-2 mb-2">
             <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-            <span className="text-sm font-medium text-slate-700">{pointsEarned.toLocaleString()}</span>
+            <span className="text-sm dark:text-slate-200 font-medium text-slate-700">{pointsEarned.toLocaleString()}</span>
           </div>
           <div className="text-xs dark:text-slate-100 text-slate-500">Points</div>
         </div>
