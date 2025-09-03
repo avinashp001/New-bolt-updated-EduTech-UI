@@ -1213,7 +1213,7 @@ export class TheoryGenerator {
    private static async getUserExamName(userId: string): Promise<string> {
     try {
       const { data, error } = await supabase
-        .from('profiles')
+        .from('users')
         .select('target_exam')
         .eq('id', userId)
         .single();
