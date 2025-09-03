@@ -97,11 +97,11 @@ const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({
 };
   
   const icons: Record<string, React.ElementType> = {
-  Mathematics: Calculator,
+  Mathematics: DraftingCompass,
   Physics: Atom,
   Chemistry: FlaskConical,
   Biology: Dna,
-  English: Book,
+  English: BookOpen,
   'Quantitative Aptitude': Calculator, // pick suitable
   Reasoning: Brain,
   'General Knowledge': Lightbulb,
