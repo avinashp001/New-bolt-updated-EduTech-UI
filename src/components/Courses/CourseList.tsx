@@ -254,7 +254,7 @@ const CourseList: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 lg:px-0">
+    <div className="max-w-7xl mx-auto space-y-8 p-3 lg:px-0">
       {/* Enhanced Header with Animated Stats */}
       <div className="relative overflow-hidden dark:from-slate-900 dark:via-gray-800 dark:to-slate-950 bg-gradient-to-br from-indigo-600 via-sky-600 to-sky-600/80 p-8 rounded-3xl text-white shadow-2xl">
         <div className="absolute inset-0 bg-black/10"></div>
