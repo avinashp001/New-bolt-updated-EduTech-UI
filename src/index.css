@@ -558,7 +558,7 @@ html {
 }
 
 @media (max-width: 450px) {
-  .max-[450px]:flex-col {
+  .max-flex-col {
     flex-direction: column ! important; /* switch to column */
   }
 }
