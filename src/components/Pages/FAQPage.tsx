@@ -314,7 +314,7 @@ const FAQPage: React.FC = () => {
             <h2 className="text-xl font-bold text-slate-800 mb-6 text-center">Browse by Category</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               {categories.map((category) => (
-              <a href="faq-section">
+              <a href="#faq-section">
                 <button
                   key={category.id}
                   onClick={() => setActiveCategory(category.id)}
