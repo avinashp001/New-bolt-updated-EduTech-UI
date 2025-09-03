@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, BookOpen, Calendar, Brain, UserCircle, Library, LibraryBig, BookOpenCheck } from 'lucide-react';
+import { Home, Calendar, UserCircle, LibraryBig, BookOpenCheck } from 'lucide-react';
 
 const BottomNavigationBar: React.FC = () => {
   const navigate = useNavigate();
@@ -23,21 +23,47 @@ const BottomNavigationBar: React.FC = () => {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 lg:hidden z-50 shadow-lg">
+      {/* Define the gradient once, globally */}
+      <svg width="0" height="0" className="absolute">
+        <defs>
+          <linearGradient id="navGradient" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#3b82f6" />   {/* tailwind blue-500 */}
+            <stop offset="100%" stopColor="#9333ea" /> {/* tailwind purple-600 */}
+          </linearGradient>
+        </defs>
+      </svg>
+
       <div className="flex justify-around items-center h-16">
-        {navItems.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => navigate(item.path)}
-            className={` flex flex-col items-center justify-center flex-1 h-full text-sm font-medium transition-colors duration-200
-              ${isActiveRoute(item.path)
-                ? 'text-blue-600 dark:text-sky-600'
-                : 'text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-300'
-              }`}
-          >
-            <item.icon className={`max-[450px]:w-5 max-[450px]:h-5 w-6 h-6 mb-1 ${isActiveRoute(item.path) ? '' : ''}`} />
-            <span className='max-[450px]:text-xs'>{item.label}</span>
-          </button>
-        ))}
+        {navItems.map((item) => {
+          const active = isActiveRoute(item.path);
+          return (
+            <button
+              key={item.id}
+              onClick={() => navigate(item.path)}
+              className="flex flex-col items-center justify-center flex-1 h-full text-sm font-medium"
+              aria-label={item.label}
+            >
+              {/* Icon: use gradient stroke when active; otherwise inherit currentColor */}
+              <item.icon
+                className="max-[450px]:w-5 max-[450px]:h-5 w-6 h-6 mb-1 transition-transform duration-200"
+                stroke={active ? 'url(#navGradient)' : 'currentColor'}
+                // optional subtle emphasis on active
+                style={{ transform: active ? 'scale(1.05)' : undefined }}
+              />
+
+              {/* Label: gradient text when active */}
+              <span
+                className={`max-[450px]:text-xs transition-colors duration-200 ${
+                  active
+                    ? 'text-transparent bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-300'
+                }`}
+              >
+                {item.label}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </nav>
   );
