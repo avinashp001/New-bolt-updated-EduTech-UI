@@ -1197,7 +1197,7 @@ const WeeklyPlanTracker: React.FC = () => {
                     </div>
                   </div>
                   
-                  <div className="max-[450px]:flex-col justify-center flex items-center space-x-3">
+                  <div className="max-flex-col justify-center flex items-center space-x-3">
                     <button className="p-2 hover:bg-slate-200 rounded-lg transition-colors group-hover:scale-110">
                       <Eye className="w-5 h-5 text-slate-600 ml-2" />
                     </button>
