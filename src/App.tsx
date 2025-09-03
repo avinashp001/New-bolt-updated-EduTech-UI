@@ -29,7 +29,7 @@ function App() {
         setSidebarOpen={setSidebarOpen}
       />
 
-      <main className={`${sidebarOpen ? 'lg:ml-64' : 'lg:ml-0'} p-4 lg:p-8 transition-all duration-300`}>
+      <main className={`${sidebarOpen ? 'lg:ml-64' : 'lg:ml-0'} p-2 lg:p-8 transition-all duration-300`}>
         <div className="max-w-7xl mx-auto">
           <div className="mb-6">
             <div className="flex items-center justify-between mb-2">
