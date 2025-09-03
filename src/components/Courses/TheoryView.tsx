@@ -1373,7 +1373,7 @@ const TheoryView: React.FC<{ userId: string }> = ({ userId }) => {
       setTheoryContent(content);
     } catch (err) {
       console.error('Error fetching theory:', err);
-      setError('Failed to load theory content. Please try again.');
+      setError(err || 'Failed to load theory content. Please try again.');
       setShowRetryPopup(true); // Show popup on error
     } finally {
       setLoading(false);
