@@ -1,5 +1,5 @@
 import React from 'react';
-import { MoreHorizontal, Play, Clock, BookOpen, Target, Calendar, AlertCircle, Globe, History, HandCoins, Landmark, DraftingCompass } from 'lucide-react';
+import { MoreHorizontal, Play, Clock, BookOpen, Target, Calendar, AlertCircle, Globe, History, HandCoins, Landmark, DraftingCompass, Brain } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface UpcomingSessionsProps {
@@ -102,9 +102,14 @@ const UpcomingSessions: React.FC<UpcomingSessionsProps> = ({
   Chemistry: FlaskConical,
   Biology: Dna,
   English: BookOpen,
-  'Quantitative Aptitude': DraftingCompass, // pick suitable
+  'Quantitative Aptitude': DraftingCompass,
+    'General Intelligence & Reasoning': Brain,
   Reasoning: Brain,
   'General Knowledge': Lightbulb,
+  History: History,
+    Geography: Globe,
+    Polity: Landmark,
+    Economics: HandCoins,
 };
 
   const getPriorityColor = (priority: string) => {
