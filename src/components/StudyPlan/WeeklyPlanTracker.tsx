@@ -639,7 +639,7 @@ const WeeklyPlanTracker: React.FC = () => {
             className="flex items-center space-x-2 max-[350px]:px-3 px-6 py-3 border-2 border-slate-300 text-slate-700 rounded-2xl font-semibold hover:bg-slate-50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ChevronLeft className="w-5 h-5" />
-            <span className='max-[350px]:text-sm'>Previous</span>
+            <span className='max-text-sm'>Previous</span>
           </button>
           
           <div className="flex items-center space-x-3">
