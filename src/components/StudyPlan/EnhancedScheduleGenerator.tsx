@@ -5,6 +5,9 @@ import { useAuth } from '../../hooks/useAuth';
 import { AIService } from '../../lib/mistralAI';
 import { supabase } from '../../lib/supabase';
 import { robustParseWithRetry } from "../../utils/jsonParser";
+import RetryPopup from '../Common/RetryPopup';
+import LoadingOverlay from '../Common/LoadingOverlay';
+
 
 interface StudentProfile {
   currentLevel: 'beginner' | 'intermediate' | 'advanced';
@@ -45,6 +48,38 @@ interface DailySchedule {
 const EnhancedScheduleGenerator: React.FC = () => {
   const { user } = useAuth();
   const { studyPlan, generateStudyPlan, loading, fetchStudyPlan } = useStudyPlan(user?.id);
+
+
+  const [popup, setPopup] = useState<{
+  isOpen: boolean;
+  title: string;
+  message: string;
+  showRetry: boolean;
+  onRetry?: () => void;
+}>({
+  isOpen: false,
+  title: "",
+  message: "",
+  showRetry: false,
+  onRetry: undefined,
+});
+
+// helper function
+const openError = (
+  title: string,
+  message: string,
+  onRetry?: () => void
+) => {
+  setPopup({
+    isOpen: true,
+    title,
+    message,
+    showRetry: !!onRetry,
+    onRetry
+  });
+};
+
+
   
   const [studentProfile, setStudentProfile] = useState<StudentProfile>({
     currentLevel: 'intermediate',
