@@ -65,9 +65,9 @@ const Footer: React.FC = () => {
     { name: 'Video Tutorials', href: '/how-to-use#videos', icon: Youtube },
     { name: 'FAQ', href: '/faq', icon: MessageSquare },
     { name: 'Contact Support', href: '/contact', icon: Mail },
-    { name: 'Community Forum', href: '/contact#community', icon: Users },
-    { name: 'Feature Requests', href: '/contact', icon: Star },
-    { name: 'Bug Reports', href: '/contact', icon: Shield }
+    { name: 'Community Forum', href: '/community', icon: Users },
+    { name: 'Feature Requests', href: '/contact', id: 'form', icon: Star },
+    { name: 'Bug Reports', href: '/contact', id: 'form', icon: Shield }
   ];
 
   const legalLinks = [
@@ -226,7 +226,16 @@ const Footer: React.FC = () => {
                   <Link
                     to={link.href}
                     className="flex items-center space-x-2 text-slate-300 hover:text-white transition-colors duration-200 group"
-                  >
+                  onClick={() => {
+    const section = document.getElementById(link.id);
+    if (section) {
+      const yOffset = -100; // 👈 adjust this value for margin/space
+      const y = section.getBoundingClientRect().top + window.pageYOffset + yOffset;
+
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
+  }}
+                    >
                     <link.icon className="w-4 h-4 text-slate-400 group-hover:text-purple-400 transition-colors" />
                     <span className="group-hover:translate-x-1 transition-transform duration-200">{link.name}</span>
                   </Link>
