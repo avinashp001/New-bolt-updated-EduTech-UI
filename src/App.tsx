@@ -49,7 +49,7 @@ function App() {
               </button>
               <div className="flex justify-center bg-gradient-to-r from-blue-900 via-violet-700 to-pink-500 w-full mx-2 border border-gray-900 px-4 py-1 rounded-lg"
                 style={{ alignItems: "center" }}>
-                <img className="w-9 h-9 bg-blue-950 border rounded-3xl" src="https://quizgenius.tech/assets/logo-ClSSRi2t.png"/>
+                <img className="w-9 h-9 bg-blue-950 border border-blue-900 rounded-3xl" src="https://quizgenius.tech/assets/logo-ClSSRi2t.png"/>
                 <h2 className="w-full ml-4 font-semibold text-lg text-white">EduAI</h2>
               </div>
             </div>
