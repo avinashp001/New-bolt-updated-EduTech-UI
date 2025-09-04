@@ -884,7 +884,7 @@ const OnboardingSetup: React.FC = () => {
 
 
           await updateProfile({ target_exam: selectedExam });
-await updateSettings(studentProfile);
+          await updateSettings(studentProfile);
           await user?.reload?.();
           
           showSuccess('Onboarding Complete!', 'Your personalized study plan is ready. Redirecting to dashboard...');
