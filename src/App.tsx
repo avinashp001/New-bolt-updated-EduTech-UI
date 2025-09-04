@@ -47,7 +47,7 @@ function App() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               </button>
-              <div className="border px-4 py-1 rounded-lg">
+              <div className="w-full border px-4 py-1 rounded-lg">
                 <h2 className="text-lg text-white">AI Edu Tech</h2>
               </div>
             </div>
