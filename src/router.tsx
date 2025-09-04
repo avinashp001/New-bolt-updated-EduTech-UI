@@ -68,8 +68,6 @@ const AuthLayout: React.FC = () => {
   //   return <OnboardingSetup />;
   // }
 
-  const location = useLocation();
-
 if (user && (!user.target_exam || user.target_exam.trim() === '')) {
   if (location.pathname !== '/app/onboarding') {
     return <Navigate to="/app/onboarding" replace />;
