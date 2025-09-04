@@ -26,6 +26,7 @@ const QuickStartGuide: React.FC<QuickStartGuideProps> = ({ isOpen, onClose }) =>
       action: 'Next',
       icon: Calendar,
       color: 'from-green-500 to-emerald-600',
+      colorLink: 'from-green-500 to-emerald-600',
       onClick: () => navigate('/app/enhanced-schedule')
     },
     {
@@ -35,6 +36,7 @@ const QuickStartGuide: React.FC<QuickStartGuideProps> = ({ isOpen, onClose }) =>
       action: 'Next',
       icon: BookOpen,
       color: 'from-purple-500 to-violet-600',
+      colorLink: 'from-purple-500 to-violet-600',
       onClick: () => navigate('/app/courses')
     },
     {
@@ -44,6 +46,7 @@ const QuickStartGuide: React.FC<QuickStartGuideProps> = ({ isOpen, onClose }) =>
       action: 'Finish',
       icon: Target,
       color: 'from-orange-500 to-red-600',
+      colorLink: 'from-orange-500 to-red-600',
       onClick: () => navigate('/app/analytics')
     }
   ];
