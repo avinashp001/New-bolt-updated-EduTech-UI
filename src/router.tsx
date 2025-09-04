@@ -40,6 +40,7 @@ import ScrollToTop from './components/Common/ScrollToTop';
 const AuthLayout: React.FC = () => {
   const { isSignedIn, isLoaded } = useUser();
   const { user, loading } = useAuth();
+  const location = useLocation();
 
   if (!isLoaded || loading || (isSignedIn && !user)) {
     return (
