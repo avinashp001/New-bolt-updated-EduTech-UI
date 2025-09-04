@@ -41,7 +41,7 @@ const QuickStartGuide: React.FC<QuickStartGuideProps> = ({ isOpen, onClose }) =>
       title: 'Track Your Progress',
       description: 'Monitor your performance with real-time analytics and insights.',
       // action: 'View Analytics',
-      action: 'Next',
+      action: 'Finish',
       icon: Target,
       color: 'from-orange-500 to-red-600',
       // onClick: () => navigate('/app/analytics')
