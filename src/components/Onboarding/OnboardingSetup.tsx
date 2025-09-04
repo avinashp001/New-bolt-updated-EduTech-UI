@@ -881,6 +881,11 @@ const OnboardingSetup: React.FC = () => {
           console.log('Generating study plan with profile:', studentProfile);
             showSuccess('Onboarding Complete!', 'Your preferences have been saved. Redirecting to dashboard...');
           console.log('Study plan generated successfully');
+
+
+          await updateProfile({ target_exam: selectedExam });
+await updateSettings(studentProfile);
+          await user?.reload?.();
           
           showSuccess('Onboarding Complete!', 'Your personalized study plan is ready. Redirecting to dashboard...');
           setIsProcessing(false);
