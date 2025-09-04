@@ -1690,8 +1690,6 @@
 
 
 
-// ------------------- Error PopUp Addition -------------------
-
 // src/components/Courses/TheoryQuizSession.tsx
 import React, { useState, useEffect, useCallback } from 'react'; // Added useCallback
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -1700,6 +1698,7 @@ import { AIService } from '../../lib/mistralAI';
 import { useAuth } from '../../hooks/useAuth';
 import { useProgress } from '../../hooks/useProgress';
 import RetryPopup from '../Common/RetryPopup'; // Import the new popup component
+import { useQuizMode } from '../../context/QuizModeContext'; // Import useQuizMode
 
 interface Question {
   id: string;
@@ -1733,6 +1732,7 @@ const TheoryQuizSession: React.FC = () => {
   const { addStudySession } = useProgress(user?.id);
   const location = useLocation();
   const navigate = useNavigate();
+  const { setQuizMode } = useQuizMode(); // Get setQuizMode from context
   
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -1747,6 +1747,21 @@ const TheoryQuizSession: React.FC = () => {
   const [theoryContent, setTheoryContent] = useState('');
   const [showRetryPopup, setShowRetryPopup] = useState(false); // New state for popup
   const [popupMessage, setPopupMessage] = useState(''); // New state for popup message
+
+  // Effect to manage quiz mode state
+  useEffect(() => {
+    if (testPhase === 'test') {
+      setQuizMode(true); // Enter quiz mode
+    } else {
+      setQuizMode(false); // Exit quiz mode
+    }
+
+    // Cleanup function to ensure quiz mode is off if component unmounts unexpectedly
+    return () => {
+      setQuizMode(false);
+    };
+  }, [testPhase, setQuizMode]);
+
 
   // Use useCallback to memoize the quiz generation function
   const generateQuizFromContent = useCallback(async (content: string, subjectName: string, topicName: string) => {
@@ -1785,9 +1800,34 @@ const TheoryQuizSession: React.FC = () => {
       
     } catch (error: any) { // Catch specific errors for popup message
       console.error('Error generating quiz:', error);
-      setPopupMessage(error.message || 'We encountered an issue generating the quiz questions. Please try again.');
-      setShowRetryPopup(true); // Show popup on error
-      setIsGeneratingQuiz(false); // Ensure loading state is off
+      
+      
+    //   setPopupMessage(error.message || 'We encountered an issue generating the quiz questions. Please try again.');
+    //   setShowRetryPopup(true); // Show popup on error
+    //   setIsGeneratingQuiz(false); // Ensure loading state is off
+
+    //    // Handle 429 specifically
+    // if (error?.message?.includes("Service tier capacity exceeded")) {
+    //   setPopupMessage("Our servers are currently busy. Please retry in a moment.");
+    //   setShowRetryPopup(true);
+    // } else {
+    //   setPopupMessage("Quiz generation failed. Please try again.");
+    const msg = error?.message ?? String(error);
+    const isCapacity =
+      msg.toLowerCase().includes('service tier capacity') ||
+      msg.toLowerCase().includes('status 429') ||
+      error?.code === 'SERVICE_TIER_CAPACITY_EXCEEDED' ||
+      error?.code === '3505' ||
+      error?.status === 429;
+
+    if (isCapacity) {
+      setPopupMessage('Our servers are currently busy (service capacity exceeded). Please retry in a moment.');
+    } else {
+      setPopupMessage('Failed to load theory content. Please try again.');
+    }
+      
+      
+      setShowRetryPopup(true);
     } finally {
       // This finally block will only run if no error was thrown or if error was caught and handled
       // If an error was thrown and caught, isGeneratingQuiz is already set to false above.
@@ -1800,82 +1840,82 @@ const TheoryQuizSession: React.FC = () => {
 
   // Extract data from navigation state
   useEffect(() => {
-    const state = location.state as any;
-    const initialSubject = state?.subject;
-    const initialTopic = state?.topic;
-    const initialTheoryContent = state?.theoryContent;
+  const state = location.state as any;
+  // accept either form (initialSubject/initTopic) or (subject/topic)
+  const initialSubject = state?.initialSubject ?? state?.subject;
+  const initialTopic   = state?.initialTopic   ?? state?.topic;
+  const initialTheoryContent = state?.theoryContent;
 
-    // Only proceed if all necessary data is present and has actually changed
-    if (initialSubject && initialTopic && initialTheoryContent && 
-        (initialSubject !== subject || initialTopic !== topic || initialTheoryContent !== theoryContent)) {
-      
-      setSubject(initialSubject);
-      setTopic(initialTopic);
-      setTheoryContent(initialTheoryContent);
-      generateQuizFromContent(initialTheoryContent, initialSubject, initialTopic);
-    } else if (!initialSubject || !initialTopic || !initialTheoryContent) {
-      // Redirect back if no content provided
-      navigate('/app/courses', { replace: true });
-    }
-  }, [location.state, navigate, subject, topic, theoryContent, generateQuizFromContent]); // Added generateQuizFromContent to dependencies
+  if (initialSubject && initialTopic && initialTheoryContent &&
+      (initialSubject !== subject || initialTopic !== topic || initialTheoryContent !== theoryContent)) {
 
-  const createFallbackQuestions = (content: string, subjectName: string, topicName: string): Question[] => {
-    const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 30);
-    const keyTerms = content.toLowerCase().match(/\b[a-z]{4,}\b/g)?.slice(0, 10) || [];
-    const hasFormulas = /\$.*\$/.test(content) || /[=+\-*/()0-9]/.test(content);
+    setSubject(initialSubject);
+    setTopic(initialTopic);
+    setTheoryContent(initialTheoryContent);
+    generateQuizFromContent(initialTheoryContent, initialSubject, initialTopic);
+  } else if (!initialSubject || !initialTopic || !initialTheoryContent) {
+    // Redirect back if no content provided
+    navigate('/app/courses', { replace: true });
+  }
+}, [location.state, navigate, subject, topic, theoryContent, generateQuizFromContent]);
+
+  // const createFallbackQuestions = (content: string, subjectName: string, topicName: string): Question[] => {
+  //   const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 30);
+  //   const keyTerms = content.toLowerCase().match(/\b[a-z]{4,}\b/g)?.slice(0, 10) || [];
+  //   const hasFormulas = /\$.*\$/.test(content) || /[=+\-*/()0-9]/.test(content);
     
-    return [
-      {
-        id: '1',
-        question: `Analyze the core principles of ${topicName} as presented in the theory. Which statement best demonstrates the interconnection between the key concepts?`,
-        options: [
-          sentences[0]?.substring(0, 80) + '...' || 'The concepts are fundamentally interconnected through shared theoretical foundations',
-          sentences[1]?.substring(0, 80) + '...' || 'Each concept operates independently without significant theoretical overlap',
-          'The relationships are purely mathematical without conceptual significance',
-          'The concepts contradict each other in fundamental ways'
-        ],
-        correctAnswer: 0,
-        explanation: `This demonstrates deep understanding of how the theoretical concepts in ${topicName} work together within the ${subjectName} framework.`,
-        topic: `${topicName} - Conceptual Analysis`,
-        difficulty: 'medium' as const,
-        questionType: 'analysis'
-      },
-      {
-        id: '2',
-        question: hasFormulas ? 
-          `Evaluate the mathematical relationships in ${topicName}. If the given conditions were modified, what would be the most significant impact?` :
-          `Critically assess the theoretical approach in ${topicName}. What would be the primary limitation in complex applications?`,
-        options: [
-          hasFormulas ? 'The mathematical relationships would require complete theoretical recalibration' : 'The theoretical limitations would become more pronounced in complex scenarios',
-          hasFormulas ? 'Only minor numerical adjustments would be needed' : 'The approach would remain equally effective in all scenarios',
-          hasFormulas ? 'The mathematical formulations would become completely invalid' : 'No significant limitations would emerge in practice',
-          hasFormulas ? 'The relationships would reverse their fundamental nature' : 'The approach would become more robust under complexity'
-        ],
-        correctAnswer: 0,
-        explanation: `This requires critical evaluation of the ${topicName} framework and understanding of its theoretical limitations and dependencies.`,
-        topic: `${topicName} - Critical Evaluation`,
-        difficulty: 'hard' as const,
-        questionType: 'evaluation'
-      },
-      {
-        id: '3',
-        question: keyTerms.length > 1 ? 
-          `Compare the roles of "${keyTerms[0]}" and "${keyTerms[1]}" in the ${topicName} framework. What is their most significant functional difference?` :
-          `Analyze the hierarchical structure of concepts in ${topicName}. Which element serves as the foundational basis?`,
-        options: [
-          keyTerms.length > 1 ? `${keyTerms[0]} provides structural foundation while ${keyTerms[1]} enables dynamic functionality` : 'The foundational element establishes the theoretical basis for all subsequent concepts',
-          keyTerms.length > 1 ? `${keyTerms[0]} and ${keyTerms[1]} serve identical functions in different contexts` : 'All elements contribute equally without hierarchical structure',
-          keyTerms.length > 1 ? `${keyTerms[1]} is more fundamental than ${keyTerms[0]} in all applications` : 'The most complex element serves as the foundation',
-          keyTerms.length > 1 ? `Both terms represent the same concept with different terminology` : 'No single element is more foundational than others'
-        ],
-        correctAnswer: 0,
-        explanation: `This requires comparative analysis and understanding of the functional roles of different elements within the ${topicName} theoretical system.`,
-        topic: `${topicName} - Comparative Analysis`,
-        difficulty: 'medium' as const,
-        questionType: 'comparison'
-      }
-    ];
-  };
+  //   return [
+  //     {
+  //       id: '1',
+  //       question: `Analyze the core principles of ${topicName} as presented in the theory. Which statement best demonstrates the interconnection between the key concepts?`,
+  //       options: [
+  //         sentences[0]?.substring(0, 80) + '...' || 'The concepts are fundamentally interconnected through shared theoretical foundations',
+  //         sentences[1]?.substring(0, 80) + '...' || 'Each concept operates independently without significant theoretical overlap',
+  //         'The relationships are purely mathematical without conceptual significance',
+  //         'The concepts contradict each other in fundamental ways'
+  //       ],
+  //       correctAnswer: 0,
+  //       explanation: `This demonstrates deep understanding of how the theoretical concepts in ${topicName} work together within the ${subjectName} framework.`,
+  //       topic: `${topicName} - Conceptual Analysis`,
+  //       difficulty: 'medium' as const,
+  //       questionType: 'analysis'
+  //     },
+  //     {
+  //       id: '2',
+  //       question: hasFormulas ? 
+  //         `Evaluate the mathematical relationships in ${topicName}. If the given conditions were modified, what would be the most significant impact?` :
+  //         `Critically assess the theoretical approach in ${topicName}. What would be the primary limitation in complex applications?`,
+  //       options: [
+  //         hasFormulas ? 'The mathematical relationships would require complete theoretical recalibration' : 'The theoretical limitations would become more pronounced in complex scenarios',
+  //         hasFormulas ? 'Only minor numerical adjustments would be needed' : 'The approach would remain equally effective in all scenarios',
+  //         hasFormulas ? 'The mathematical formulations would become completely invalid' : 'No significant limitations would emerge in practice',
+  //         hasFormulas ? 'The relationships would reverse their fundamental nature' : 'The approach would become more robust under complexity'
+  //       ],
+  //       correctAnswer: 0,
+  //       explanation: `This requires critical evaluation of the ${topicName} framework and understanding of its theoretical limitations and dependencies.`,
+  //       topic: `${topicName} - Critical Evaluation`,
+  //       difficulty: 'hard' as const,
+  //       questionType: 'evaluation'
+  //     },
+  //     {
+  //       id: '3',
+  //       question: keyTerms.length > 1 ? 
+  //         `Compare the roles of "${keyTerms[0]}" and "${keyTerms[1]}" in the ${topicName} framework. What is their most significant functional difference?` :
+  //         `Analyze the hierarchical structure of concepts in ${topicName}. Which element serves as the foundational basis?`,
+  //       options: [
+  //         keyTerms.length > 1 ? `${keyTerms[0]} provides structural foundation while ${keyTerms[1]} enables dynamic functionality` : 'The foundational element establishes the theoretical basis for all subsequent concepts',
+  //         keyTerms.length > 1 ? `${keyTerms[0]} and ${keyTerms[1]} serve identical functions in different contexts` : 'All elements contribute equally without hierarchical structure',
+  //         keyTerms.length > 1 ? `${keyTerms[1]} is more fundamental than ${keyTerms[0]} in all applications` : 'The most complex element serves as the foundation',
+  //         keyTerms.length > 1 ? `Both terms represent the same concept with different terminology` : 'No single element is more foundational than others'
+  //       ],
+  //       correctAnswer: 0,
+  //       explanation: `This requires comparative analysis and understanding of the functional roles of different elements within the ${topicName} theoretical system.`,
+  //       topic: `${topicName} - Comparative Analysis`,
+  //       difficulty: 'medium' as const,
+  //       questionType: 'comparison'
+  //     }
+  //   ];
+  // };
 
   const handleAnswerSelect = (answerIndex: number) => {
     const newAnswers = [...userAnswers];
@@ -2375,7 +2415,7 @@ const TheoryQuizSession: React.FC = () => {
         </div>
 
         {/* Recommendations */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        <div className="bg-white p-6 max-p-4 rounded-xl shadow-sm border border-slate-200">
           <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center space-x-2">
             <Target className="w-5 h-5 text-purple-600" />
             <span>AI Recommendations</span>
@@ -2423,7 +2463,7 @@ const TheoryQuizSession: React.FC = () => {
                   {/* Question Header */}
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center space-x-3">
-                      <div className={`w-8 h-8 min-[350px]:w-8 min-[350px]:h-6 rounded-full flex items-center justify-center font-bold text-white ${
+                      <div className={`w-8 h-8 maxh-12 rounded-full flex items-center justify-center font-bold text-white ${
                         isCorrect ? 'bg-green-600' : 'bg-red-600'
                       }`}>
                         {index + 1}
@@ -2478,7 +2518,7 @@ const TheoryQuizSession: React.FC = () => {
                           key={optionIndex}
                           className={`p-4 rounded-lg border-2 ${optionClass} transition-all`}
                         >
-                          <div className="flex items-center justify-between min-[350px]:flex-col">
+                          <div className="flex items-center justify-between max-flex-col">
                             <div className="flex items-center space-x-3 flex-1">
                               <span className={`font-medium ${textClass}`}>
                                 {String.fromCharCode(65 + optionIndex)}.
