@@ -104,6 +104,16 @@ const Header: React.FC<HeaderProps> = ({ userName, avgActivity, studySessions = 
                   
                   Ready to continue your learning journey?
                 </p>
+            {studySessions.length === 0 && (
+                  <div className="mt-2">
+                    <button
+                      onClick={() => setShowQuickStart(true)}
+                      className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                    >
+                      Show quick start guide →
+                    </button>
+                  </div>
+                )}
           </div>
         </div>
 
