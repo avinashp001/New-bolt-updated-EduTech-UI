@@ -567,6 +567,40 @@ html {
   .max-hidden{
     display: none;
   }
+  .max-ml-2{
+    margin-left: 0.5rem;
+  }
+  .max-ml-4{
+    margin-left: 1rem;
+  }
+  .max-mr-2{
+    margin-right: 0.5rem;
+  }
+  .max-mr-4{
+    margin-right: 1rem;
+  }
+  .max-mt-2{
+    margin-top: 0.5rem;
+  }
+  .max-mt-4{
+    margin-top: 1rem;
+  }
+  .max-mt-6{
+    margin-top: 1.5rem;
+  }
+  .max-mb-2{
+    margin-bottom: 0.5rem;
+  }
+  .max-mb-4{
+    margin-bottom: 1rem;
+  }
+  .max-mb-6{
+    margin-bottom: 1.5rem;
+  }
+  .max-px-4{
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
   .max-px-2{
     padding-left: 0.5rem;
     padding-right: 0.5rem;
@@ -619,6 +653,9 @@ html {
   .max-text-sm{
     font-size: 0.875rem;
     line-height: 1.25rem;
+  }
+  .maxh-12{
+    width: 3rem;
   }
 }
 
