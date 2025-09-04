@@ -36,8 +36,8 @@ const GetStartedPage: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
 
 
-  
-   const location = useLocation();
+  const step2Ref = useRef<HTMLDivElement | null>(null);
+
 
   useEffect(() => {
     if (location.hash) {
