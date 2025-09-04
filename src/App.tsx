@@ -48,6 +48,7 @@ function App() {
                 </svg>
               </button>
               <div className="bg-gradient-to-r from-blue-900 via-violet-700 to-pink-500 w-full mx-2 border border-gray-900 px-4 py-1 rounded-lg">
+                <img className="w-2 h-2" src=""/>
                 <h2 className="w-full font-semibold text-lg text-white">EduAI</h2>
               </div>
             </div>
