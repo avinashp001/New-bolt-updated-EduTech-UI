@@ -73,6 +73,8 @@ if (user && (!user.target_exam || user.target_exam.trim() === '')) {
   if (location.pathname !== '/app/onboarding') {
     return <Navigate to="/app/onboarding" replace />;
   }
+} else {
+  return <Navigate to="/app/dashboard" replace />
 }
   
   console.log('User authenticated and onboarded, rendering main app');
