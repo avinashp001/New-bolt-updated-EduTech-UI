@@ -48,6 +48,26 @@ const HowToUsePage: React.FC = () => {
     { id: 'advanced', name: 'Advanced Features', icon: Settings }
   ];
 
+  useEffect(() => {
+  if (location.hash) {
+    const id = location.hash.replace("#", "");
+
+    setTimeout(() => {
+      const section = document.getElementById(id);
+      if (section) {
+        const yOffset = -80; // adjust for sticky navbar height
+        const y =
+          section.getBoundingClientRect().top +
+          window.pageYOffset +
+          yOffset;
+
+        window.scrollTo({ top: y, behavior: "smooth" });
+      }
+    }, 200); // ⏳ give render a bit more time
+  }
+}, [location]);
+
+
   const gettingStartedSteps = [
     {
       title: "Sign Up & Create Your Profile",
