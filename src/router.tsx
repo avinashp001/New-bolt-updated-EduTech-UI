@@ -66,10 +66,8 @@ const AuthLayout: React.FC = () => {
     // return <Navigate to="/app/onboarding" replace />;
     console.log('User needs onboarding, rendering OnboardingSetup directly');
     return <OnboardingSetup />;
-  } else if (user && user.target_exam) {
-    return <Navigate to="/app/dashboard" replace />
   } 
-
+  
   console.log('User authenticated and onboarded, rendering main app');
    return (
     <>
