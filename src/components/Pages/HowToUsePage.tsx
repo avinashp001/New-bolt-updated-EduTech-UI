@@ -32,6 +32,14 @@ const HowToUsePage: React.FC = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [activeCategory, setActiveCategory] = useState('getting-started');
 
+  const sectionRefs = {
+    'getting-started': useRef<HTMLDivElement | null>(null),
+    'study-planning': useRef<HTMLDivElement | null>(null),
+    'ai-features': useRef<HTMLDivElement | null>(null),
+    'analytics': useRef<HTMLDivElement | null>(null),
+    'advanced': useRef<HTMLDivElement | null>(null),
+  };
+  
   const categories = [
     { id: 'getting-started', name: 'Getting Started', icon: Rocket },
     { id: 'study-planning', name: 'Study Planning', icon: Calendar },
