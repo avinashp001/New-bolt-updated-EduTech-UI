@@ -659,6 +659,8 @@ import { useAuth } from '../../hooks/useAuth';
 import { useSettings } from '../../hooks/useSettings';
 import LoadingSpinner from '../Common/LoadingSpinner';
 import { useNotification } from '../../context/NotificationContext';
+import { useLocation } from "react-router-dom";
+
 
 const OnboardingSetup: React.FC = () => {
   const { user, updateProfile, loading: authLoading } = useAuth();
