@@ -24,7 +24,7 @@ import {
   Calendar,
   GraduationCap
 } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import SEOHead from '../SEO/SEOHead';
 import { useUser } from '@clerk/clerk-react';
 
@@ -33,6 +33,32 @@ const GetStartedPage: React.FC = () => {
   const navigate = useNavigate();
   const [selectedExam, setSelectedExam] = useState('');
   const [currentStep, setCurrentStep] = useState(1);
+
+
+  
+   const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash) {
+      const id = location.hash.replace("#", "");
+
+      // Wait for DOM to render before trying to scroll
+      setTimeout(() => {
+        const section = document.getElementById(id);
+        if (section) {
+          const yOffset = -80; // adjust if you have a sticky navbar
+          const y =
+            section.getBoundingClientRect().top +
+            window.pageYOffset +
+            yOffset;
+
+          window.scrollTo({ top: y, behavior: "smooth" });
+        }
+      }, 50); // small delay to ensure section is mounted
+    }
+  }, [location]);
+
+  
 
   // Redirect if already signed in
   useEffect(() => {
