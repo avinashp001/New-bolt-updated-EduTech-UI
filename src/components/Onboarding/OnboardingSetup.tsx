@@ -653,7 +653,7 @@
 
 
 import React, { useRef, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Brain, Target, Calendar, BookOpen, CheckCircle, ArrowRight, Award, Zap, Rocket, TrendingUp, AlertTriangle, RefreshCw } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useSettings } from '../../hooks/useSettings';
