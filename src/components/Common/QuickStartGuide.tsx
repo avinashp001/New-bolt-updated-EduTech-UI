@@ -107,6 +107,7 @@ const QuickStartGuide: React.FC<QuickStartGuideProps> = ({ isOpen, onClose }) =>
           </div>
 
           <div className="space-y-4">
+            {currentStep > 0 && (
             <button
               onClick={handleStepAction}
               className={`w-full bg-gradient-to-r ${currentStepData.colorLink} text-white py-3 px-6 max-px-4 max-py-2 max-text-xs rounded-xl font-bold hover:shadow-lg transition-all duration-300 transform hover:scale-102 flex items-center justify-center space-x-2`}
@@ -114,6 +115,7 @@ const QuickStartGuide: React.FC<QuickStartGuideProps> = ({ isOpen, onClose }) =>
               <span>{currentStepData.actionLink}</span>
               <ArrowRight className="w-3 h-3" />
             </button>
+       )}
             
             <button
               onClick={handleStepNext}
