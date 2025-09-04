@@ -22,26 +22,29 @@ const QuickStartGuide: React.FC<QuickStartGuideProps> = ({ isOpen, onClose }) =>
     {
       title: 'Create Your Study Plan',
       description: 'Generate a personalized study schedule based on your exam and timeline.',
-      action: 'Create Plan',
+      // action: 'Create Plan',
+      action: 'Next',
       icon: Calendar,
       color: 'from-green-500 to-emerald-600',
-      onClick: () => navigate('/app/enhanced-schedule')
+      // onClick: () => navigate('/app/enhanced-schedule')
     },
     {
       title: 'Explore Your Courses',
       description: 'Browse your subjects and start learning with AI-powered content.',
-      action: 'View Courses',
+      // action: 'View Courses',
+      action: 'Next',
       icon: BookOpen,
       color: 'from-purple-500 to-violet-600',
-      onClick: () => navigate('/app/courses')
+      // onClick: () => navigate('/app/courses')
     },
     {
       title: 'Track Your Progress',
       description: 'Monitor your performance with real-time analytics and insights.',
-      action: 'View Analytics',
+      // action: 'View Analytics',
+      action: 'Next',
       icon: Target,
       color: 'from-orange-500 to-red-600',
-      onClick: () => navigate('/app/analytics')
+      // onClick: () => navigate('/app/analytics')
     }
   ];
 
