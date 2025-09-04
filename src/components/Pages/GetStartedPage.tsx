@@ -68,7 +68,7 @@ const GetStartedPage: React.FC = () => {
       // The AuthLayout will handle further redirection to onboarding if needed.
       navigate('/app/dashboard', { replace: true });
     }
-  }, [isSignedIn, navigate]);
+  }, [isSignedIn, navigate, location.hash]);
   
 
   const examTypes = [
