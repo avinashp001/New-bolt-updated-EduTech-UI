@@ -145,7 +145,7 @@ const EnhancedDashboard: React.FC = () => {
         {!studyPlanLoading && !studyPlan && (
           <div className="bg-gradient-to-r from-blue-600 to-purple-700 rounded-3xl p-8 text-white shadow-2xl border border-blue-500">
             <div className="flex items-center space-x-4 mb-6">
-              <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+              <div className="w-16 h-8 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
                 <Calendar className="w-8 h-8 text-white" />
               </div>
               <div>
