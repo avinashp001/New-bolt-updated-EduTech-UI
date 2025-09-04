@@ -48,7 +48,7 @@ function App() {
                 </svg>
               </button>
               <div>
-                <h2 className="text-lg">AI Edu Tech</h2>
+                <h2 className="text-lg text-white">AI Edu Tech</h2>
               </div>
             </div>
             <NavigationBreadcrumb />
