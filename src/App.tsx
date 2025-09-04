@@ -33,7 +33,7 @@ function App() {
       <main className={`${sidebarOpen ? 'lg:ml-64' : 'lg:ml-0'} lg:p-8 transition-all duration-300`}>
         <div className="max-w-7xl mx-auto">
           <div className="mb-6">
-            <div className="flex pl-4 pt-4 items-center justify-between mb-2">
+            <div className="flex pl-4 pt-4 items-center justify-between pb-2">
               <button
                 onClick={() => setSidebarOpen(true)}
                 className="p-2 rounded-lg bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700"
