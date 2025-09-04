@@ -156,7 +156,7 @@ const EnhancedDashboard: React.FC = () => {
               </div>
             </div>
             
-            <div className="hidden md:block grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div className="max-hidden grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               {/* <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-center">
                 <Brain className="w-8 h-8 text-white mx-auto mb-3" />
                 <h3 className="font-bold text-lg mb-2">AI-Powered</h3>
