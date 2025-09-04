@@ -168,7 +168,7 @@ const LandingPage: React.FC = () => {
                 ) : (
                   <>
                 <Link
-                  to="/get-started#onboarding-"
+                  to="/get-started#onboarding-progress"
                   className="inline-flex items-center space-x-2 bg-white text-blue-600 px-8 py-4 rounded-2xl font-bold hover:bg-blue-50 transition-all duration-300 transform hover:scale-105 shadow-lg"
                 >
                   <Rocket className="w-5 h-5" />
