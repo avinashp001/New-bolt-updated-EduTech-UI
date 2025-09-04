@@ -22,7 +22,7 @@ const QuickStartGuide: React.FC<QuickStartGuideProps> = ({ isOpen, onClose }) =>
     {
       title: 'Create Your Study Plan',
       description: 'Generate a personalized study schedule based on your exam and timeline.',
-      // action: 'Create Plan',
+      // actionLink: 'Create Plan',
       action: 'Next',
       icon: Calendar,
       color: 'from-green-500 to-emerald-600',
@@ -31,7 +31,7 @@ const QuickStartGuide: React.FC<QuickStartGuideProps> = ({ isOpen, onClose }) =>
     {
       title: 'Explore Your Courses',
       description: 'Browse your subjects and start learning with AI-powered content.',
-      // action: 'View Courses',
+      // actionLink: 'View Courses',
       action: 'Next',
       icon: BookOpen,
       color: 'from-purple-500 to-violet-600',
@@ -40,7 +40,7 @@ const QuickStartGuide: React.FC<QuickStartGuideProps> = ({ isOpen, onClose }) =>
     {
       title: 'Track Your Progress',
       description: 'Monitor your performance with real-time analytics and insights.',
-      // action: 'View Analytics',
+      // actionLink: 'View Analytics',
       action: 'Finish',
       icon: Target,
       color: 'from-orange-500 to-red-600',
@@ -100,6 +100,13 @@ const QuickStartGuide: React.FC<QuickStartGuideProps> = ({ isOpen, onClose }) =>
           </div>
 
           <div className="space-y-4">
+            <button
+              onClick={handleStepAction}
+              className={`w-full bg-gradient-to-r ${currentStepData.color} text-white py-2 px-4 rounded-xl font-bold hover:shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2`}
+            >
+              <span>{currentStepData.actionLink}</span>
+              <ArrowRight className="w-3 h-3" />
+            </button>
             <button
               onClick={handleStepAction}
               className={`w-full bg-gradient-to-r ${currentStepData.color} text-white py-3 px-6 rounded-xl font-bold hover:shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2`}
