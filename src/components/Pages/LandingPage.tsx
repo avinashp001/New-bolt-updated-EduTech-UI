@@ -317,7 +317,7 @@ const LandingPage: React.FC = () => {
                     </div>
                   </div>
                   <Link
-                    to="/get-started"
+                    to="/get-started#onboarding-progress"
                     className="block w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-xl font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-300 group-hover:scale-105 text-center"
                   >
                     Start Preparation
