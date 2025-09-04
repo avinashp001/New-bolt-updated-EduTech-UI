@@ -174,7 +174,7 @@ const EnhancedDashboard: React.FC = () => {
             <div className="text-center">
               <button
                 onClick={() => navigate('/app/enhanced-schedule')}
-                className="bg-white text-blue-600 px-8 py-4 rounded-2xl font-bold hover:bg-blue-50 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center space-x-3 mx-auto"
+                className="max-px-4 max-py-2 max-text-sm bg-white text-blue-600 px-8 py-4 rounded-2xl font-bold hover:bg-blue-50 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center space-x-3 mx-auto"
               >
                 <Rocket className="w-6 h-6" />
                 <span>Generate My Study Plan</span>
