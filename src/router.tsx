@@ -70,7 +70,6 @@ const AuthLayout: React.FC = () => {
     return <DashboardWrapper/>
   } 
 
-  
   console.log('User authenticated and onboarded, rendering main app');
    return (
     <>
