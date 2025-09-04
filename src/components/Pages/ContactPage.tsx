@@ -840,7 +840,7 @@ const ContactPage: React.FC = () => {
         {/* Main Contact Form */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 mb-16">
           {/* Contact Form */}
-          <div className="lg:col-span-2">
+          <div id="form" className="lg:col-span-2">
             <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-8">
               <div className="flex items-center space-x-3 mb-8">
                 <Send className="w-6 h-6 text-blue-600" />
