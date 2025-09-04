@@ -147,7 +147,7 @@ const EnhancedDashboard: React.FC = () => {
             <div className="flex items-center space-x-4 mb-6">
               <div>
                 <h2 className="max-text-xl text-3xl font-bold mb-2">Generate Your Study Plan</h2>
-                <p className="text-blue-100 text-lg">
+                <p className="max-text-xs text-blue-100 text-lg">
                   Welcome! Let's create your personalized AI-powered study plan to maximize your exam preparation.
                 </p>
               </div>
