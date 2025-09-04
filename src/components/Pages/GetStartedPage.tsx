@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Rocket, 
   Brain, 
@@ -31,6 +31,7 @@ import { useUser } from '@clerk/clerk-react';
 const GetStartedPage: React.FC = () => {
   const { isSignedIn } = useUser();
   const navigate = useNavigate();
+  const location = useLocation();
   const [selectedExam, setSelectedExam] = useState('');
   const [currentStep, setCurrentStep] = useState(1);
 
