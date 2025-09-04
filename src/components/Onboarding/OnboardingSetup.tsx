@@ -743,6 +743,28 @@ const OnboardingSetup: React.FC = () => {
       stepRefs.current[currentStep - 1]?.focus(); // Focus the element for accessibility
     }
   }, [currentStep]);
+
+
+   const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash) {
+      // remove the "#" from hash
+      const id = location.hash.replace("#", "");
+      const section = document.getElementById(id);
+      if (section) {
+        // 👇 smooth scroll + margin offset
+        const yOffset = -80; // adjust offset for navbar/header
+        const y =
+          section.getBoundingClientRect().top +
+          window.pageYOffset +
+          yOffset;
+
+        window.scrollTo({ top: y, behavior: "smooth" });
+      }
+    }
+  }, [location]);
+  
   
   const examTypes = [
     'UPSC Civil Services',
