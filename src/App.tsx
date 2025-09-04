@@ -47,6 +47,9 @@ function App() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               </button>
+              <div>
+                <h2 className="text-lg">AI Edu Tech</h2>
+              </div>
             </div>
             <NavigationBreadcrumb />
           </div>
