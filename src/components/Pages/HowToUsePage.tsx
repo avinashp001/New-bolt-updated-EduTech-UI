@@ -371,6 +371,14 @@ const HowToUsePage: React.FC = () => {
                 onClick={() => {
                   setActiveCategory(category.id);
                   setActiveStep(0);
+
+                  // ✅ Smooth scroll to section
+      setTimeout(() => {
+        sectionRefs[category.id].current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 100);
                 }}
                 className={`p-4 rounded-xl transition-all duration-300 ${
                   activeCategory === category.id
