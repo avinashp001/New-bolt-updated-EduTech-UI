@@ -378,7 +378,7 @@ const HowToUsePage: React.FC = () => {
           behavior: "smooth",
           block: "start",
         });
-      }, 1000);
+      }, 100);
                 }}
                 className={`p-4 rounded-xl transition-all duration-300 ${
                   activeCategory === category.id
