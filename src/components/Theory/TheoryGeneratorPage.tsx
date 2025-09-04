@@ -18,6 +18,7 @@ const TheoryGeneratorPage: React.FC = () => {
   const [generatedTheory, setGeneratedTheory] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showRetryPopup, setShowRetryPopup] = useState(false); // New state for popup
   const theoryContentRef = useRef<HTMLDivElement>(null);
 
   // const subjects = [
@@ -59,15 +60,32 @@ const TheoryGeneratorPage: React.FC = () => {
     setIsLoading(true);
     setGeneratedTheory(null);
     setError(null);
+     setShowRetryPopup(false);
 
     try {
       const theory = await AIService.generateTheoryV2(subjectInput, topicInput, user.id, selectedExamLevel);
       setGeneratedTheory(theory);
       showSuccess('Theory Generated!', `Theoretical content for "${topicInput}" in ${subjectInput} (${selectedExamLevel} level) has been successfully generated.`);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error generating theory:', err);
-      setError('Failed to generate theory. Please try again later.');
-      showError('Generation Failed', 'Could not generate theory. Please check your input and try again.');
+
+
+      const msg = err?.message ?? String(err);
+    const isCapacity =
+      msg.toLowerCase().includes('service tier capacity') ||
+      msg.toLowerCase().includes('status 429') ||
+      err?.code === 'SERVICE_TIER_CAPACITY_EXCEEDED' ||
+      err?.code === '3505' ||
+      err?.status === 429;
+
+    if (isCapacity) {
+      setError('Our servers are currently busy (service capacity exceeded). Please retry in a moment.');
+    } else {
+      setError('Failed to load theory content. Please try again.');
+    }
+      setShowRetryPopup(true);
+      // setError('Failed to generate theory. Please try again later.');
+      // showError('Generation Failed', 'Could not generate theory. Please check your input and try again.');
     } finally {
       setIsLoading(false);
     }
