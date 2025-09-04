@@ -49,6 +49,7 @@ const HowToUsePage: React.FC = () => {
     { id: 'advanced', name: 'Advanced Features', icon: Settings }
   ];
 
+  const location = useLocation();
   useEffect(() => {
   if (location.hash) {
     const id = location.hash.replace("#", "");
