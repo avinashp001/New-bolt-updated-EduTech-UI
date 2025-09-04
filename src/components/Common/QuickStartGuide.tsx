@@ -59,6 +59,7 @@ const QuickStartGuide: React.FC<QuickStartGuideProps> = ({ isOpen, onClose }) =>
   const handleStepNext = () => {
       handleNext();
   };
+  
   const handleStepAction = () => {
     const step = steps[currentStep];
     if (step.onClick) {
@@ -112,7 +113,7 @@ const QuickStartGuide: React.FC<QuickStartGuideProps> = ({ isOpen, onClose }) =>
             </button>
             
             <button
-              onClick={handleStepAction}
+              onClick={handleStepNext}
               className={`w-full bg-gradient-to-r ${currentStepData.color} text-white py-3 px-6 rounded-xl font-bold hover:shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2`}
             >
               <span>{currentStepData.action}</span>
