@@ -1,5 +1,5 @@
 import { Mistral } from '@mistralai/mistralai';
-import { safeParseJSON } from '../../utils/jsonParser';
+import { safeParseJSON, parseFirstJSONCandidate  } from '../../utils/jsonParser';
 
 const apiKey = import.meta.env.VITE_MISTRAL_API_KEY;
 const useMockAI = !apiKey;
@@ -22,8 +22,8 @@ export class QuestionGenerator {
       const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 20).slice(0, 10);
       const firstSentence = sentences[0]?.trim() || `This ${subject} content covers important concepts`;
       
-      return JSON.stringify({
-        questions: [
+
+      const rawQuestions = [
           {
             id: '1',
             question: `Based on the uploaded content, which statement best describes the main topic discussed?`,
@@ -112,8 +112,11 @@ export class QuestionGenerator {
             explanation: 'This explanation is provided in the uploaded material.',
             topic: 'Content Understanding'
           }
-        ]
-      });
+        ];
+      const shuffledQuestions = rawQuestions.map(q => this.shuffleQuestionOptions(q));
+      return JSON.stringify({ questions: shuffledQuestions });
+
+
     }
 
     const prompt = this.getTestQuestionsPrompt(content, subject);
@@ -147,65 +150,65 @@ export class QuestionGenerator {
       // Use robust JSON parsing
       const parsedQuestions = safeParseJSON<{ questions: any[] }>(aiResponse);
       
-      if (parsedQuestions && parsedQuestions.questions && Array.isArray(parsedQuestions.questions)) {
-        return JSON.stringify(parsedQuestions);
-      }
+     if (parsedQuestions && parsedQuestions.questions && Array.isArray(parsedQuestions.questions)) {
+  const shuffled = parsedQuestions.questions.map(q => this.shuffleQuestionOptions(q));
+  return JSON.stringify({ questions: shuffled });
+}
+
       
-      console.warn('Failed to parse AI question response, using fallback');
-      return JSON.stringify({
-        questions: [
-          {
-            id: '1',
-            question: `Based on the uploaded content, what is the main topic discussed?`,
-            options: ['Content-specific concept', 'Alternative concept', 'Different approach', 'General overview'],
-            correctAnswer: 0,
-            explanation: 'This is the main focus of the uploaded material.',
-            topic: 'Main Content'
-          }
-        ]
-      });
-    } catch (error) {
+
+      let parsed: any | null = parseFirstJSONCandidate(aiResponse);
+
+      if (!parsed) {
+  const firstBrace = aiResponse.indexOf('{');
+  const lastBrace = aiResponse.lastIndexOf('}');
+  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+    try {
+      parsed = JSON.parse(aiResponse.substring(firstBrace, lastBrace + 1));
+    } catch (e) {
+      // ignore - we already attempted multi-pass parsing above
+    }
+  }
+}
+
+if (parsed && parsed.questions && Array.isArray(parsed.questions)) {
+  const shuffled = parsed.questions.map(q => this.shuffleQuestionOptions(q));
+  return JSON.stringify({ questions: shuffled });
+}
+
+
+
+      // console.warn('Failed to parse AI question response, using fallback');
+    } catch (error: any) {
       console.error('Error generating test questions:', error);
-      return JSON.stringify({
-        questions: [
-          {
-            id: '1',
-            question: `Based on the uploaded content, what is the main topic discussed?`,
-            options: ['Content-specific concept', 'Alternative concept', 'Different approach', 'General overview'],
-            correctAnswer: 0,
-            explanation: 'This is the main focus of the uploaded material.',
-            topic: 'Main Content'
-          }
-        ]
-      });
+      // Wrap and rethrow so UI can show popup
+  const errMsg = error?.message ?? String(error);
+  const e = new Error(errMsg);
+  (e as any).code = error?.code ?? error?.status ?? "GENERATION_FAILED";
+  throw e;
     }
   }
+   private static shuffleQuestionOptions(question: any): any {
+  const options = [...question.options];
+  const correctAnswerIndex = question.correctAnswer; 
+  const correctAnswerText = options[correctAnswerIndex];
 
-    private static shuffleQuestionOptions(question: any): any {
-    const options = [...question.options];
-    const correctAnswer = question.correctAnswer;
-
-    // Create an array of indices [0, 1, 2, 3]
-    const indices = options.map((_, i) => i);
-
-    // Fisher-Yates shuffle algorithm for indices
-    for (let i = indices.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [indices[i], indices[j]] = [indices[j], indices[i]];
-    }
-
-    // Reorder options based on shuffled indices
-    const shuffledOptions = indices.map(i => options[i]);
-
-    // Find the new index of the correct answer
-    const newCorrectAnswer = indices.indexOf(correctAnswer);
-
-    return {
-      ...question,
-      options: shuffledOptions,
-      correctAnswer: newCorrectAnswer,
-    };
+  // Fisher-Yates shuffle
+  for (let i = options.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [options[i], options[j]] = [options[j], options[i]];
   }
+
+  // Find new index of the correct answer
+  const newCorrectAnswer = options.findIndex(opt => opt === correctAnswerText);
+
+  return {
+    ...question,
+    options,
+    correctAnswer: newCorrectAnswer,
+  };
+}
+
 
 
   private static getTestQuestionsPrompt(content: string, subject: string): string {
