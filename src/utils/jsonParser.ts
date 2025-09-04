@@ -286,7 +286,76 @@ function collectScheduleEntries(parsed: any): any[] {
  *  - Then scan the remaining text for inline JSON-like chunks
  *  - Parse each candidate with multi-pass repair
  *  - Merge into { dailySchedule: [...] }
+ * 
  */
+
+
+// ------------------------------
+// Generic JSON candidate parser (new)
+// ------------------------------
+/**
+ * Attempts to extract and parse the first JSON-like candidate (any shape)
+ * from an AI response. Uses the same fenced-block / inline-candidate extraction
+ * and multi-pass repair already present in this file.
+ *
+ * Returns the parsed object (any) or null if none parsed successfully.
+ */
+export function parseFirstJSONCandidate(aiText: string): any | null {
+  log("parseFirstJSONCandidate: raw length:", aiText?.length ?? 0);
+  if (!aiText || typeof aiText !== "string") {
+    err("parseFirstJSONCandidate input is not a string");
+    return null;
+  }
+
+  // Reuse existing helpers
+  const fenced = extractFencedBlocks(aiText);
+  const jsonFenced = fenced.filter(b => b.language === "json").map(b => b.content);
+  const anyFenced = fenced
+    .filter(b => b.language !== "json")
+    .map(b => b.content);
+
+  const textWithoutFences = removeFencedBlocks(aiText);
+  const inlineCandidates = scanInlineJSONCandidates(textWithoutFences);
+
+  const candidates: string[] = [];
+  candidates.push(...jsonFenced, ...anyFenced, ...inlineCandidates);
+
+  // If nothing found, try a crude brace substring fallback (whole text)
+  if (candidates.length === 0) {
+    warn("parseFirstJSONCandidate: No JSON-like candidates found. Trying full-text brace fallback.");
+    const firstBrace = aiText.indexOf('{');
+    const lastBrace = aiText.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+      const cand = aiText.slice(firstBrace, lastBrace + 1);
+      const parsedFallback = tryParseCandidate(cand);
+      if (parsedFallback) return parsedFallback;
+    }
+    return null;
+  }
+
+  log(`parseFirstJSONCandidate: Found ${candidates.length} candidate(s).`);
+
+  for (const cand of candidates) {
+    const parsed = tryParseCandidate(cand);
+    if (parsed) {
+      log("parseFirstJSONCandidate: successfully parsed one candidate");
+      return parsed;
+    }
+  }
+
+  // Last effort: attempt to parse the entire response (cleaned)
+  const wholeParsed = tryParseCandidate(aiText);
+  if (wholeParsed) {
+    log("parseFirstJSONCandidate: parsed by trying whole text");
+    return wholeParsed;
+  }
+
+  warn("parseFirstJSONCandidate: no candidate parsed successfully");
+  return null;
+}
+
+
+
 export function safeParseJSON(aiText: string): any | null {
   log("Raw AI response length:", aiText?.length ?? 0);
 
