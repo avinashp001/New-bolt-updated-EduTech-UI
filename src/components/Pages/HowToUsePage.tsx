@@ -394,7 +394,7 @@ const HowToUsePage: React.FC = () => {
         </div>
 
         {/* Step-by-Step Guide */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        <div ref={sectionRefs[activeCategory]} className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {/* Steps Navigation */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 sticky top-6">
