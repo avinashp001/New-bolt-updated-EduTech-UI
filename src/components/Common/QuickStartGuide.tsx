@@ -56,16 +56,10 @@ const QuickStartGuide: React.FC<QuickStartGuideProps> = ({ isOpen, onClose }) =>
     }
   };
 
-  const handleStepAction = () => {
-    const step = steps[currentStep];
-    if (step.onClick) {
-      step.onClick();
-      onClose();
-    } else {
+  const handleStepNext = () => {
       handleNext();
-    }
   };
-  const handleStepAction2 = () => {
+  const handleStepAction = () => {
     const step = steps[currentStep];
     if (step.onClick) {
       step.onClick();
