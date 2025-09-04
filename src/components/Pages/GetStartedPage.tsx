@@ -312,7 +312,7 @@ const GetStartedPage: React.FC = () => {
         )}
 
         {currentStep >= 2 && (
-          <div className="mb-16">
+          <div ref={step2Ref} className="mb-16">
             <div className="bg-gradient-to-r from-blue-600 to-purple-700 rounded-3xl p-12 text-white text-center">
               <h2 className="text-3xl font-bold mb-4">Ready to Transform Your Preparation?</h2>
               <p className="text-blue-100 text-lg mb-8 max-w-2xl mx-auto">
