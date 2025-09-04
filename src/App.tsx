@@ -48,7 +48,7 @@ function App() {
                 </svg>
               </button>
               <div className="flex justify-center bg-gradient-to-r from-blue-900 via-violet-700 to-pink-500 w-full mx-2 border border-gray-900 px-4 py-1 rounded-lg"
-                style{{alignItem:"center"}}>
+                style={{ alignItems: "center" }}>
                 <img className="w-10 h-10 bg-white/80 border rounded-3xl" src="https://quizgenius.tech/assets/logo-ClSSRi2t.png"/>
                 <h2 className="w-full font-semibold text-lg text-white">EduAI</h2>
               </div>
