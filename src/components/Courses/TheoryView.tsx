@@ -1371,10 +1371,26 @@ const TheoryView: React.FC<{ userId: string }> = ({ userId }) => {
     try {
       const content = await AIService.generateTheory(subject, topic, userId);
       setTheoryContent(content);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching theory:', err);
-      setError(err || 'Failed to load theory content. Please try again.');
-      setShowRetryPopup(true); // Show popup on error
+
+
+      const msg = err?.message ?? String(err);
+    const isCapacity =
+      msg.toLowerCase().includes('service tier capacity') ||
+      msg.toLowerCase().includes('status 429') ||
+      err?.code === 'SERVICE_TIER_CAPACITY_EXCEEDED' ||
+      err?.code === '3505' ||
+      err?.status === 429;
+
+    if (isCapacity) {
+      setError('Our servers are currently busy (service capacity exceeded). Please retry in a moment.');
+    } else {
+      setError('Failed to load theory content. Please try again.');
+    }
+
+
+      setShowRetryPopup(true);
     } finally {
       setLoading(false);
     }
