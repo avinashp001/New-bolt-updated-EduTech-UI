@@ -674,7 +674,7 @@ const HowToUsePage: React.FC = () => {
         </div>
 
         {/* Video Tutorial Section */}
-        <div id="videos" className="mt-16 bg-gradient-to-r from-slate-900 to-slate-800 rounded-3xl p-12 text-white">
+        <div id="videos" className="max-p-6 mt-16 bg-gradient-to-r from-slate-900 to-slate-800 rounded-3xl p-12 text-white">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">Video Tutorials</h2>
             <p className="text-slate-300 text-lg">
