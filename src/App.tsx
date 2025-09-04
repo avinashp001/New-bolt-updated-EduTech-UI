@@ -48,7 +48,7 @@ function App() {
                 </svg>
               </button>
               <div className="bg-gradient-to-r from-blue-900 to-violet-700 w-full mx-2 border border-gray-900 px-4 py-1 rounded-lg">
-                <h2 className="w-full text-center font-semibold text-lg text-white">EduAI</h2>
+                <h2 className="w-full font-semibold text-lg text-white">EduAI</h2>
               </div>
             </div>
             <NavigationBreadcrumb />
