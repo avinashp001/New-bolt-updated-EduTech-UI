@@ -73,7 +73,8 @@ const AuthLayout: React.FC = () => {
   console.log('User authenticated and onboarded, rendering main app');
    return (
     <>
-      <ScrollToTop /> 
+      <ScrollToTop />
+      <Outlet/>
       <App />
     </>
   );
