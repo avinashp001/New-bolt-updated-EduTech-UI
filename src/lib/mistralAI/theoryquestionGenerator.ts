@@ -498,9 +498,13 @@ export class TheoryQuestionGenerator {
       });
 
       return response.choices[0]?.message?.content || this.getFallbackQuestions(subject, topic, examLevel); // Pass examLevel
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error generating theory quiz questions:', error);
-      return this.getFallbackQuestions(subject, topic, examLevel); // Pass examLevel
+      // Wrap and rethrow so UI can show popup
+  const errMsg = error?.message ?? String(error);
+  const e = new Error(errMsg);
+  (e as any).code = error?.code ?? error?.status ?? "GENERATION_FAILED";
+  throw e;
     }
   }
 
