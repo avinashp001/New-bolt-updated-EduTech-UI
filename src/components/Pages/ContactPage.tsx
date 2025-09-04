@@ -1118,7 +1118,7 @@ const ContactPage: React.FC = () => {
 
         {/* Office Location Map */}
         <div id="office-location" className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
-          <div className="max-p-4 p-8">
+          <div className="max-p-6 p-8">
             <h2 className="text-2xl font-bold text-slate-800 text-center mb-8">Visit Our Office</h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <div>
