@@ -750,19 +750,21 @@ const OnboardingSetup: React.FC = () => {
 
   useEffect(() => {
     if (location.hash) {
-      // remove the "#" from hash
       const id = location.hash.replace("#", "");
-      const section = document.getElementById(id);
-      if (section) {
-        // 👇 smooth scroll + margin offset
-        const yOffset = -80; // adjust offset for navbar/header
-        const y =
-          section.getBoundingClientRect().top +
-          window.pageYOffset +
-          yOffset;
 
-        window.scrollTo({ top: y, behavior: "smooth" });
-      }
+      // Wait for DOM to render before trying to scroll
+      setTimeout(() => {
+        const section = document.getElementById(id);
+        if (section) {
+          const yOffset = -80; // adjust if you have a sticky navbar
+          const y =
+            section.getBoundingClientRect().top +
+            window.pageYOffset +
+            yOffset;
+
+          window.scrollTo({ top: y, behavior: "smooth" });
+        }
+      }, 50); // small delay to ensure section is mounted
     }
   }, [location]);
   
