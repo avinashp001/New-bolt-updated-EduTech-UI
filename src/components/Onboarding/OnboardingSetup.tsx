@@ -744,29 +744,6 @@ const OnboardingSetup: React.FC = () => {
       stepRefs.current[currentStep - 1]?.focus(); // Focus the element for accessibility
     }
   }, [currentStep]);
-
-
-   const location = useLocation();
-
-  useEffect(() => {
-    if (location.hash) {
-      const id = location.hash.replace("#", "");
-
-      // Wait for DOM to render before trying to scroll
-      setTimeout(() => {
-        const section = document.getElementById(id);
-        if (section) {
-          const yOffset = -80; // adjust if you have a sticky navbar
-          const y =
-            section.getBoundingClientRect().top +
-            window.pageYOffset +
-            yOffset;
-
-          window.scrollTo({ top: y, behavior: "smooth" });
-        }
-      }, 50); // small delay to ensure section is mounted
-    }
-  }, [location]);
   
   
   const examTypes = [
