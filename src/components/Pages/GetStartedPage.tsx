@@ -69,7 +69,13 @@ const GetStartedPage: React.FC = () => {
       navigate('/app/dashboard', { replace: true });
     }
   }, [isSignedIn, navigate, location.hash]);
-  
+
+
+   useEffect(() => {
+    if (currentStep === 2 && step2Ref.current) {
+      step2Ref.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [currentStep]);
 
   const examTypes = [
     { id: 'upsc', name: 'UPSC Civil Services', icon: '🏛️', students: '50,000+', difficulty: 'High' },
