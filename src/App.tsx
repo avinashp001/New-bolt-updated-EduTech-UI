@@ -48,6 +48,7 @@ function App() {
                 </svg>
               </button>
               <div className="bg-gradient-to-r from-blue-900 to-violet-700 w-full mx-2 border border-gray-900 px-4 py-1 rounded-lg">
+                
                 <h2 className="w-full text-center text-lg text-white">AI Edu Tech</h2>
               </div>
             </div>
