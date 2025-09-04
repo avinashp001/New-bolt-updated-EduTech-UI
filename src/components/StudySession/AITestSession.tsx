@@ -3,19 +3,20 @@ import { Brain, FileText, Clock, CheckCircle, AlertCircle, TrendingUp, BookOpen,
 import { useDropzone } from 'react-dropzone';
 import { AIService } from '../../lib/mistralAI';
 import { PDFParser } from '../../lib/pdfParser';
-import { safeParseJSON } from '../../utils/jsonParser';
+// import { safeParseJSON } from '../../utils/jsonParser'; // not used now
 import { useAuth } from '../../hooks/useAuth';
 import { useProgress } from '../../hooks/useProgress';
 import { useDetailedSchedule } from '../../hooks/useDetailedSchedule';
 import { supabase } from '../../lib/supabase';
 import RetryPopup from '../Common/RetryPopup';
-
+import { useQuizMode } from '../../context/QuizModeContext';
+import { parseFirstJSONCandidate } from '../../utils/jsonParser';
 
 interface Question {
   id: string;
   question: string;
   options: string[];
-  correctAnswer: number;
+  correctAnswer: number; // 0-based index
   explanation: string;
   topic: string;
 }
@@ -30,15 +31,117 @@ interface TestResult {
   detailedAnalysis: string;
   recommendations: string[];
   nextSteps: string[];
-  questions: Question[]; 
+  questions: Question[];
   userAnswers: number[];
 }
+
+// --- Normalizers / Helpers ---
+const toFourOptions = (raw: any): string[] => {
+  let opts: string[] = [];
+  if (Array.isArray(raw)) opts = raw.map(String);
+  else if (raw && typeof raw === 'object') {
+    // sometimes comes as {A: "...", B: "...", ...}
+    const keys = Object.keys(raw).sort(); // A,B,C,D...
+    opts = keys.map(k => String(raw[k]));
+  }
+  // ensure 4 options
+  const padded = [...opts].slice(0, 4);
+  while (padded.length < 4) padded.push('None of the above');
+  return padded;
+};
+
+const letterToIndex = (val: string): number | null => {
+  const v = val.trim().toUpperCase();
+  if (['A', 'B', 'C', 'D'].includes(v)) return v.charCodeAt(0) - 65;
+  return null;
+};
+
+const guessCorrectIndex = (q: any, opts: string[]): number => {
+  // Try number (0- or 1-based)
+  if (typeof q.correctAnswer === 'number') {
+    return q.correctAnswer >= 1 ? q.correctAnswer - 1 : q.correctAnswer;
+  }
+  // Try letter A-D
+  if (typeof q.correctAnswer === 'string') {
+    // sometimes it's the text of the option
+    const byLetter = letterToIndex(q.correctAnswer);
+    if (byLetter !== null) return Math.min(Math.max(byLetter, 0), 3);
+
+    const textIdx = opts.findIndex(o => o.trim().toLowerCase() === q.correctAnswer.trim().toLowerCase());
+    if (textIdx !== -1) return textIdx;
+  }
+  if (typeof q.answer === 'number') return q.answer >= 1 ? q.answer - 1 : q.answer;
+  if (typeof q.answer === 'string') {
+    const byLetter = letterToIndex(q.answer);
+    if (byLetter !== null) return Math.min(Math.max(byLetter, 0), 3);
+    const textIdx = opts.findIndex(o => o.trim().toLowerCase() === q.answer.trim().toLowerCase());
+    if (textIdx !== -1) return textIdx;
+  }
+  // Default to first
+  return 0;
+};
+
+const normalizeQuestions = (raw: any, selectedSubject: string): Question[] => {
+  const list: any[] = Array.isArray(raw) ? raw : raw?.questions || raw?.data || [];
+  return list
+    .map((q, idx) => {
+      const options = toFourOptions(q.options ?? q.choices ?? q.answers);
+      const correctAnswer = guessCorrectIndex(q, options);
+      const text =
+        q.question || q.q || q.prompt || q.text || `Question ${idx + 1}`;
+      const topic =
+        q.topic || q.chapter || q.subtopic || selectedSubject || 'General';
+      const explanation =
+        q.explanation || q.explain || q.why || 'Review the concept.';
+      return {
+        id: String(q.id ?? idx + 1),
+        question: String(text),
+        options,
+        correctAnswer: Math.min(Math.max(correctAnswer, 0), options.length - 1),
+        explanation: String(explanation),
+        topic: String(topic),
+      } as Question;
+    })
+    .filter(q => q.question && q.options?.length >= 2);
+};
+
+const buildTinyFallback = (content: string, selectedSubject: string): Question[] => {
+  const sentences = content.split(/[.!?]+/).map(s => s.trim()).filter(Boolean);
+  const first = sentences[0]?.slice(0, 80) || 'Core idea from your material';
+  return [
+    {
+      id: '1',
+      question: `What is a key idea from your ${selectedSubject} material?`,
+      options: [first, 'Background detail', 'Irrelevant fact', 'Random guess'],
+      correctAnswer: 0,
+      explanation: 'This captures the main idea from the uploaded content.',
+      topic: selectedSubject || 'General',
+    },
+    {
+      id: '2',
+      question: 'Which option best aligns with the central theme?',
+      options: ['Central theme', 'Peripheral note', 'Outlier detail', 'Contradiction'],
+      correctAnswer: 0,
+      explanation: 'Focus on the central theme discussed.',
+      topic: selectedSubject || 'General',
+    },
+    {
+      id: '3',
+      question: 'Identify the most accurate statement based on the content.',
+      options: ['Accurate statement', 'Partially true', 'Misleading', 'Incorrect'],
+      correctAnswer: 0,
+      explanation: 'Accuracy is prioritized.',
+      topic: selectedSubject || 'General',
+    },
+  ];
+};
 
 const AITestSession: React.FC = () => {
   const { user } = useAuth();
   const { detailedSchedule, loading: detailedScheduleLoading } = useDetailedSchedule(user?.id);
   const { addStudySession } = useProgress(user?.id, detailedSchedule, detailedScheduleLoading);
-  
+  const { setQuizMode } = useQuizMode();
+
   const [selectedSubject, setSelectedSubject] = useState('');
   const [uploadedContent, setUploadedContent] = useState<string>('');
   const [fileName, setFileName] = useState('');
@@ -51,112 +154,65 @@ const AITestSession: React.FC = () => {
   const [testStartTime, setTestStartTime] = useState<Date | null>(null);
   const [testPhase, setTestPhase] = useState<'upload' | 'test' | 'results'>('upload');
 
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
   const [showRetryPopup, setShowRetryPopup] = useState(false);
-  
+
   const subjects = [
     'Mathematics', 'Physics', 'Chemistry', 'Biology',
     'History', 'Geography', 'Economics', 'Political Science',
     'English', 'Current Affairs', 'Reasoning', 'General Knowledge'
   ];
 
+  useEffect(() => {
+    setQuizMode(testPhase === 'test');
+    return () => setQuizMode(false);
+  }, [testPhase, setQuizMode]);
+
   const onDrop = async (acceptedFiles: File[]) => {
     if (!selectedSubject) {
       alert('Please select a subject first.');
       return;
     }
-
     const file = acceptedFiles[0];
     if (!file) return;
 
     setIsGeneratingTest(true);
     setFileName(file.name);
+    setError('');
+    setShowRetryPopup(false);
 
     try {
-      // Use proper PDF parsing
+      // 1) Extract content
       const content = await PDFParser.extractTextFromFile(file);
-      
-      // Validate extracted content
       if (!PDFParser.validateFileContent(content)) {
-        throw new Error('The file content could not be properly extracted or appears to be corrupted. Please try a different file.');
+        throw new Error('The file content could not be extracted properly. Try another file.');
       }
-      
       setUploadedContent(content);
-      
-      // Generate test questions using AI with actual content
-      const testQuestions = await AIService.generateTestQuestions(content, selectedSubject);
-      
-      // Use robust JSON parsing
-      const parsedResponse = safeParseJSON<{ questions: Question[] }>(testQuestions);
-      
-      let parsedQuestions: Question[];
-      
-      if (parsedResponse && parsedResponse.questions && Array.isArray(parsedResponse.questions)) {
-        parsedQuestions = parsedResponse.questions;
-      } else {
-        console.warn('Failed to parse AI questions, using content-based fallback');
-        // Create content-based fallback questions
-        const contentLines = content.split('\n').filter(line => line.trim().length > 20);
-        const keyTerms = content.toLowerCase().match(/\b[a-z]{4,}\b/g)?.slice(0, 10) || [];
-        const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 30);
-        
-        parsedQuestions = [
-          {
-            id: '1',
-            question: `Based on the extracted ${selectedSubject} content from the PDF, what is the main topic discussed?`,
-            options: [
-              sentences[0]?.substring(0, 60) + '...' || 'Primary concept from extracted content',
-              sentences[1]?.substring(0, 60) + '...' || 'Alternative interpretation',
-              'General theoretical approach',
-              'General overview'
-            ],
-            correctAnswer: 0,
-            explanation: 'This is the main focus based on the extracted PDF content.',
-            topic: 'PDF Content Analysis'
-          },
-          {
-            id: '2',
-            question: keyTerms.length > 0 ? 
-              `The extracted PDF content mentions "${keyTerms[0]}" in the context of:` :
-              `According to the extracted material, what approach is emphasized?`,
-            options: [
-              sentences[2]?.substring(0, 60) + '...' || 'Content-specific approach from PDF',
-              'Alternative method',
-              'Different strategy',
-              'General technique'
-            ],
-            correctAnswer: 1,
-            explanation: 'This approach is emphasized in the extracted PDF material.',
-            topic: 'PDF Content Understanding'
-          },
-          {
-            id: '3',
-            question: `What key concept does the PDF content explain?`,
-            options: [
-              sentences[3]?.substring(0, 60) + '...' || 'Key concept from PDF',
-              'Basic introductory information',
-              'Advanced theoretical framework',
-              'General background knowledge'
-            ],
-            correctAnswer: 0,
-            explanation: 'This key concept is explained in the extracted PDF content.',
-            topic: 'Key Concepts from PDF'
-          }
-        ];
+
+      // 2) Ask AI to generate questions
+      const raw = await AIService.generateTestQuestions(content, selectedSubject);
+
+      // 3) Parse/normalize
+      const parsed = parseFirstJSONCandidate<any>(raw);
+      let normalized = normalizeQuestions(parsed, selectedSubject);
+
+      // 4) Fallback if parsing produced nothing
+      if (!normalized || normalized.length === 0) {
+        console.warn('Failed to parse AI questions, using tiny fallback');
+        normalized = buildTinyFallback(content, selectedSubject);
       }
 
-      setQuestions(parsedQuestions);
-      setUserAnswers(new Array(parsedQuestions.length).fill(-1));
+      // 5) >>> CRITICAL: move to TEST phase <<<
+      setQuestions(normalized);
+      setUserAnswers(new Array(normalized.length).fill(-1));
       setTestPhase('test');
       setTestStartTime(new Date());
-      
-    } catch (error) {
-      console.error('Error processing file:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Error processing the file. Please try again.';
-      // alert(errorMessage);
-      setError(errorMessage);
-  setShowRetryPopup(true);
+
+    } catch (e: any) {
+      console.error('Error processing file / generating questions:', e);
+      const msg = e?.message || 'Error generating the test. Please try again.';
+      setError(msg);
+      setShowRetryPopup(true);
     } finally {
       setIsGeneratingTest(false);
     }
@@ -189,25 +245,16 @@ const AITestSession: React.FC = () => {
   };
 
   const handlePreviousQuestion = () => {
-    if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(currentQuestionIndex - 1);
-    }
+    if (currentQuestionIndex > 0) setCurrentQuestionIndex(currentQuestionIndex - 1);
   };
 
   const finishTest = async () => {
     if (!testStartTime || !user) return;
 
     setIsAnalyzing(true);
-    const timeSpent = Math.floor((new Date().getTime() - testStartTime.getTime()) / 1000 / 60);
-    
-    try {
-      // // Calculate basic results
-      // const correctAnswers = userAnswers.reduce((count, answer, index) => {
-      //   return answer === questions[index]?.correctAnswer ? count + 1 : count;
-      // }, 0);
-      // const score = Math.round((correctAnswers / questions.length) * 100);
+    const timeSpent = Math.floor((Date.now() - testStartTime.getTime()) / 1000 / 60);
 
-      // Calculate basic results
+    try {
       let correctAnswers = 0;
       const weakConcepts: string[] = [];
       const strongConcepts: string[] = [];
@@ -222,8 +269,7 @@ const AITestSession: React.FC = () => {
       });
 
       const scorePercentage = Math.round((correctAnswers / questions.length) * 100);
-      
-      // Get detailed analysis from AI
+
       const analysisData = {
         questions: questions.map((q, index) => ({
           question: q.question,
@@ -233,110 +279,84 @@ const AITestSession: React.FC = () => {
           isCorrect: userAnswers[index] === q.correctAnswer
         })),
         subject: selectedSubject,
-        uploadedContent: uploadedContent.substring(0, 2000), // First 2000 chars
+        uploadedContent: uploadedContent.substring(0, 2000),
         score: scorePercentage,
         timeSpent
       };
 
-      const aiAnalysis = await AIService.analyzeTestPerformance(analysisData);
-      
-      // Use robust JSON parsing for analysis
-      const analysis = safeParseJSON<{
+      const aiAnalysisRaw = await AIService.analyzeTestPerformance(analysisData);
+      const analysis = parseFirstJSONCandidate<{
         strongAreas: string[];
         weakAreas: string[];
         detailedAnalysis: string;
         recommendations: string[];
         nextSteps: string[];
-      }>(aiAnalysis);
+      }>(aiAnalysisRaw);
 
-      let finalStrongAreas = analysis?.strongAreas || (scorePercentage >= 70 ? ['Good understanding of core concepts'] : []);
-      let finalWeakAreas = analysis?.weakAreas || (scorePercentage < 70 ? ['Needs improvement in fundamental concepts'] : []);
-      let finalDetailedAnalysis = analysis?.detailedAnalysis || `You scored ${scorePercentage}% on this ${selectedSubject} test. ${scorePercentage >= 70 ? 'Good performance!' : 'There is room for improvement.'}`;
-      let finalRecommendations = analysis?.recommendations || ['Review the uploaded material', 'Practice more questions', 'Focus on weak areas'];
-      let finalNextSteps = analysis?.nextSteps || ['Continue with next topic', 'Take more practice tests'];
+      const finalStrongAreas = analysis?.strongAreas || (scorePercentage >= 70 ? ['Good understanding of core concepts'] : []);
+      const finalWeakAreas = analysis?.weakAreas || (scorePercentage < 70 ? ['Needs improvement in fundamental concepts'] : []);
+      const finalDetailedAnalysis = analysis?.detailedAnalysis || `You scored ${scorePercentage}% on this ${selectedSubject} test. ${scorePercentage >= 70 ? 'Good performance!' : 'There is room for improvement.'}`;
+      const finalRecommendations = analysis?.recommendations || ['Review the uploaded material', 'Practice more questions', 'Focus on weak areas'];
+      const finalNextSteps = analysis?.nextSteps || ['Continue with next topic', 'Take more practice tests'];
 
-      
-      
-      // if (!analysis) {
-      //   console.warn('Failed to parse AI analysis, using fallback');
-      //   // Fallback analysis
-      //   const fallbackAnalysis = {
-      //     strongAreas: score >= 70 ? ['Good understanding of core concepts'] : [],
-      //     weakAreas: score < 70 ? ['Needs improvement in fundamental concepts'] : [],
-      //     detailedAnalysis: `You scored ${score}% on this ${selectedSubject} test. ${score >= 70 ? 'Good performance!' : 'There is room for improvement.'}`,
-      //     recommendations: ['Review the uploaded material', 'Practice more questions', 'Focus on weak areas'],
-      //     nextSteps: ['Continue with next topic', 'Take more practice tests']
-      //   };
-
-      
-        const result: TestResult = {
-          score: scorePercentage,
-          totalQuestions: questions.length,
-          correctAnswers,
-          timeSpent,
-          // strongAreas: fallbackAnalysis.strongAreas,
-          // weakAreas: fallbackAnalysis.weakAreas,
-          // detailedAnalysis: fallbackAnalysis.detailedAnalysis,
-          // recommendations: fallbackAnalysis.recommendations,
-          // nextSteps: fallbackAnalysis.nextSteps,
-          strongAreas: finalStrongAreas,
+      const result: TestResult = {
+        score: scorePercentage,
+        totalQuestions: questions.length,
+        correctAnswers,
+        timeSpent,
+        strongAreas: finalStrongAreas,
         weakAreas: finalWeakAreas,
         detailedAnalysis: finalDetailedAnalysis,
         recommendations: finalRecommendations,
         nextSteps: finalNextSteps,
-        questions: questions,
-        userAnswers: userAnswers
-        };
-        
-        setTestResult(result);
-        setTestPhase('results');
+        questions,
+        userAnswers
+      };
 
-      // Save to quiz_attempts table (NEW)
-      const { data: quizAttemptData, error: quizAttemptError } = await supabase
+      setTestResult(result);
+      setTestPhase('results');
+
+      // persist attempt
+      const { error: quizAttemptError } = await supabase
         .from('quiz_attempts')
         .insert({
           user_id: user.id,
           subject: selectedSubject,
-          topic: questions[0]?.topic || 'General', // Use first question's topic or general
+          topic: questions[0]?.topic || 'General',
           score_percentage: scorePercentage,
           time_taken_minutes: timeSpent,
           total_questions: questions.length,
           correct_answers: correctAnswers,
-          weak_concepts: Array.from(new Set(weakConcepts)), // Ensure unique
-          strong_concepts: Array.from(new Set(strongConcepts)), // Ensure unique
-          attempt_details: analysisData, // Store full data for reference
+          weak_concepts: Array.from(new Set(weakConcepts)),
+          strong_concepts: Array.from(new Set(strongConcepts)),
+          attempt_details: analysisData,
         })
         .select()
         .single();
 
       if (quizAttemptError) {
         console.error('Error saving quiz attempt:', quizAttemptError);
-        alert('Error saving detailed quiz attempt. Please check console.');
-        setError(quizAttemptError);
+        setError(quizAttemptError.message || 'Failed to save quiz attempt.');
         setShowRetryPopup(true);
       }
-        
-        // Save high-level summary to study_sessions (existing)
+
+      // progress summary
       await addStudySession({
         user_id: user.id,
         subject: selectedSubject,
         duration_minutes: timeSpent,
         topics_covered: Array.from(new Set(questions.map(q => q.topic))),
-        performance_score: Math.max(1, Math.ceil(scorePercentage / 10)), // Convert percentage to 1-10 scale
+        performance_score: Math.max(1, Math.ceil(scorePercentage / 10)),
       });
-
-
-    } catch (error) {
-      console.error('Error analyzing test:', error);
-      // alert('Error analyzing test results. Please try again.');
-      setError(error);
-  setShowRetryPopup(true);
+    } catch (e: any) {
+      console.error('Error analyzing test:', e);
+      setError(e?.message || 'Error analyzing test results. Please try again.');
+      setShowRetryPopup(true);
     } finally {
       setIsAnalyzing(false);
     }
   };
 
-  
   const resetTest = () => {
     setTestPhase('upload');
     setQuestions([]);
@@ -346,6 +366,8 @@ const AITestSession: React.FC = () => {
     setUploadedContent('');
     setFileName('');
     setTestStartTime(null);
+    setError('');
+    setShowRetryPopup(false);
   };
 
   if (testPhase === 'results' && testResult) {
@@ -431,12 +453,12 @@ const AITestSession: React.FC = () => {
         </div>
 
         {/* Recommendations */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-          <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center space-x-2">
+        <div className="max-p-2 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+          <h3 className="max-ml-2 text-lg font-semibold text-slate-800 mb-4 flex items-center space-x-2">
             <Target className="w-5 h-5 text-purple-600" />
             <span>AI Recommendations</span>
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="max-ml-2 grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <h4 className="font-medium text-slate-700 mb-3">Study Recommendations</h4>
               <ul className="space-y-2">
@@ -461,7 +483,7 @@ const AITestSession: React.FC = () => {
             </div>
           </div>
                   {/* Detailed Question Review */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        <div className="max-p-2 mt-4 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
           <h3 className="text-lg font-semibold text-slate-800 mb-6 flex items-center space-x-2">
             <BookOpen className="w-5 h-5 text-blue-600" />
             <span>Question-by-Question Review</span>
@@ -534,7 +556,7 @@ const AITestSession: React.FC = () => {
                           key={optionIndex}
                           className={`p-4 rounded-lg border-2 ${optionClass} transition-all`}
                         >
-                          <div className="flex items-center justify-between">
+                          <div className="max-flex-col flex items-center justify-between">
                             <div className="flex items-center space-x-3 flex-1">
                               <span className={`font-medium ${textClass}`}>
                                 {String.fromCharCode(65 + optionIndex)}.
@@ -808,13 +830,13 @@ const AITestSession: React.FC = () => {
       {showRetryPopup && (
   <RetryPopup
     isOpen={showRetryPopup}
-    title="Failed to Generate Theory"
+    title="Failed to Generate Quiz"
     message={error} 
-    onRetry={() => {
+    onTryAgain={() => {
       setShowRetryPopup(false);
       resetTest(); // optional: reset to upload phase
     }} 
-    onClose={() => setShowRetryPopup(false)} 
+    onCancel={() => setShowRetryPopup(false)} 
   />
 )}
 
