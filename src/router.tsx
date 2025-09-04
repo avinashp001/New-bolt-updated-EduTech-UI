@@ -59,13 +59,21 @@ const AuthLayout: React.FC = () => {
   }
 
   // Check if user has completed onboarding (target_exam is set)
-  if (user && (!user.target_exam || user.target_exam.trim() === '')) {
-    // User is signed in but hasn't completed onboarding
-    // console.log('User needs onboarding, redirecting to /app/onboarding');
-    // return <Navigate to="/app/onboarding" replace />;
-    console.log('User needs onboarding, rendering OnboardingSetup directly');
-    return <OnboardingSetup />;
+  // if (user && (!user.target_exam || user.target_exam.trim() === '')) {
+  //   // User is signed in but hasn't completed onboarding
+  //   // console.log('User needs onboarding, redirecting to /app/onboarding');
+  //   // return <Navigate to="/app/onboarding" replace />;
+  //   console.log('User needs onboarding, rendering OnboardingSetup directly');
+  //   return <OnboardingSetup />;
+  // }
+
+  const location = useLocation();
+
+if (user && (!user.target_exam || user.target_exam.trim() === '')) {
+  if (location.pathname !== '/app/onboarding') {
+    return <Navigate to="/app/onboarding" replace />;
   }
+}
   
   console.log('User authenticated and onboarded, rendering main app');
    return (
