@@ -229,3 +229,13 @@ export interface TheoryStudyLog {
   created_at: string;
   updated_at: string;
 }
+
+export interface UserUsage {
+  id: string;
+  user_id: string;
+  feature_key: string;
+  daily_count: number;
+  last_reset_date: string; // YYYY-MM-DD format
+  created_at: string;
+  updated_at: string;
+}
