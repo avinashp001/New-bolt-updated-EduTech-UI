@@ -6,11 +6,15 @@ import { useAuth } from '../../hooks/useAuth';
 import { useNotification } from '../../context/NotificationContext';
 import TheoryContentDisplay from './TheoryContentDisplay';
 import html2pdf from 'html2pdf.js';
+import { useUsage, USAGE_LIMITS, FEATURE_NAMES } from '../../hooks/useUsage'; // NEW
+import UpgradePromptModal from '../Common/UpgradePromptModal'; // NEW
+
 
 
 const TheoryGeneratorPage: React.FC = () => {
   const { user } = useAuth();
   const { showSuccess, showError } = useNotification();
+  const { getUsage, incrementUsage, hasExceededLimit, isPremium } = useUsage(); // NEW
 
   const [subjectInput, setSubjectInput] = useState('');
   const [topicInput, setTopicInput] = useState('');
@@ -20,6 +24,7 @@ const TheoryGeneratorPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showRetryPopup, setShowRetryPopup] = useState(false); // New state for popup
   const theoryContentRef = useRef<HTMLDivElement>(null);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false); // NEW
 
   // const subjects = [
   //   'Mathematics', 'Physics', 'Chemistry', 'Biology',
@@ -57,12 +62,21 @@ const TheoryGeneratorPage: React.FC = () => {
       return;
     }
 
+    // NEW: Check usage limit
+    if (!isPremium && hasExceededLimit(FEATURE_NAMES.THEORY_GENERATION)) {
+      setShowUpgradeModal(true);
+      return;
+    }
+
     setIsLoading(true);
     setGeneratedTheory(null);
     setError(null);
      setShowRetryPopup(false);
 
     try {
+      // NEW: Increment usage after passing the check
+      await incrementUsage(FEATURE_NAMES.THEORY_GENERATION);
+
       const theory = await AIService.generateTheoryV2(subjectInput, topicInput, user.id, selectedExamLevel);
       setGeneratedTheory(theory);
       showSuccess('Theory Generated!', `Theoretical content for "${topicInput}" in ${subjectInput} (${selectedExamLevel} level) has been successfully generated.`);
@@ -118,7 +132,7 @@ const TheoryGeneratorPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 p-3">
+    <div className="max-w-4xl mx-auto space-y-6 max-p-0 p-3">
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-700 p-6 rounded-2xl text-white">
         <div className="flex items-center space-x-3 mb-4">
@@ -237,9 +251,9 @@ const TheoryGeneratorPage: React.FC = () => {
         </div>
       )} */}
       {generatedTheory && (
-        <div ref={theoryContentRef} className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">Generated Theory</h3>
+        <div ref={theoryContentRef} className="bg-white max-py-2 max-p-0 p-6 rounded-xl shadow-sm border border-slate-200">
+          <div className="max-p-2 flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-800">Generated Theory</h3>
             <button
               onClick={handleDownloadPdf}
               className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
@@ -268,6 +282,14 @@ const TheoryGeneratorPage: React.FC = () => {
           <LoadingSpinner message="We are making your content Available... Please wait" variant="brain" />
         </div>
       )}
+
+      <UpgradePromptModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        featureName={FEATURE_NAMES.THEORY_GENERATION}
+        limit={USAGE_LIMITS.THEORY_GENERATION}
+        subscriptionPageUrl={import.meta.env.VITE_SUBSCRIPTION_PAGE_URL}
+      />
     </div>
   );
 };
