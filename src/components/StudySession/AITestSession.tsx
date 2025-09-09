@@ -11,6 +11,9 @@ import { supabase } from '../../lib/supabase';
 import RetryPopup from '../Common/RetryPopup';
 import { useQuizMode } from '../../context/QuizModeContext';
 import { parseFirstJSONCandidate } from '../../utils/jsonParser';
+import { useUsage, USAGE_LIMITS, FEATURE_NAMES } from '../../hooks/useUsage'; // NEW
+import UpgradePromptModal from '../Common/UpgradePromptModal'; // NEW
+
 
 interface Question {
   id: string;
@@ -35,50 +38,219 @@ interface TestResult {
   userAnswers: number[];
 }
 
-// --- Normalizers / Helpers ---
-const toFourOptions = (raw: any): string[] => {
-  let opts: string[] = [];
-  if (Array.isArray(raw)) opts = raw.map(String);
-  else if (raw && typeof raw === 'object') {
-    // sometimes comes as {A: "...", B: "...", ...}
-    const keys = Object.keys(raw).sort(); // A,B,C,D...
-    opts = keys.map(k => String(raw[k]));
-  }
-  // ensure 4 options
-  const padded = [...opts].slice(0, 4);
-  while (padded.length < 4) padded.push('None of the above');
-  return padded;
+// --- Normalizers / Helpers (REPLACE existing helpers with this block) ---
+
+// Normalize raw option text (strip labels like "A.", "1)", HTML, punctuation clumps, and trim)
+const cleanOptionText = (s: any) => {
+  if (s === null || s === undefined) return '';
+  let str = String(s);
+  // remove HTML tags
+  str = str.replace(/<[^>]*>/g, ' ');
+  // remove leading labels like "A)", "A.", "1)", "1.", "Option A:", "Ans - A"
+  str = str.replace(/^\s*(?:option\s*)?[A-Da-d]\s*[:\)\.\-\)]\s*/i, '');
+  str = str.replace(/^\s*[0-9]+\s*[:\)\.\-\)]\s*/i, '');
+  // collapse multiple non-alphanum to spaces, trim
+  str = str.replace(/[\u200B-\u200D\uFEFF]/g, '') // remove zero-width junk
+           .replace(/[^0-9a-zA-Z\s,.'’\-()\/]+/g, ' ')
+           .replace(/\s+/g, ' ')
+           .trim();
+  return str;
 };
 
-const letterToIndex = (val: string): number | null => {
-  const v = val.trim().toUpperCase();
-  if (['A', 'B', 'C', 'D'].includes(v)) return v.charCodeAt(0) - 65;
+const toFourOptions = (raw: any): string[] => {
+  let opts: string[] = [];
+
+  if (Array.isArray(raw)) {
+    opts = raw.map(cleanOptionText).filter(Boolean);
+  } else if (raw && typeof raw === 'object') {
+    // handle objects like { A: '...', B: '...' } or keyed maps
+    const keys = Object.keys(raw).sort();
+    opts = keys.map(k => cleanOptionText(raw[k])).filter(Boolean);
+  } else if (typeof raw === 'string') {
+    // sometimes AI returns newline-separated options
+    opts = raw.split(/\r?\n/).map(cleanOptionText).filter(Boolean);
+  }
+
+  // ensure exactly 4 options (truncate or pad)
+  const final = [...opts].slice(0, 4);
+  while (final.length < 4) final.push('None of the above');
+  return final;
+};
+
+// helper: normalized lower-case, remove punctuation, collapse spaces
+const normalizeText = (s: string) =>
+  (s || '').toString().replace(/<[^>]*>/g, ' ')
+    .replace(/[^0-9a-zA-Z\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+
+// token set for jaccard
+const tokens = (s: string) => {
+  const n = normalizeText(s);
+  if (!n) return new Set<string>();
+  return new Set(n.split(' ').filter(Boolean));
+};
+
+const jaccard = (a: string, b: string) => {
+  const sa = tokens(a);
+  const sb = tokens(b);
+  if (sa.size === 0 || sb.size === 0) return 0;
+  let inter = 0;
+  sa.forEach(t => { if (sb.has(t)) inter++; });
+  const uni = new Set([...sa, ...sb]).size;
+  return uni === 0 ? 0 : inter / uni;
+};
+
+// longest common substring normalized score (0..1)
+const longestCommonSubstrScore = (a: string, b: string) => {
+  const s1 = normalizeText(a);
+  const s2 = normalizeText(b);
+  if (!s1 || !s2) return 0;
+  const aLen = s1.length;
+  const bLen = s2.length;
+  const dp = Array(bLen + 1).fill(0);
+  let maxLen = 0;
+  for (let i = 1; i <= aLen; i++) {
+    for (let j = bLen; j >= 1; j--) {
+      if (s1[i - 1] === s2[j - 1]) {
+        dp[j] = dp[j - 1] + 1;
+        if (dp[j] > maxLen) maxLen = dp[j];
+      } else {
+        dp[j] = 0;
+      }
+    }
+  }
+  const minLen = Math.min(aLen, bLen);
+  return minLen === 0 ? 0 : maxLen / minLen;
+};
+
+// robust letter finder: finds A-D when expressed as 'A', 'A)', 'Option A', 'Answer: B' etc.
+const extractLetterIndex = (val: any, optsLen = 4): number | null => {
+  if (val === null || val === undefined) return null;
+  const s = String(val).toUpperCase();
+  if (!s) return null;
+
+  // common patterns
+  const patterns = [
+    /OPTION\s*[:\-\)]*\s*([A-D])/i,
+    /ANSWER\s*[:\-\)]*\s*([A-D])/i,
+    /\b([A-D])\b/,     // standalone letter
+    /([A-D])\)/,       // "A)"
+    /([A-D])\./        // "A."
+  ];
+  for (const rx of patterns) {
+    const m = s.match(rx);
+    if (m && m[1]) {
+      const idx = m[1].toUpperCase().charCodeAt(0) - 65;
+      if (idx >= 0 && idx < optsLen) return idx;
+    }
+  }
   return null;
 };
 
-const guessCorrectIndex = (q: any, opts: string[]): number => {
-  // Try number (0- or 1-based)
-  if (typeof q.correctAnswer === 'number') {
-    return q.correctAnswer >= 1 ? q.correctAnswer - 1 : q.correctAnswer;
+// robust numeric extractor: recognizes numbers (1,2,3 or 0-based 0..3 or 1..4 in strings)
+const extractNumberIndex = (val: any, optsLen = 4): number | null => {
+  if (val === null || val === undefined) return null;
+  if (typeof val === 'number' && Number.isFinite(val)) {
+    const idx = val >= 1 ? val - 1 : val;
+    if (Number.isInteger(idx) && idx >= 0 && idx < optsLen) return idx;
   }
-  // Try letter A-D
-  if (typeof q.correctAnswer === 'string') {
-    // sometimes it's the text of the option
-    const byLetter = letterToIndex(q.correctAnswer);
-    if (byLetter !== null) return Math.min(Math.max(byLetter, 0), 3);
+  const s = String(val || '').replace(/[^0-9\-]/g, '');
+  if (!s) return null;
+  const n = parseInt(s, 10);
+  if (!isNaN(n)) {
+    const idx = n >= 1 ? n - 1 : n;
+    if (idx >= 0 && idx < optsLen) return idx;
+  }
+  return null;
+};
 
-    const textIdx = opts.findIndex(o => o.trim().toLowerCase() === q.correctAnswer.trim().toLowerCase());
-    if (textIdx !== -1) return textIdx;
+// Main guesser that uses multiple strategies & scoring
+const guessCorrectIndex = (q: any, opts: string[]): number => {
+  // 1) direct numeric fields
+  const numericCandidates = [q?.correctAnswer, q?.answer, q?.answerIndex, q?.answer_index];
+  for (const c of numericCandidates) {
+    const num = extractNumberIndex(c, opts.length);
+    if (num !== null) return num;
   }
-  if (typeof q.answer === 'number') return q.answer >= 1 ? q.answer - 1 : q.answer;
-  if (typeof q.answer === 'string') {
-    const byLetter = letterToIndex(q.answer);
-    if (byLetter !== null) return Math.min(Math.max(byLetter, 0), 3);
-    const textIdx = opts.findIndex(o => o.trim().toLowerCase() === q.answer.trim().toLowerCase());
-    if (textIdx !== -1) return textIdx;
+
+  // 2) letter patterns anywhere in strings
+  const stringCandidates = [q?.correctAnswer, q?.answer, q?.ans, q?.answer_text];
+  for (const c of stringCandidates) {
+    const letterIdx = extractLetterIndex(c, opts.length);
+    if (letterIdx !== null) return letterIdx;
   }
-  // Default to first
-  return 0;
+
+  // 3) textual matching: exact -> jaccard/substring best match
+  // prepare cleaned options
+  const cleanedOpts = opts.map(o => cleanOptionText(o));
+  // candidate texts to try (stringified fields)
+  const strCandidates = stringCandidates
+    .filter(Boolean)
+    .map(c => String(c).trim())
+    .filter(Boolean);
+
+  // if parsed as object (AI may return { correctAnswer: { value: '...' } })
+  if (typeof q?.correctAnswer === 'object' && q?.correctAnswer !== null) {
+    try {
+      strCandidates.push(JSON.stringify(q.correctAnswer));
+    } catch {}
+  }
+
+  // for each candidate, compute best-scoring option
+  for (const cand of strCandidates) {
+    const candNorm = normalizeText(cand);
+    if (!candNorm) continue;
+
+    // try exact equality with cleaned option
+    const eqIdx = cleanedOpts.findIndex(o => normalizeText(o) === candNorm);
+    if (eqIdx !== -1) return eqIdx;
+
+    // compute similarity scores
+    let bestIdx = -1;
+    let bestScore = 0;
+    for (let i = 0; i < cleanedOpts.length; i++) {
+      const o = cleanedOpts[i];
+      const score = Math.max(jaccard(o, cand), longestCommonSubstrScore(o, cand));
+      if (score > bestScore) {
+        bestScore = score;
+        bestIdx = i;
+      }
+    }
+    // threshold: only accept reasonably strong match
+    if (bestIdx !== -1 && bestScore >= 0.40) return bestIdx;
+  }
+
+  // 4) fallback: attempt to match option text appearing inside explanation (explanation may say "option X")
+  if (q?.explanation) {
+    const explCandidates = [q.explanation].map(String);
+    for (const cand of explCandidates) {
+      let bestIdx = -1;
+      let bestScore = 0;
+      for (let i = 0; i < opts.length; i++) {
+        const score = Math.max(jaccard(opts[i], cand), longestCommonSubstrScore(opts[i], cand));
+        if (score > bestScore) { bestScore = score; bestIdx = i; }
+      }
+      if (bestIdx !== -1 && bestScore >= 0.45) return bestIdx;
+    }
+  }
+
+  // 5) last resort: pick a random index (so not always 0). Use Math.random to avoid deterministic bias.
+  return Math.floor(Math.random() * Math.max(1, opts.length));
+};
+
+const shuffleOptions = (options: string[], correctIndex: number) => {
+  // keep track of correctness flag so we can shuffle without losing correct pointer
+  const arr = options.map((opt, i) => ({ opt, isCorrect: i === correctIndex }));
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  const newOptions = arr.map(a => a.opt);
+  const newCorrectIndex = arr.findIndex(a => a.isCorrect);
+  // guarantee in-range numeric index
+  return { newOptions, newCorrectIndex: Math.max(0, newCorrectIndex) };
 };
 
 const normalizeQuestions = (raw: any, selectedSubject: string): Question[] => {
@@ -86,24 +258,32 @@ const normalizeQuestions = (raw: any, selectedSubject: string): Question[] => {
   return list
     .map((q, idx) => {
       const options = toFourOptions(q.options ?? q.choices ?? q.answers);
-      const correctAnswer = guessCorrectIndex(q, options);
-      const text =
-        q.question || q.q || q.prompt || q.text || `Question ${idx + 1}`;
-      const topic =
-        q.topic || q.chapter || q.subtopic || selectedSubject || 'General';
-      const explanation =
-        q.explanation || q.explain || q.why || 'Review the concept.';
+
+      // ✅ match correctAnswerText to options
+      let correctIndex = 0;
+      if (q.correctAnswerText) {
+        const match = options.findIndex(
+          opt => opt.trim().toLowerCase() === String(q.correctAnswerText).trim().toLowerCase()
+        );
+        if (match !== -1) correctIndex = match;
+      }
+
+      // Shuffle while preserving correct index
+      const { newOptions, newCorrectIndex } = shuffleOptions(options, correctIndex);
+
       return {
         id: String(q.id ?? idx + 1),
-        question: String(text),
-        options,
-        correctAnswer: Math.min(Math.max(correctAnswer, 0), options.length - 1),
-        explanation: String(explanation),
-        topic: String(topic),
-      } as Question;
+        question: String(q.question || q.q || q.prompt || `Question ${idx + 1}`),
+        options: newOptions,
+        correctAnswer: newCorrectIndex,
+        explanation: String(q.explanation || 'Review the concept.'),
+        topic: String(q.topic || selectedSubject || 'General'),
+      };
     })
     .filter(q => q.question && q.options?.length >= 2);
 };
+
+
 
 const buildTinyFallback = (content: string, selectedSubject: string): Question[] => {
   const sentences = content.split(/[.!?]+/).map(s => s.trim()).filter(Boolean);
@@ -141,6 +321,8 @@ const AITestSession: React.FC = () => {
   const { detailedSchedule, loading: detailedScheduleLoading } = useDetailedSchedule(user?.id);
   const { addStudySession } = useProgress(user?.id, detailedSchedule, detailedScheduleLoading);
   const { setQuizMode } = useQuizMode();
+  const { getUsage, incrementUsage, hasExceededLimit, isPremium, loading: usageLoading, fetchUsage } = useUsage();// NEW
+
 
   const [selectedSubject, setSelectedSubject] = useState('');
   const [uploadedContent, setUploadedContent] = useState<string>('');
@@ -156,6 +338,9 @@ const AITestSession: React.FC = () => {
 
   const [error, setError] = useState<string>('');
   const [showRetryPopup, setShowRetryPopup] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false); // NEW
+
+
 
   const subjects = [
     'Mathematics', 'Physics', 'Chemistry', 'Biology',
@@ -173,6 +358,18 @@ const AITestSession: React.FC = () => {
       alert('Please select a subject first.');
       return;
     }
+
+    const FEATURE_KEY = 'AI_TEST_SESSION';
+
+if (!isPremium) {
+  if (usageLoading) await fetchUsage();
+  if (hasExceededLimit(FEATURE_KEY)) {
+    setShowUpgradeModal(true);
+    return;
+  }
+}
+
+
     const file = acceptedFiles[0];
     if (!file) return;
 
@@ -188,6 +385,7 @@ const AITestSession: React.FC = () => {
         throw new Error('The file content could not be extracted properly. Try another file.');
       }
       setUploadedContent(content);
+
 
       // 2) Ask AI to generate questions
       const raw = await AIService.generateTestQuestions(content, selectedSubject);
@@ -208,6 +406,7 @@ const AITestSession: React.FC = () => {
       setTestPhase('test');
       setTestStartTime(new Date());
 
+      await incrementUsage(FEATURE_KEY);
     } catch (e: any) {
       console.error('Error processing file / generating questions:', e);
       const msg = e?.message || 'Error generating the test. Please try again.';
@@ -483,8 +682,8 @@ const AITestSession: React.FC = () => {
             </div>
           </div>
                   {/* Detailed Question Review */}
-        <div className="max-p-2 mt-4 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-          <h3 className="text-lg font-semibold text-slate-800 mb-6 flex items-center space-x-2">
+        <div className="max-p-0 mt-4 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+          <h3 className="max-px-4 max-py-4 max-mb-2 text-lg font-semibold text-slate-800 mb-6 flex items-center space-x-2">
             <BookOpen className="w-5 h-5 text-blue-600" />
             <span>Question-by-Question Review</span>
           </h3>
@@ -839,6 +1038,15 @@ const AITestSession: React.FC = () => {
     onCancel={() => setShowRetryPopup(false)} 
   />
 )}
+
+
+{/* NEW: Upgrade Modal */}
+      <UpgradePromptModal
+  isOpen={showUpgradeModal}
+  onClose={() => setShowUpgradeModal(false)}
+  featureName={FEATURE_NAMES.AI_TEST_SESSION}
+  limit={USAGE_LIMITS.AI_TEST_SESSION}
+/>
 
     </div>
   );
