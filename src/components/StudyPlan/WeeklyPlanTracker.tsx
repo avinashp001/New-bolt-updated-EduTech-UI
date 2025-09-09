@@ -1271,17 +1271,17 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { 
-  Calendar, 
-  Target, 
-  BookOpen, 
-  CheckCircle, 
-  AlertCircle, 
-  TrendingUp, 
-  Brain, 
-  Upload, 
-  FileText, 
-  Plus, 
+import {
+  Calendar,
+  Target,
+  BookOpen,
+  CheckCircle,
+  AlertCircle,
+  TrendingUp,
+  Brain,
+  Upload,
+  FileText,
+  Plus,
   X,
   Play,
   Award,
@@ -1309,6 +1309,11 @@ import { PDFParser } from '../../lib/pdfParser';
 import { supabase, WeeklyAssessment } from '../../lib/supabase';
 import { useDetailedSchedule } from '../../hooks/useDetailedSchedule';
 import { useQuizMode } from '../../context/QuizModeContext'; // Import useQuizMode
+import { useUsage, USAGE_LIMITS, FEATURE_NAMES } from '../../hooks/useUsage'; // NEW
+import UpgradePromptModal from '../Common/UpgradePromptModal'; // NEW
+import { parseFirstJSONCandidate } from '../../utils/jsonParser';
+
+
 
 interface WeeklyTest {
   id: string;
@@ -1340,6 +1345,7 @@ interface SubjectAssessment {
   completedAt?: string;
 }
 
+
 const WeeklyPlanTracker: React.FC = () => {
   const { user } = useAuth();
   const location = useLocation();
@@ -1348,10 +1354,11 @@ const WeeklyPlanTracker: React.FC = () => {
   const { detailedSchedule, detailedScheduleLoading } = useDetailedSchedule(user?.id);
   const { addStudySession, progressReports } = useProgress(user?.id, detailedSchedule, detailedScheduleLoading);
   const { setQuizMode } = useQuizMode(); // Get setQuizMode from context
-  
+  const { getUsage, incrementUsage, hasExceededLimit, isPremium, loading: usageLoading, fetchUsage } = useUsage(); // NEW
+
   const initialSubject = location.state?.initialSubject || '';
   const initialTopic = location.state?.initialTopic || '';
-  
+
   const [currentWeek, setCurrentWeek] = useState(1);
   const [fetchedWeeklyAssessments, setFetchedWeeklyAssessments] = useState<WeeklyAssessment[]>([]);
   const [weeklyAssessments, setWeeklyAssessments] = useState<Record<number, SubjectAssessment[]>>({});
@@ -1372,6 +1379,129 @@ const WeeklyPlanTracker: React.FC = () => {
     completedWeeks: 0,
     currentProgress: 0
   });
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false); // NEW
+
+
+
+  // --- Option normalizer & answer heuristics (NEW) ---
+  const toFourOptions = (raw: any): string[] => {
+    let opts: string[] = [];
+
+    if (Array.isArray(raw)) {
+      opts = raw.map(String);
+    } else if (raw && typeof raw === 'object') {
+      const keys = Object.keys(raw).sort();
+      opts = keys.map(k => String(raw[k]));
+    }
+
+    // ensure exactly 4 options
+    const padded = [...opts].slice(0, 4);
+    while (padded.length < 4) padded.push('None of the above');
+    return padded;
+  };
+
+  const letterToIndex = (val: string | undefined | null): number | null => {
+    if (!val || typeof val !== 'string') return null;
+    const cleaned = val.replace(/[^A-Za-z]/g, '').trim().toUpperCase();
+    if (!cleaned) return null;
+    const ch = cleaned[0];
+    if (['A', 'B', 'C', 'D'].includes(ch)) return ch.charCodeAt(0) - 65;
+    return null;
+  };
+
+  const guessCorrectIndex = (q: any, opts: string[]): number => {
+    const tryNumber = (val: any) => {
+      if (typeof val === 'number' && Number.isFinite(val)) {
+        const idx = val >= 1 ? val - 1 : val;
+        if (Number.isInteger(idx) && idx >= 0 && idx < opts.length) return idx;
+      }
+      return null;
+    };
+    const numFromCorrect = tryNumber(q?.correctAnswer);
+    if (numFromCorrect !== null) return numFromCorrect;
+    const numFromAnswer = tryNumber(q?.answer);
+    if (numFromAnswer !== null) return numFromAnswer;
+
+    const tryString = (val: any) => {
+      if (!val || typeof val !== 'string') return null;
+      const s = val.trim();
+
+      // Letter like "A", "B.", "C)"
+      const byLetter = letterToIndex(s);
+      if (byLetter !== null && byLetter >= 0 && byLetter < opts.length) return byLetter;
+
+      // Numeric inside string "2", "2."
+      const digits = s.replace(/[^0-9]/g, '');
+      if (digits) {
+        const n = parseInt(digits, 10);
+        const idx = n >= 1 ? n - 1 : n;
+        if (!isNaN(idx) && idx >= 0 && idx < opts.length) return idx;
+      }
+
+      // Exact text match
+      const exact = opts.findIndex(o => o.trim().toLowerCase() === s.toLowerCase());
+      if (exact !== -1) return exact;
+
+      // Partial text match (option contains answer text or vice versa)
+      const partial = opts.findIndex(o =>
+        o.toLowerCase().includes(s.toLowerCase()) || s.toLowerCase().includes(o.toLowerCase())
+      );
+      if (partial !== -1) return partial;
+
+      return null;
+    };
+
+    const strFromCorrect = tryString(q?.correctAnswer);
+    if (strFromCorrect !== null) return strFromCorrect;
+    const strFromAnswer = tryString(q?.answer);
+    if (strFromAnswer !== null) return strFromAnswer;
+
+    // Last resort: choose a random option index (so we don't always fall back to 0)
+    return Math.floor(Math.random() * Math.max(1, opts.length));
+  };
+
+  const shuffleOptions = (options: string[], correctIndex: number) => {
+    const arr = options.map((opt, i) => ({ opt, isCorrect: i === correctIndex }));
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    const newOptions = arr.map(a => a.opt);
+    const newCorrectIndex = arr.findIndex(a => a.isCorrect);
+    return { newOptions, newCorrectIndex: Math.max(0, newCorrectIndex) };
+  };
+
+  const normalizeQuestions = (raw: any, selectedSubject: string) => {
+  const list: any[] = Array.isArray(raw) ? raw : raw?.questions || raw?.data || [];
+  return list
+    .map((q, idx) => {
+      const options = toFourOptions(q.options ?? q.choices ?? q.answers ?? q.optionsList);
+
+      // ✅ Use correctAnswerText provided by AI
+      let correctIndex = 0;
+      if (q.correctAnswerText) {
+        const match = options.findIndex(
+          opt => opt.trim().toLowerCase() === String(q.correctAnswerText).trim().toLowerCase()
+        );
+        if (match !== -1) correctIndex = match;
+      }
+
+      const { newOptions, newCorrectIndex } = shuffleOptions(options, correctIndex);
+
+      return {
+        id: String(q.id ?? idx + 1),
+        question: String(q.question || q.q || q.prompt || `Question ${idx + 1}`),
+        options: newOptions,
+        correctAnswer: newCorrectIndex,
+        explanation: String(q.explanation || 'Review the concept.'),
+        topic: String(q.topic || selectedSubject || 'General'),
+      };
+    })
+    .filter(q => q.question && q.options?.length >= 2);
+};
+
+
+
 
   // Effect to manage quiz mode state based on showTestInterface
   useEffect(() => {
@@ -1402,9 +1532,9 @@ const WeeklyPlanTracker: React.FC = () => {
       const diffWeeks = Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 7));
       const calculatedWeek = Math.min(diffWeeks, studyPlan.total_duration_weeks);
       setCurrentWeek(calculatedWeek);
-      
+
       initializeWeeklyAssessments(calculatedWeek);
-      
+
       // Animate stats
       setTimeout(() => {
         setAnimatedWeekStats({
@@ -1436,15 +1566,15 @@ const WeeklyPlanTracker: React.FC = () => {
 
   const initializeWeeklyAssessments = (week: number) => {
     if (!studyPlan) return;
-    
+
     setWeeklyAssessments(prev => {
       if (prev[week]) return prev;
-      
+
       const weekSubjects = studyPlan.subjects.map(subject => ({
         subject,
         completed: false
       }));
-      
+
       return {
         ...prev,
         [week]: weekSubjects
@@ -1458,6 +1588,17 @@ const WeeklyPlanTracker: React.FC = () => {
       return;
     }
 
+    // --- New safe flow: usage check, AI call, robust parse, normalize, then increment ---
+    const FEATURE_KEY = 'WEEKLY_ASSESSMENT';
+
+    if (!isPremium) {
+      if (usageLoading) await fetchUsage();
+      if (hasExceededLimit(FEATURE_KEY)) {
+        setShowUpgradeModal(true);
+        return;
+      }
+    }
+
     const file = acceptedFiles[0];
     if (!file) return;
 
@@ -1466,51 +1607,57 @@ const WeeklyPlanTracker: React.FC = () => {
 
     try {
       const content = await PDFParser.extractTextFromFile(file);
-      
       if (!PDFParser.validateFileContent(content)) {
         throw new Error('The file content could not be properly extracted or appears to be corrupted.');
       }
-      
       setUploadedContent(content);
-      
-      const testQuestions = await AIService.generateTestQuestions(content, uploadingSubject);
-      
-      let parsedQuestions: any[];
+
+      // 1) Ask AI to generate the test (raw string)
+      const raw = await AIService.generateTestQuestions(content, uploadingSubject);
+
+      // 2) Try to extract the first valid JSON candidate safely
+      let parsed: any = null;
       try {
-        const firstBrace = testQuestions.indexOf('{');
-        const lastBrace = testQuestions.lastIndexOf('}');
-        
-        if (firstBrace !== -1 && lastBrace !== -1) {
-          const jsonString = testQuestions.substring(firstBrace, lastBrace + 1);
-          const parsed = JSON.parse(jsonString);
-          parsedQuestions = parsed.questions || [];
-        } else {
-          throw new Error('No valid JSON found');
-        }
-      } catch (parseError) {
-        console.error('Error parsing AI questions:', parseError);
-        parsedQuestions = createFallbackQuestions(content, uploadingSubject);
+        parsed = parseFirstJSONCandidate<any>(raw);
+      } catch (e) {
+        console.warn('parseFirstJSONCandidate failed:', e);
       }
 
-      setQuestions(parsedQuestions);
-      setUserAnswers(new Array(parsedQuestions.length).fill(-1));
+      // 3) Normalize parsed output (if available), else fallback
+      let normalized = [];
+      if (parsed) {
+        normalized = normalizeQuestions(parsed, uploadingSubject);
+      }
+      if (!normalized || normalized.length === 0) {
+        normalized = createFallbackQuestions(content, uploadingSubject);
+      }
+
+      // 4) ✅ Only increment usage AFTER successful generation/normalization
+      try {
+        await incrementUsage(FEATURE_KEY);
+      } catch (incErr) {
+        console.error('incrementUsage failed (non-blocking):', incErr);
+      }
+
+      // 5) Show quiz in UI
+      setQuestions(normalized);
+      setUserAnswers(new Array(normalized.length).fill(-1));
       setActiveSubject(uploadingSubject);
-      setShowTestInterface(true); // Show the quiz interface
+      setShowTestInterface(true);
       setTestStartTime(new Date());
-      
     } catch (error) {
       console.error('Error processing file:', error);
-      const errorMessage = error instanceof Error ? error.message : `Error processing "${file.name}". Please try again.`;
-      alert(errorMessage);
+      alert('Quiz generation failed. Please try again.');
     } finally {
       setIsUploading(false);
     }
+
   };
 
   const createFallbackQuestions = (content: string, subject: string): any[] => {
     const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 30);
     const keyTerms = content.toLowerCase().match(/\b[a-z]{4,}\b/g)?.slice(0, 10) || [];
-    
+
     return [
       {
         id: '1',
@@ -1527,7 +1674,7 @@ const WeeklyPlanTracker: React.FC = () => {
       },
       {
         id: '2',
-        question: keyTerms.length > 0 ? 
+        question: keyTerms.length > 0 ?
           `The content mentions "${keyTerms[0]}" in the context of:` :
           `According to the material, what approach is emphasized?`,
         options: [
@@ -1580,14 +1727,14 @@ const WeeklyPlanTracker: React.FC = () => {
 
     setIsAnalyzing(true);
     const timeSpent = Math.floor((new Date().getTime() - testStartTime.getTime()) / 1000 / 60);
-    
+
     try {
       const correctAnswers = userAnswers.reduce((count, answer, index) => {
         return answer === questions[index]?.correctAnswer ? count + 1 : count;
       }, 0);
-      
+
       const score = Math.round((correctAnswers / questions.length) * 100);
-      
+
       const analysisData = {
         questions: questions.map((q, index) => ({
           question: q.question,
@@ -1605,12 +1752,12 @@ const WeeklyPlanTracker: React.FC = () => {
       };
 
       const aiAnalysis = await AIService.analyzeWeeklyPerformance(analysisData);
-      
+
       let analysis;
       try {
         const firstBrace = aiAnalysis.indexOf('{');
         const lastBrace = aiAnalysis.lastIndexOf('}');
-        
+
         if (firstBrace !== -1 && lastBrace !== -1) {
           const jsonString = aiAnalysis.substring(firstBrace, lastBrace + 1);
           analysis = JSON.parse(jsonString);
@@ -1675,22 +1822,22 @@ const WeeklyPlanTracker: React.FC = () => {
       }
 
       setFetchedWeeklyAssessments(prev => [savedAssessment, ...prev]);
-      
+
       setWeeklyAssessments(prev => ({
         ...prev,
-        [currentWeek]: prev[currentWeek]?.map(assessment => 
-          assessment.subject === activeSubject 
-            ? { 
-                ...assessment, 
-                completed: true, 
-                score, 
-                fileName: fileName,
-                completedAt: new Date().toISOString()
-              }
+        [currentWeek]: prev[currentWeek]?.map(assessment =>
+          assessment.subject === activeSubject
+            ? {
+              ...assessment,
+              completed: true,
+              score,
+              fileName: fileName,
+              completedAt: new Date().toISOString()
+            }
             : assessment
         ) || []
       }));
-      
+
       setTestResult({
         ...weeklyTest,
         totalQuestions: questions.length,
@@ -1734,14 +1881,14 @@ const WeeklyPlanTracker: React.FC = () => {
     const weekAssessments = weeklyAssessments[week] || [];
     const completedCount = weekAssessments.filter(a => a.completed).length;
     const totalCount = weekAssessments.length;
-    
+
     if (completedCount === totalCount && totalCount > 0) {
       const avgScore = weekAssessments.reduce((sum, a) => sum + (a.score || 0), 0) / completedCount;
       return avgScore >= 70 ? 'completed' : 'needs-improvement';
     } else if (completedCount > 0) {
       return 'partial';
     }
-    
+
     return week === currentWeek ? 'current' : week < currentWeek ? 'missed' : 'upcoming';
   };
 
@@ -1754,10 +1901,10 @@ const WeeklyPlanTracker: React.FC = () => {
 
   const getWeekSubjects = (week: number) => {
     if (!studyPlan) return [];
-    
+
     const subjectsPerWeek = Math.ceil(studyPlan.subjects.length / studyPlan.total_duration_weeks);
     const startIndex = ((week - 1) * subjectsPerWeek) % studyPlan.subjects.length;
-    
+
     return studyPlan.subjects.slice(startIndex, startIndex + Math.min(subjectsPerWeek, studyPlan.subjects.length - startIndex));
   };
 
@@ -1823,7 +1970,7 @@ const WeeklyPlanTracker: React.FC = () => {
         <div className="relative overflow-hidden bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 p-3 rounded-3xl text-white shadow-2xl">
           <div className="absolute inset-0 bg-black/10"></div>
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-32 translate-x-32"></div>
-          
+
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center space-x-4">
@@ -1843,11 +1990,11 @@ const WeeklyPlanTracker: React.FC = () => {
                 </div>
               </div>
             </div>
-            
+
             {/* Enhanced Progress Bar */}
             <div className="relative">
               <div className="w-full bg-purple-400/30 rounded-full h-2 overflow-hidden">
-                <div 
+                <div
                   className="bg-gradient-to-r from-white to-purple-100 h-2 rounded-full transition-all duration-500 flex items-center justify-end pr-3"
                   style={{ width: `${progress}%` }}
                 >
@@ -1855,7 +2002,7 @@ const WeeklyPlanTracker: React.FC = () => {
                 </div>
               </div>
               <div className="absolute top-0 left-0 w-full h-full flex items-center">
-                <Sparkles className="w-4 h-4 text-white animate-ping" style={{ 
+                <Sparkles className="w-4 h-4 text-white animate-ping" style={{
                   left: `${progress}%`,
                   transform: 'translateX(-50%)'
                 }} />
@@ -1894,18 +2041,16 @@ const WeeklyPlanTracker: React.FC = () => {
                 <button
                   key={index}
                   onClick={() => handleAnswerSelect(index)}
-                  className={`w-full p-4 text-left rounded-2xl border-2 transition-all duration-300 hover:shadow-lg ${
-                    userAnswers[currentQuestionIndex] === index
-                      ? 'border-indigo-500 bg-gradient-to-r from-indigo-50 to-purple-50 text-indigo-800 shadow-lg scale-105'
-                      : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50 hover:scale-102'
-                  }`}
+                  className={`w-full p-4 text-left rounded-2xl border-2 transition-all duration-300 hover:shadow-lg ${userAnswers[currentQuestionIndex] === index
+                    ? 'border-indigo-500 bg-gradient-to-r from-indigo-50 to-purple-50 text-indigo-800 shadow-lg scale-105'
+                    : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50 hover:scale-102'
+                    }`}
                 >
                   <div className="flex items-center space-x-4">
-                    <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center font-bold transition-all duration-300 ${
-                      userAnswers[currentQuestionIndex] === index
-                        ? 'border-indigo-500 bg-indigo-500 text-white'
-                        : 'border-slate-300 text-slate-500'
-                    }`}>
+                    <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center font-bold transition-all duration-300 ${userAnswers[currentQuestionIndex] === index
+                      ? 'border-indigo-500 bg-indigo-500 text-white'
+                      : 'border-slate-300 text-slate-500'
+                      }`}>
                       {String.fromCharCode(65 + index)}
                     </div>
                     <span className="flex-1 font-medium">{option}</span>
@@ -1929,7 +2074,7 @@ const WeeklyPlanTracker: React.FC = () => {
             <ChevronLeft className="w-5 h-5" />
             <span className='max-text-sm'>Previous</span>
           </button>
-          
+
           <div className="flex items-center space-x-3">
             <div className="text-center">
               <div className="text-sm dark:text-slate-200 text-slate-600 mb-1">Progress</div>
@@ -1945,7 +2090,7 @@ const WeeklyPlanTracker: React.FC = () => {
               </div>
             </div>
           </div>
-          
+
           <button
             onClick={handleNextQuestion}
             disabled={userAnswers[currentQuestionIndex] === -1}
@@ -1993,7 +2138,7 @@ const WeeklyPlanTracker: React.FC = () => {
         <div className="relative overflow-hidden bg-gradient-to-br dark:from-emerald-700 dark:to-emerald-800 from-green-500 via-emerald-600 to-teal-600 p-8 rounded-3xl text-white shadow-2xl">
           <div className="absolute inset-0 bg-black/10"></div>
           <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -translate-y-48 translate-x-48"></div>
-          
+
           <div className="relative z-10">
             <div className="flex items-center space-x-4 mb-6">
               <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
@@ -2006,7 +2151,7 @@ const WeeklyPlanTracker: React.FC = () => {
                 </p>
               </div>
             </div>
-            
+
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 text-center">
                 <div className="text-3xl font-bold mb-2">{testResult.score}%</div>
@@ -2074,7 +2219,7 @@ const WeeklyPlanTracker: React.FC = () => {
             <RotateCcw className="w-5 h-5" />
             <span>Take Another Assessment</span>
           </button>
-          
+
           <button
             onClick={() => {
               const nextWeek = Math.min(currentWeek + 1, studyPlan.total_duration_weeks);
@@ -2098,7 +2243,7 @@ const WeeklyPlanTracker: React.FC = () => {
       <div className="relative overflow-hidden bg-gradient-to-br dark:from-slate-800 dark:via-gray-800 dark:to-slate-900 from-cyan-800 via-sky-800 to-blue-900 p-5 rounded-3xl text-white shadow-2xl">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -translate-y-48 translate-x-48"></div>
-        
+
         <div className="relative z-10">
           <div className="flex items-center space-x-4 mb-6">
             <div className="w-20 h-10 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
@@ -2111,7 +2256,7 @@ const WeeklyPlanTracker: React.FC = () => {
               </p>
             </div>
           </div>
-          
+
           <div className="grid max-grid-cols-2 grid-cols-3 gap-6">
             <div className="bg-white/10 backdrop-blur-md rounded-2xl max-p-4 p-6 text-center">
               <div className="text-2xl font-bold mb-2">{animatedWeekStats.totalWeeks}</div>
@@ -2147,7 +2292,7 @@ const WeeklyPlanTracker: React.FC = () => {
               const status = getWeekStatus(week);
               const subjects = getWeekSubjects(week);
               const StatusIcon = getStatusIcon(status);
-              
+
               return (
                 <div
                   key={week}
@@ -2155,16 +2300,14 @@ const WeeklyPlanTracker: React.FC = () => {
                     setCurrentWeek(week);
                     initializeWeeklyAssessments(week);
                   }}
-                  className={`relative p-6 rounded-2xl border-2 text-center cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
-                    week === currentWeek ? 'ring-4 ring-blue-500/20 scale-105' : ''
-                  } ${
-                    status === 'completed' ? 'border-yellow-300 bg-gradient-to-br from-yellow-50 to-orange-50' :
-                    status === 'needs-improvement' ? 'border-orange-300 bg-gradient-to-br from-orange-50 to-red-50' :
-                    status === 'current' ? 'border-blue-300 bg-gradient-to-br from-blue-50 to-indigo-50' :
-                    status === 'partial' ? 'border-green-300 bg-gradient-to-br from-green-50 to-emerald-50' :
-                    status === 'missed' ? 'border-red-300 bg-gradient-to-br from-red-50 to-pink-50' :
-                    'border-slate-200 bg-gradient-to-br from-slate-50 to-gray-50'
-                  }`}
+                  className={`relative p-6 rounded-2xl border-2 text-center cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${week === currentWeek ? 'ring-4 ring-blue-500/20 scale-105' : ''
+                    } ${status === 'completed' ? 'border-yellow-300 bg-gradient-to-br from-yellow-50 to-orange-50' :
+                      status === 'needs-improvement' ? 'border-orange-300 bg-gradient-to-br from-orange-50 to-red-50' :
+                        status === 'current' ? 'border-blue-300 bg-gradient-to-br from-blue-50 to-indigo-50' :
+                          status === 'partial' ? 'border-green-300 bg-gradient-to-br from-green-50 to-emerald-50' :
+                            status === 'missed' ? 'border-red-300 bg-gradient-to-br from-red-50 to-pink-50' :
+                              'border-slate-200 bg-gradient-to-br from-slate-50 to-gray-50'
+                    }`}
                 >
                   {/* Week Badge */}
                   <div className={`absolute -top-3 -left-3 w-8 h-8 bg-gradient-to-r ${getStatusColor(status)} rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg`}>
@@ -2173,14 +2316,13 @@ const WeeklyPlanTracker: React.FC = () => {
 
                   {/* Status Icon */}
                   <div className="mb-4">
-                    <StatusIcon className={`w-8 h-8 mx-auto ${
-                      status === 'completed' ? 'text-yellow-600' :
+                    <StatusIcon className={`w-8 h-8 mx-auto ${status === 'completed' ? 'text-yellow-600' :
                       status === 'needs-improvement' ? 'text-orange-600' :
-                      status === 'current' ? 'text-blue-600' :
-                      status === 'partial' ? 'text-green-600' :
-                      status === 'missed' ? 'text-red-600' :
-                      'text-slate-400'
-                    }`} />
+                        status === 'current' ? 'text-blue-600' :
+                          status === 'partial' ? 'text-green-600' :
+                            status === 'missed' ? 'text-red-600' :
+                              'text-slate-400'
+                      }`} />
                   </div>
 
                   {/* Subjects */}
@@ -2224,19 +2366,18 @@ const WeeklyPlanTracker: React.FC = () => {
             </div>
           </div>
         </div>
-        
-        <div className="p-8">
+
+        <div className="p-8 max-p-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {(weeklyAssessments[currentWeek] || []).map((assessment, index) => (
               <div
                 key={assessment.subject}
-                className={`relative p-6 rounded-2xl border-2 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
-                  assessment.completed
-                    ? 'border-green-300 bg-gradient-to-br from-green-50 to-emerald-50'
-                    : uploadingSubject === assessment.subject
+                className={`relative p-6 rounded-2xl border-2 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${assessment.completed
+                  ? 'border-green-300 bg-gradient-to-br from-green-50 to-emerald-50'
+                  : uploadingSubject === assessment.subject
                     ? 'border-purple-300 bg-gradient-to-br from-purple-50 to-indigo-50'
                     : 'border-slate-200 bg-gradient-to-br from-slate-50 to-gray-50 hover:border-slate-300'
-                }`}
+                  }`}
               >
                 {/* Subject Icon */}
                 <div className="absolute -top-3 -right-3">
@@ -2261,11 +2402,10 @@ const WeeklyPlanTracker: React.FC = () => {
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-slate-600">Score:</span>
-                        <div className={`px-3 py-1 rounded-full text-sm font-bold ${
-                          (assessment.score || 0) >= 80 ? 'bg-green-100 text-green-800' :
-                          (assessment.score || 0) >= 60 ? 'bg-yellow-100 text-yellow-800' : 
-                          'bg-red-100 text-red-800'
-                        }`}>
+                        <div className={`px-3 py-1 rounded-full text-sm font-bold ${(assessment.score || 0) >= 80 ? 'bg-green-100 text-green-800' :
+                          (assessment.score || 0) >= 60 ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-red-100 text-red-800'
+                          }`}>
                           {assessment.score}%
                         </div>
                       </div>
@@ -2316,7 +2456,7 @@ const WeeklyPlanTracker: React.FC = () => {
             <span>Upload Content for Assessment</span>
           </h3>
         </div>
-        
+
         <div className="p-8 max-p-4">
           {uploadingSubject && (
             <div className="mb-6 p-6 bg-gradient-to-r from-purple-50 to-indigo-50 border-2 border-purple-200 rounded-2xl">
@@ -2324,7 +2464,7 @@ const WeeklyPlanTracker: React.FC = () => {
                 <div>
                   <p className="text-purple-800 font-bold text-lg">📚 Selected: {uploadingSubject}</p>
                   <p className="text-purple-600 text-sm mt-1">
-                    {initialTopic 
+                    {initialTopic
                       ? `Upload material related to "${initialTopic}" for topic-specific questions`
                       : 'Upload study material to generate content-specific questions'
                     }
@@ -2360,16 +2500,15 @@ const WeeklyPlanTracker: React.FC = () => {
           {/* Enhanced File Upload */}
           <div
             {...getRootProps()}
-            className={`relative border-2 border-dashed rounded-3xl max-py-5 max-px-2 p-12 text-center transition-all duration-300 cursor-pointer ${
-              !uploadingSubject
-                ? 'border-slate-200 bg-slate-50 cursor-not-allowed opacity-50'
-                : isDragActive 
-                ? 'border-purple-400 bg-purple-50 scale-105 shadow-lg' 
+            className={`relative border-2 border-dashed rounded-3xl max-py-5 max-px-2 p-12 text-center transition-all duration-300 cursor-pointer ${!uploadingSubject
+              ? 'border-slate-200 bg-slate-50 cursor-not-allowed opacity-50'
+              : isDragActive
+                ? 'border-purple-400 bg-purple-50 scale-105 shadow-lg'
                 : 'border-slate-300 hover:border-purple-400 hover:bg-slate-50 hover:shadow-lg'
-            }`}
+              }`}
           >
             <input {...getInputProps()} disabled={!uploadingSubject} />
-            
+
             {isUploading ? (
               <div className="space-y-4">
                 <div className="relative mx-auto w-16 h-16">
@@ -2398,11 +2537,11 @@ const WeeklyPlanTracker: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-slate-700 font-bold text-xl mb-2">
-                    {!uploadingSubject 
+                    {!uploadingSubject
                       ? 'Select a subject first to upload content'
-                      : isDragActive 
-                      ? '✨ Drop your study material here...' 
-                      : '📚 Upload study material for AI assessment'
+                      : isDragActive
+                        ? '✨ Drop your study material here...'
+                        : '📚 Upload study material for AI assessment'
                     }
                   </p>
                   <p className="text-slate-500">
@@ -2428,7 +2567,7 @@ const WeeklyPlanTracker: React.FC = () => {
                   <FileText className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <p className="text-green-800 font-bold">✅ Content uploaded: {fileName}</p>
+                  <p className="text-green-800 font-bold">Content uploaded: {fileName}</p>
                   <p className="text-green-600 text-sm">
                     {fileName.toLowerCase().endsWith('.pdf') ? 'PDF content extracted successfully • ' : ''}
                     Ready to generate {uploadingSubject} assessment
@@ -2456,7 +2595,7 @@ const WeeklyPlanTracker: React.FC = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="p-8">
             <div className="space-y-4">
               {fetchedWeeklyAssessments.map((test) => (
@@ -2471,11 +2610,10 @@ const WeeklyPlanTracker: React.FC = () => {
                     <div className="flex-1">
                       <div className="flex items-center space-x-3 mb-2">
                         <h4 className="font-bold text-slate-800 text-lg">{test.score}% Score</h4>
-                        <div className={`px-3 py-1 rounded-full text-xs font-bold ${
-                          test.score >= 80 ? 'bg-green-100 text-green-800' :
+                        <div className={`px-3 py-1 rounded-full text-xs font-bold ${test.score >= 80 ? 'bg-green-100 text-green-800' :
                           test.score >= 60 ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-red-100 text-red-800'
-                        }`}>
+                            'bg-red-100 text-red-800'
+                          }`}>
                           {test.score >= 80 ? 'Excellent' : test.score >= 60 ? 'Good' : 'Needs Work'}
                         </div>
                       </div>
@@ -2484,7 +2622,7 @@ const WeeklyPlanTracker: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="max-flex-col justify-center flex items-center space-x-3">
                     <button className="p-2 hover:bg-slate-200 rounded-lg transition-colors group-hover:scale-110">
                       <Eye className="w-5 h-5 text-slate-600 ml-2" />
@@ -2516,20 +2654,20 @@ const WeeklyPlanTracker: React.FC = () => {
               <ChevronLeft className="w-5 h-5" />
               <span className="max-text-xs">Previous Week</span>
             </button>
-            
+
             <div className="text-center">
               <div className="max-text-lg text-3xl font-bold text-slate-800 mb-2">Week {currentWeek}</div>
               <div className="max-text-xs text-slate-600">
                 {getWeekProgress(currentWeek).completed} of {getWeekProgress(currentWeek).total} subjects completed
               </div>
               <div className="mt-2 max-w-24 w-32 bg-slate-200 rounded-full h-2 mx-auto">
-                <div 
+                <div
                   className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full transition-all duration-500"
                   style={{ width: `${(getWeekProgress(currentWeek).completed / Math.max(getWeekProgress(currentWeek).total, 1)) * 100}%` }}
                 />
               </div>
             </div>
-            
+
             <button
               onClick={() => {
                 const nextWeek = Math.min(studyPlan.total_duration_weeks, currentWeek + 1);
@@ -2545,6 +2683,15 @@ const WeeklyPlanTracker: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* NEW: Upgrade Modal */}
+      <UpgradePromptModal
+        isOpen={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        featureName={FEATURE_NAMES.WEEKLY_ASSESSMENT}
+        limit={USAGE_LIMITS.WEEKLY_ASSESSMENT}
+        subscriptionPageUrl={import.meta.env.VITE_SUBSCRIPTION_PAGE_URL}
+      />
     </div>
   );
 };
