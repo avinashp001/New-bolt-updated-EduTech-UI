@@ -1,21 +1,18 @@
 import React, { useState } from 'react';
-import { 
-  Settings, 
-  User, 
-  Bell, 
-  Shield, 
-  Palette, 
-  Brain, 
-  Eye, 
-  Download, 
-  Trash2, 
-  Moon, 
+import {
+  Settings,
+  User,
+  Bell,
+  Shield,
+  Palette,
+  Brain,
+  Eye,
+  Download,
+  Trash2,
+  Moon,
   Sun,
   Monitor,
-  Volume2,
-  VolumeX,
-  Smartphone,
-  Globe,
+  DollarSign,
   Database,
   Zap,
   Save,
@@ -24,6 +21,7 @@ import {
 import { useTheme } from '../../context/ThemeContext';
 import { useSettings } from '../../hooks/useSettings';
 import { useAuth } from '../../hooks/useAuth';
+import SubscriptionAndUsageManager from './SubscriptionAndUsageManager';
 
 const SettingsPage: React.FC = () => {
   const { theme, toggleTheme, setTheme } = useTheme();
@@ -43,6 +41,7 @@ const SettingsPage: React.FC = () => {
     { id: 'accessibility', label: 'Accessibility', icon: Eye },
     { id: 'privacy', label: 'Privacy & Data', icon: Shield },
     { id: 'advanced', label: 'Advanced', icon: Zap },
+    { id: 'subscription', label: 'Subscription & Usage', icon: DollarSign },
   ];
 
   const handleProfileUpdate = async () => {
@@ -76,7 +75,7 @@ Are you absolutely sure you want to clear all your data?`;
 
     if (window.confirm(confirmMessage)) {
       const doubleConfirm = window.confirm('Last chance! This will delete EVERYTHING. Are you 100% sure?');
-      
+
       if (doubleConfirm) {
         try {
           await clearAllUserData();
@@ -176,14 +175,12 @@ Are you absolutely sure you want to clear all your data?`;
                   </div>
                   <button
                     onClick={() => updateSettings({ breakReminders: !settings.breakReminders })}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                      settings.breakReminders ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-600'
-                    }`}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${settings.breakReminders ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-600'
+                      }`}
                   >
                     <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        settings.breakReminders ? 'translate-x-6' : 'translate-x-1'
-                      }`}
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${settings.breakReminders ? 'translate-x-6' : 'translate-x-1'
+                        }`}
                     />
                   </button>
                 </div>
@@ -200,22 +197,20 @@ Are you absolutely sure you want to clear all your data?`;
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <button
                   onClick={() => setTheme('light')}
-                  className={`p-4 rounded-lg border-2 transition-all ${
-                    theme === 'light'
+                  className={`p-4 rounded-lg border-2 transition-all ${theme === 'light'
                       ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
                       : 'border-slate-300 dark:border-slate-600 hover:border-slate-400'
-                  }`}
+                    }`}
                 >
                   <Sun className="w-8 h-8 mx-auto mb-2 text-yellow-500" />
                   <p className="font-medium text-slate-800 dark:text-slate-100">Light</p>
                 </button>
                 <button
                   onClick={() => setTheme('dark')}
-                  className={`p-4 rounded-lg border-2 transition-all ${
-                    theme === 'dark'
+                  className={`p-4 rounded-lg border-2 transition-all ${theme === 'dark'
                       ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
                       : 'border-slate-300 dark:border-slate-600 hover:border-slate-400'
-                  }`}
+                    }`}
                 >
                   <Moon className="w-8 h-8 mx-auto mb-2 text-blue-500" />
                   <p className="font-medium text-slate-800 dark:text-slate-100">Dark</p>
@@ -329,14 +324,12 @@ Are you absolutely sure you want to clear all your data?`;
                     </div>
                     <button
                       onClick={() => updateSettings({ [item.key]: !settings[item.key as keyof typeof settings] })}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                        settings[item.key as keyof typeof settings] ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-600'
-                      }`}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${settings[item.key as keyof typeof settings] ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-600'
+                        }`}
                     >
                       <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                          settings[item.key as keyof typeof settings] ? 'translate-x-6' : 'translate-x-1'
-                        }`}
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${settings[item.key as keyof typeof settings] ? 'translate-x-6' : 'translate-x-1'
+                          }`}
                       />
                     </button>
                   </div>
@@ -359,14 +352,12 @@ Are you absolutely sure you want to clear all your data?`;
                   </div>
                   <button
                     onClick={() => updateSettings({ highContrast: !settings.highContrast })}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                      settings.highContrast ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-600'
-                    }`}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${settings.highContrast ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-600'
+                      }`}
                   >
                     <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        settings.highContrast ? 'translate-x-6' : 'translate-x-1'
-                      }`}
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${settings.highContrast ? 'translate-x-6' : 'translate-x-1'
+                        }`}
                     />
                   </button>
                 </div>
@@ -377,14 +368,12 @@ Are you absolutely sure you want to clear all your data?`;
                   </div>
                   <button
                     onClick={() => updateSettings({ reducedMotion: !settings.reducedMotion })}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                      settings.reducedMotion ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-600'
-                    }`}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${settings.reducedMotion ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-600'
+                      }`}
                   >
                     <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        settings.reducedMotion ? 'translate-x-6' : 'translate-x-1'
-                      }`}
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${settings.reducedMotion ? 'translate-x-6' : 'translate-x-1'
+                        }`}
                     />
                   </button>
                 </div>
@@ -406,14 +395,12 @@ Are you absolutely sure you want to clear all your data?`;
                   </div>
                   <button
                     onClick={() => updateSettings({ dataSharing: !settings.dataSharing })}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                      settings.dataSharing ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-600'
-                    }`}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${settings.dataSharing ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-600'
+                      }`}
                   >
                     <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        settings.dataSharing ? 'translate-x-6' : 'translate-x-1'
-                      }`}
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${settings.dataSharing ? 'translate-x-6' : 'translate-x-1'
+                        }`}
                     />
                   </button>
                 </div>
@@ -424,14 +411,12 @@ Are you absolutely sure you want to clear all your data?`;
                   </div>
                   <button
                     onClick={() => updateSettings({ analyticsOptIn: !settings.analyticsOptIn })}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                      settings.analyticsOptIn ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-600'
-                    }`}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${settings.analyticsOptIn ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-600'
+                      }`}
                   >
                     <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        settings.analyticsOptIn ? 'translate-x-6' : 'translate-x-1'
-                      }`}
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${settings.analyticsOptIn ? 'translate-x-6' : 'translate-x-1'
+                        }`}
                     />
                   </button>
                 </div>
@@ -457,7 +442,7 @@ Are you absolutely sure you want to clear all your data?`;
                 </button>
                 <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
                   <p className="text-amber-800 text-sm">
-                    <strong>Warning:</strong> Clearing all data will permanently delete your study sessions, 
+                    <strong>Warning:</strong> Clearing all data will permanently delete your study sessions,
                     progress reports, uploaded materials, and all other learning data. This action cannot be undone.
                   </p>
                 </div>
@@ -499,14 +484,12 @@ Are you absolutely sure you want to clear all your data?`;
                   </div>
                   <button
                     onClick={() => updateSettings({ focusMode: !settings.focusMode })}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                      settings.focusMode ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-600'
-                    }`}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${settings.focusMode ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-600'
+                      }`}
                   >
                     <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        settings.focusMode ? 'translate-x-6' : 'translate-x-1'
-                      }`}
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${settings.focusMode ? 'translate-x-6' : 'translate-x-1'
+                        }`}
                     />
                   </button>
                 </div>
@@ -517,14 +500,12 @@ Are you absolutely sure you want to clear all your data?`;
                   </div>
                   <button
                     onClick={() => updateSettings({ experimentalFeatures: !settings.experimentalFeatures })}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                      settings.experimentalFeatures ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-600'
-                    }`}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${settings.experimentalFeatures ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-600'
+                      }`}
                   >
                     <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        settings.experimentalFeatures ? 'translate-x-6' : 'translate-x-1'
-                      }`}
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${settings.experimentalFeatures ? 'translate-x-6' : 'translate-x-1'
+                        }`}
                     />
                   </button>
                 </div>
@@ -547,6 +528,8 @@ Are you absolutely sure you want to clear all your data?`;
             </div>
           </div>
         );
+      case 'subscription': // NEW: Render the new component
+        return <SubscriptionAndUsageManager />;
 
       default:
         return null;
@@ -590,12 +573,19 @@ Are you absolutely sure you want to clear all your data?`;
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
-                    activeTab === tab.id
+                  onClick={() => {
+                    setActiveTab(tab.id);
+                    // Scroll to the content section
+                    const section = document.getElementById("setting-section");
+                    if (section) {
+                      section.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }
+                  }}
+
+                  className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${activeTab === tab.id
                       ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
                       : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
-                  }`}
+                    }`}
                 >
                   <tab.icon className="w-5 h-5" />
                   <span className="font-medium">{tab.label}</span>
@@ -607,9 +597,9 @@ Are you absolutely sure you want to clear all your data?`;
 
         {/* Content */}
         <div className="lg:col-span-3">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+          <div id="setting-section" className="max-p-2 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
             {renderTabContent()}
-            
+
             {saving && (
               <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                 <p className="text-blue-800 dark:text-blue-200 text-sm">Saving settings...</p>
