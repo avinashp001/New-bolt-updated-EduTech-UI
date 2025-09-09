@@ -4,10 +4,10 @@ import { useAuth } from './useAuth';
 
 // Define feature keys and their free tier limits
 export const USAGE_LIMITS = {
-  AI_MENTOR_CHAT: 5, // Free tier limit for AI Mentor chat messages per day
-  THEORY_GENERATION: 3, // Free tier limit for theory generation per day
-  AI_TEST_SESSION: 3, // Free tier limit for AI test sessions per day
-  WEEKLY_ASSESSMENT: 1, // Free tier limit for weekly assessments per day
+  AI_MENTOR_CHAT: 100, // 1 Free tier limit for AI Mentor chat messages per day
+  THEORY_GENERATION: 300, // 2 Free tier limit for theory generation per day
+  AI_TEST_SESSION: 200, // 2 Free tier limit for AI test sessions per day
+  WEEKLY_ASSESSMENT: 300, // 3 Free tier limit for weekly assessments per day
   // Add more features as needed
 };
 
