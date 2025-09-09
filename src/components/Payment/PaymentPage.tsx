@@ -5,6 +5,7 @@ import { DollarSign, CheckCircle, XCircle, Loader2, User, Mail, Phone, CreditCar
 import { useAuth } from '../../hooks/useAuth';
 import LoadingSpinner from '../Common/LoadingSpinner';
 import { useNotification } from '../../context/NotificationContext';
+import { supabase } from '../../lib/supabase'; // Import supabase client
 
 // Extend Window interface for Razorpay
 declare global {
@@ -78,66 +79,110 @@ const PaymentPage: React.FC = () => {
       showError('Missing Information', 'Please fill in all customer details.');
       return;
     }
+    if (!user?.id) {
+      showError('Authentication Error', 'User not logged in. Please log in and try again.');
+      return;
+    }
 
     setIsLoading(true);
     setStep(3); // Move to payment processing step
 
-    // In a real application, you would make an API call to your backend
-    // to create an order and get an order_id.
-    // For this frontend-only example, we'll simulate it.
-    const amountInPaise = parseFloat(planDetails.price.replace('₹', '')) * 100; // Razorpay expects amount in smallest currency unit (paise)
+    try {
+      const amountInPaise = parseFloat(planDetails.price.replace('₹', '')) * 100; // Razorpay expects amount in smallest currency unit (paise)
 
-    const options = {
-      key: import.meta.env.VITE_RAZORPAY_KEY_ID, // Your Razorpay Key ID
-      amount: amountInPaise,
-      currency: 'INR',
-      name: 'EduAI',
-      description: `${planDetails.planName} Subscription`,
-      image: '/vite.svg', // Your company logo
-      prefill: {
-        name: customerDetails.name,
-        email: customerDetails.email,
-        contact: customerDetails.phone,
-      },
-      notes: {
-        plan_name: planDetails.planName,
-        user_id: user?.id,
-      },
-      theme: {
-        color: '#3b82f6', // Primary color for the checkout form
-      },
-      handler: async (response: any) => {
-        // This function is called when the payment is successful
-        console.log('Payment successful:', response);
-        // In a real app, you would send response.razorpay_payment_id,
-        // response.razorpay_order_id, and response.razorpay_signature to your backend for verification.
-        setPaymentStatus('success');
-        setPaymentMessage('Your subscription was successful! Welcome to EduAI.');
-        showSuccess('Payment Successful', 'Your plan has been activated!');
-        setIsLoading(false);
-        setStep(4); // Move to status step
-      },
-      modal: {
-        ondismiss: () => {
-          // This function is called when the payment modal is closed without completing payment
-          console.log('Payment modal dismissed');
-          setPaymentStatus('failed');
-          setPaymentMessage('Payment was cancelled or failed. Please try again.');
-          showError('Payment Cancelled', 'You closed the payment window.');
+      // 1. Call Supabase Edge Function to create Razorpay Order
+      const { data: orderData, error: orderError } = await supabase.functions.invoke('create-razorpay-order', {
+        body: {
+          amount: amountInPaise,
+          currency: 'INR',
+          receipt: `receipt_${user.id}_${Date.now()}`,
+          plan_name: planDetails.planName,
+          user_id: user.id,
+        },
+      });
+
+      if (orderError) {
+        console.error('Error creating Razorpay order via Edge Function:', orderError);
+        throw new Error(orderError.message || 'Failed to create payment order.');
+      }
+
+      const order = orderData.data; // The actual order object from Razorpay
+
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID, // Your Razorpay Key ID from .env
+        amount: order.amount,
+        currency: order.currency,
+        name: 'EduAI',
+        description: `${planDetails.planName} Subscription`,
+        image: '/vite.svg', // Your company logo
+        order_id: order.id, // Pass the order_id received from the backend
+        prefill: {
+          name: customerDetails.name,
+          email: customerDetails.email,
+          contact: customerDetails.phone,
+        },
+        notes: {
+          plan_name: planDetails.planName,
+          user_id: user.id,
+        },
+        theme: {
+          color: '#3b82f6', // Primary color for the checkout form
+        },
+        handler: async (response: any) => {
+          // This function is called when the the payment is successful on Razorpay's side
+          console.log('Payment successful on Razorpay:', response);
+
+          // 2. Call Supabase Edge Function to verify payment and update subscription status
+          const { data: verifyData, error: verifyError } = await supabase.functions.invoke('verify-razorpay-payment', {
+            body: {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              plan_name: planDetails.planName,
+              user_id: user.id,
+              price: planDetails.price,
+              duration: planDetails.duration,
+            },
+          });
+
+          if (verifyError) {
+            console.error('Error verifying payment via Edge Function:', verifyError);
+            setPaymentStatus('failed');
+            setPaymentMessage(verifyError.message || 'Payment verification failed on server.');
+            showError('Payment Failed', 'Server verification failed. Please contact support.');
+          } else if (verifyData.data && verifyData.data.success) {
+            setPaymentStatus('success');
+            setPaymentMessage('Your subscription was successful! Welcome to EduAI.');
+            showSuccess('Payment Successful', 'Your plan has been activated!');
+          } else {
+            setPaymentStatus('failed');
+            setPaymentMessage('Payment verification failed. Please contact support.');
+            showError('Payment Failed', 'Verification failed. Please contact support.');
+          }
           setIsLoading(false);
           setStep(4); // Move to status step
         },
-      },
-    };
+        modal: {
+          ondismiss: () => {
+            // This function is called when the payment modal is closed without completing payment
+            console.log('Payment modal dismissed');
+            setPaymentStatus('failed');
+            setPaymentMessage('Payment was cancelled or failed. Please try again.');
+            showError('Payment Cancelled', 'You closed the payment window.');
+            setIsLoading(false);
+            setStep(4); // Move to status step
+          },
+        },
+      };
 
-    try {
       const rzp = new window.Razorpay(options);
       rzp.open();
+
     } catch (error) {
-      console.error('Error opening Razorpay:', error);
+      console.error('Error initiating payment:', error);
       setPaymentStatus('failed');
-      setPaymentMessage('Could not initiate payment. Please try again.');
-      showError('Payment Error', 'Failed to open payment gateway.');
+      setPaymentMessage(error.message || 'Could not initiate payment. Please try again.');
+      showError('Payment Error', error.message || 'Failed to initiate payment.');
       setIsLoading(false);
       setStep(4); // Move to status step
     }
