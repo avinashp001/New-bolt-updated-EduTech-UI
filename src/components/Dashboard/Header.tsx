@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import QuickStartGuide from '../Common/QuickStartGuide';
 import { useProgress } from '../../hooks/useProgress';
 
+
 interface HeaderProps {
   userName: string;
   avgActivity: number;
@@ -36,7 +37,7 @@ const Header: React.FC<HeaderProps> = ({ userName, avgActivity, studySessions = 
   const weeklyActivityChange = lastWeekMinutes > 0
     ? Math.round(((thisWeekMinutes - lastWeekMinutes) / lastWeekMinutes) * 100)
     : thisWeekMinutes > 0 ? 100 : 0;
-  
+
 
 
   // Calculate streak
